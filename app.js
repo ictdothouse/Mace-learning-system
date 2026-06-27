@@ -6,12 +6,50 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const path = require('path');
 
+// ==========================================
+// KESELAMATAN: IMPORT SECURITY PACKAGES
+// ==========================================
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+
 // ✅ IMPORT YANG BETUL UNTUK STRUKTUR EXPORT BAHARU
 const { router: athleteRoutes } = require('./routes/athlete');
 const adminRoutes = require('./routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// ==========================================
+// KESELAMATAN: SECURITY MIDDLEWARE
+// ==========================================
+
+// Helmet.js untuk Security Headers
+app.use(helmet({
+    contentSecurityPolicy: false, // Disable untuk EJS compatibility (optional)
+    crossOriginEmbedderPolicy: false
+}));
+
+// Rate Limiting - Prevent Brute Force
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minit
+    max: 100, // max 100 requests per IP per window
+    message: 'Terlalu banyak request. Sila cuba lagi kemudian.',
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+// Apply rate limit ke semua routes
+app.use(limiter);
+
+// Rate limit lebih ketat untuk login/access routes
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minit
+    max: 5, // max 5 attempts per IP
+    message: 'Terlalu banyak percubaan login. Sila cuba lagi kemudian.'
+});
+
+app.use('/access', authLimiter);
+app.use('/admin-mace', authLimiter);
 
 // ==========================================
 // VALIDASI & KONEKSI DATABASE
