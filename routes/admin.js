@@ -412,45 +412,58 @@ router.get('/api/questions', async (req, res) => {
 // ==========================================
 router.get('/migrate-lessons', async (req, res) => {
     try {
-        const existingLessons = await Lesson.countDocuments();
-        
-        // Semak jika sudah ada modul
-        const existingModules = await Module.countDocuments();
-        if (existingModules > 0) {
-            return res.send(`ℹ️ Sistem sudah mempunyai ${existingModules} modul. Migration tidak diperlukan.<br><br>
-                <a href="/admin-mace/modules">Kembali ke Pengurusan Modul</a>`);
-        }
-        
-        // Cipta modul induk
-        const parentModule = await Module.create({
-            title: 'Kurikulum Utama MACE',
-            description: 'Modul induk untuk semua lesson dan kuiz sedia ada',
-            order: 1,
-            isActive: true
+        // Kira lesson yang BELUM ada moduleId (lesson lama)
+        const orphanLessons = await Lesson.countDocuments({ 
+            $or: [
+                { moduleId: { $exists: false } },
+                { moduleId: null }
+            ]
         });
         
-        // Update semua lesson sedia ada dengan moduleId baru
-        if (existingLessons > 0) {
-            const result = await Lesson.updateMany(
-                { moduleId: { $exists: false } }, // Hanya lesson tanpa moduleId
-                { $set: { moduleId: parentModule._id } }
-            );
-            
-            res.send(`✅ Migration berjaya!<br><br>
-                • Modul dicipta: <strong>${parentModule.title}</strong><br>
-                • ${result.modifiedCount} lesson dipindahkan ke modul ini<br>
-                • Semua kuiz dikekalkan<br><br>
-                <a href="/admin-mace/modules">Lihat Modul</a> | 
+        if (orphanLessons === 0) {
+            const totalLessons = await Lesson.countDocuments();
+            return res.send(`✅ Semua lesson sudah mempunyai modul.<br><br>
+                • Jumlah lesson dalam sistem: ${totalLessons}<br>
+                • Lesson tanpa modul: 0<br><br>
+                <a href="/admin-mace/modules">Kembali ke Pengurusan Modul</a> | 
                 <a href="/admin-mace/elearning">Dashboard E-Learning</a>`);
-        } else {
-            res.send(`ℹ️ Tiada lesson sedia ada untuk dipindahkan.<br>
-                Modul "${parentModule.title}" telah dicipta.<br><br>
-                Anda boleh mula menambah lesson baru melalui dashboard E-Learning.<br><br>
-                <a href="/admin-mace/elearning">Ke Dashboard E-Learning</a>`);
         }
+        
+        // Cari atau cipta modul induk
+        let parentModule = await Module.findOne({ title: 'Kurikulum Utama MACE' });
+        
+        if (!parentModule) {
+            parentModule = await Module.create({
+                title: 'Kurikulum Utama MACE',
+                description: 'Modul induk untuk semua lesson dan kuiz sedia ada',
+                order: 1,
+                isActive: true
+            });
+        }
+        
+        // Update semua lesson tanpa moduleId
+        const result = await Lesson.updateMany(
+            { 
+                $or: [
+                    { moduleId: { $exists: false } },
+                    { moduleId: null }
+                ]
+            },
+            { $set: { moduleId: parentModule._id } }
+        );
+        
+        res.send(`✅ Migration berjaya!<br><br>
+            • Modul: <strong>${parentModule.title}</strong> (ID: ${parentModule._id})<br>
+            • ${result.modifiedCount} lesson dipindahkan ke modul ini<br>
+            • Baki lesson tanpa modul: ${orphanLessons - result.modifiedCount}<br>
+            • Semua kuiz dikekalkan<br><br>
+            <a href="/admin-mace/modules">Lihat Modul</a> | 
+            <a href="/admin-mace/lessons?moduleId=${parentModule._id}">Lihat Lesson</a> | 
+            <a href="/admin-mace/elearning">Dashboard E-Learning</a>`);
     } catch (err) { 
         console.error('Migration Error:', err);
         res.status(500).send(`❌ Ralat Migration: ${err.message}<br><br>
+            <pre>${err.stack}</pre><br>
             <a href="javascript:history.back()">Kembali</a>`); 
     }
 });
