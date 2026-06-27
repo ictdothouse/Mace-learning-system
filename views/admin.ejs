@@ -295,7 +295,7 @@
                 <div class="flex justify-between items-center mb-8">
                     <div>
                         <h2 class="text-2xl font-bold text-gray-900 mb-2">🎨 Template Sijil</h2>
-                        <p class="text-gray-500">Urus dan customize template sijil untuk atlet.</p>
+                        <p class="text-gray-500">Urus dan customize template sijil untuk atlet dengan live preview & drag-drop.</p>
                     </div>
                     <button onclick="document.getElementById('createTemplateModal').classList.remove('hidden')" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition flex items-center gap-2 shadow-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
@@ -353,167 +353,238 @@
                 </div>
             </div>
 
-            <!-- Modal: Cipta Template Baru -->
+            <!-- Modal: Cipta/Edit Template dengan LIVE PREVIEW -->
             <div id="createTemplateModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 overflow-y-auto">
-                <div class="bg-white rounded-xl shadow-2xl max-w-6xl w-full mx-4 my-8 max-h-[90vh] overflow-y-auto">
-                    <div class="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
-                        <h3 class="text-xl font-bold text-gray-900">Cipta Template Baharu</h3>
+                <div class="bg-white rounded-xl shadow-2xl max-w-7xl w-full mx-4 my-8 max-h-[95vh] overflow-hidden flex flex-col">
+                    <div class="p-6 border-b border-gray-200 flex justify-between items-center flex-shrink-0">
+                        <h3 class="text-xl font-bold text-gray-900">Cipta Template Baharu - Live Preview & Drag-Drop</h3>
                         <button onclick="document.getElementById('createTemplateModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
                     </div>
-                    <form action="/admin-mace/templates/create" method="POST" class="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- Left Column: Content -->
-                        <div class="space-y-4">
-                            <h4 class="font-bold text-gray-700 border-b pb-2">Kandungan Text</h4>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Template</label>
-                                <input type="text" name="name" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Tajuk Utama</label>
-                                <input type="text" name="title" value="SIJIL PENGHARGAAN" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Subtitle</label>
-                                <input type="text" name="subtitle" value="KURSUS eLEARNING ATLET SUKMA" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Kursus</label>
-                                <input type="text" name="courseName" value="KURSUS eLEARNING ATLET SUKMA" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                                <input type="text" name="description" value="Adalah dengan ini diperakui bahawa" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
-                            </div>
-                            <div class="grid grid-cols-2 gap-4">
+                    
+                    <div class="flex-1 overflow-hidden flex flex-col lg:flex-row">
+                        <!-- LEFT: Form Controls -->
+                        <div class="w-full lg:w-1/2 overflow-y-auto p-6 border-r border-gray-200">
+                            <form id="createTemplateForm" action="/admin-mace/templates/create" method="POST" class="space-y-6">
+                                <!-- Basic Info -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Penandatangan</label>
-                                    <input type="text" name="signatoryName" value="PENGARAH" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                                    <h4 class="font-bold text-gray-700 border-b pb-2 mb-3">Maklumat Asas</h4>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Template</label>
+                                        <input type="text" name="name" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                                    </div>
                                 </div>
+
+                                <!-- Content Text -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Jawatan Penandatangan</label>
-                                    <input type="text" name="signatoryTitle" value="Majlis Sukan Negara" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                                    <h4 class="font-bold text-gray-700 border-b pb-2 mb-3">Kandungan Text</h4>
+                                    <div class="space-y-3">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Tajuk Utama</label>
+                                            <input type="text" name="title" value="SIJIL PENGHARGAAN" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Subtitle</label>
+                                            <input type="text" name="subtitle" value="KURSUS eLEARNING ATLET SUKMA" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                            <input type="text" name="description" value="Adalah dengan ini diperakui bahawa" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Kursus</label>
+                                            <input type="text" name="courseName" value="KURSUS eLEARNING ATLET SUKMA" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Penandatangan</label>
+                                                <input type="text" name="signatoryName" value="PENGARAH" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Jawatan Penandatangan</label>
+                                                <input type="text" name="signatoryTitle" value="Majlis Sukan Negara" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <!-- Toggle Options -->
-                            <h4 class="font-bold text-gray-700 border-b pb-2 mt-6">Pilihan Paparan</h4>
-                            <div class="grid grid-cols-2 gap-3">
-                                <label class="flex items-center gap-2">
-                                    <input type="checkbox" name="showTitle" checked class="w-4 h-4 text-blue-600 rounded">
-                                    <span class="text-sm text-gray-700">Tajuk</span>
-                                </label>
-                                <label class="flex items-center gap-2">
-                                    <input type="checkbox" name="showSubtitle" checked class="w-4 h-4 text-blue-600 rounded">
-                                    <span class="text-sm text-gray-700">Subtitle</span>
-                                </label>
-                                <label class="flex items-center gap-2">
-                                    <input type="checkbox" name="showDescription" checked class="w-4 h-4 text-blue-600 rounded">
-                                    <span class="text-sm text-gray-700">Description</span>
-                                </label>
-                                <label class="flex items-center gap-2">
-                                    <input type="checkbox" name="showAthleteName" checked class="w-4 h-4 text-blue-600 rounded">
-                                    <span class="text-sm text-gray-700">Nama Atlet</span>
-                                </label>
-                                <label class="flex items-center gap-2">
-                                    <input type="checkbox" name="showIcNumber" class="w-4 h-4 text-blue-600 rounded">
-                                    <span class="text-sm text-gray-700">No. IC</span>
-                                </label>
-                                <label class="flex items-center gap-2">
-                                    <input type="checkbox" name="showNegeri" checked class="w-4 h-4 text-blue-600 rounded">
-                                    <span class="text-sm text-gray-700">Negeri</span>
-                                </label>
-                                <label class="flex items-center gap-2">
-                                    <input type="checkbox" name="showSukan" class="w-4 h-4 text-blue-600 rounded">
-                                    <span class="text-sm text-gray-700">Sukan</span>
-                                </label>
-                                <label class="flex items-center gap-2">
-                                    <input type="checkbox" name="showCourseName" checked class="w-4 h-4 text-blue-600 rounded">
-                                    <span class="text-sm text-gray-700">Nama Kursus</span>
-                                </label>
-                                <label class="flex items-center gap-2">
-                                    <input type="checkbox" name="showDate" checked class="w-4 h-4 text-blue-600 rounded">
-                                    <span class="text-sm text-gray-700">Tarikh</span>
-                                </label>
-                                <label class="flex items-center gap-2">
-                                    <input type="checkbox" name="showSignatory" checked class="w-4 h-4 text-blue-600 rounded">
-                                    <span class="text-sm text-gray-700">Penandatangan</span>
-                                </label>
-                            </div>
+
+                                <!-- Toggle Options -->
+                                <div>
+                                    <h4 class="font-bold text-gray-700 border-b pb-2 mb-3">Pilihan Paparan</h4>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <label class="flex items-center gap-2"><input type="checkbox" name="showTitle" checked class="w-4 h-4 text-blue-600 rounded"><span class="text-sm text-gray-700">Tajuk</span></label>
+                                        <label class="flex items-center gap-2"><input type="checkbox" name="showSubtitle" checked class="w-4 h-4 text-blue-600 rounded"><span class="text-sm text-gray-700">Subtitle</span></label>
+                                        <label class="flex items-center gap-2"><input type="checkbox" name="showDescription" checked class="w-4 h-4 text-blue-600 rounded"><span class="text-sm text-gray-700">Description</span></label>
+                                        <label class="flex items-center gap-2"><input type="checkbox" name="showAthleteName" checked class="w-4 h-4 text-blue-600 rounded"><span class="text-sm text-gray-700">Nama Atlet</span></label>
+                                        <label class="flex items-center gap-2"><input type="checkbox" name="showIcNumber" class="w-4 h-4 text-blue-600 rounded"><span class="text-sm text-gray-700">No. IC</span></label>
+                                        <label class="flex items-center gap-2"><input type="checkbox" name="showNegeri" checked class="w-4 h-4 text-blue-600 rounded"><span class="text-sm text-gray-700">Negeri</span></label>
+                                        <label class="flex items-center gap-2"><input type="checkbox" name="showSukan" class="w-4 h-4 text-blue-600 rounded"><span class="text-sm text-gray-700">Sukan</span></label>
+                                        <label class="flex items-center gap-2"><input type="checkbox" name="showCourseName" checked class="w-4 h-4 text-blue-600 rounded"><span class="text-sm text-gray-700">Nama Kursus</span></label>
+                                        <label class="flex items-center gap-2"><input type="checkbox" name="showDate" checked class="w-4 h-4 text-blue-600 rounded"><span class="text-sm text-gray-700">Tarikh</span></label>
+                                        <label class="flex items-center gap-2"><input type="checkbox" name="showSignatory" checked class="w-4 h-4 text-blue-600 rounded"><span class="text-sm text-gray-700">Penandatangan</span></label>
+                                    </div>
+                                </div>
+
+                                <!-- Colors & Font -->
+                                <div>
+                                    <h4 class="font-bold text-gray-700 border-b pb-2 mb-3">Warna & Font</h4>
+                                    <div class="grid grid-cols-3 gap-3 mb-3">
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Warna Utama</label>
+                                            <input type="color" name="primaryColor" value="#004aad" class="w-full h-9 border border-gray-300 rounded cursor-pointer">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Warna Sekunder</label>
+                                            <input type="color" name="secondaryColor" value="#333333" class="w-full h-9 border border-gray-300 rounded cursor-pointer">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Warna Aksen</label>
+                                            <input type="color" name="accentColor" value="#fbbf24" class="w-full h-9 border border-gray-300 rounded cursor-pointer">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Font</label>
+                                        <select name="fontFamily" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                                            <option value="Helvetica">Helvetica (Default)</option>
+                                            <option value="Times-Roman">Times Roman</option>
+                                            <option value="Courier">Courier</option>
+                                            <option value="Helvetica-Bold">Helvetica Bold</option>
+                                            <option value="Times-Bold">Times Bold</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Background -->
+                                <div>
+                                    <h4 class="font-bold text-gray-700 border-b pb-2 mb-3">Background Sijil</h4>
+                                    <div class="space-y-3">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Background</label>
+                                            <select name="backgroundImageType" id="bgType" onchange="toggleBgInputs()" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                                                <option value="none">Tiada (Solid Color)</option>
+                                                <option value="url">URL Image</option>
+                                                <option value="r2">Cloudflare R2</option>
+                                            </select>
+                                        </div>
+                                        <div id="bgUrlInput" class="hidden">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Background Image URL</label>
+                                            <input type="url" name="backgroundImageUrl" placeholder="https://example.com/background.jpg" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                                        </div>
+                                        <div id="bgR2Input" class="hidden">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">R2 Key (contoh: certificates/bg1.png)</label>
+                                            <input type="text" name="backgroundR2Key" placeholder="certificates/background.png" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Opacity Background (0.1 - 1.0)</label>
+                                            <input type="range" name="backgroundOpacity" min="0.1" max="1" step="0.1" value="1" class="w-full" oninput="document.getElementById('opacityVal').textContent = this.value; updatePreview()">
+                                            <span class="text-xs text-gray-600">Nilai: <span id="opacityVal">1</span></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Border & Logo -->
+                                <div>
+                                    <h4 class="font-bold text-gray-700 border-b pb-2 mb-3">Border & Logo</h4>
+                                    <div class="space-y-2 mb-3">
+                                        <label class="flex items-center gap-2"><input type="checkbox" name="showBorder" checked class="w-4 h-4 text-blue-600 rounded"><span class="text-sm text-gray-700">Show Border</span></label>
+                                        <label class="flex items-center gap-2"><input type="checkbox" name="showLogo" class="w-4 h-4 text-blue-600 rounded"><span class="text-sm text-gray-700">Show Logo</span></label>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Logo URL (optional)</label>
+                                        <input type="url" name="logoUrl" id="logoUrl" placeholder="https://example.com/logo.png" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" onchange="updatePreview()">
+                                    </div>
+                                </div>
+
+                                <!-- Footer Text -->
+                                <div>
+                                    <h4 class="font-bold text-gray-700 border-b pb-2 mb-3">Footer Text</h4>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Teks Footer Baris 1</label>
+                                        <input type="text" name="footerLine1" value="Sijil ini dijana secara elektronik" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                                    </div>
+                                    <div class="mt-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Teks Footer Baris 2</label>
+                                        <input type="text" name="footerLine2" value="Tidak memerlukan cop rasmi" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                                    </div>
+                                    <label class="flex items-center gap-2 mt-2"><input type="checkbox" name="showFooter" checked class="w-4 h-4 text-blue-600 rounded"><span class="text-sm text-gray-700">Show Footer</span></label>
+                                </div>
+
+                                <div class="pt-4 border-t flex justify-end gap-3">
+                                    <button type="button" onclick="document.getElementById('createTemplateModal').classList.add('hidden')" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">Batal</button>
+                                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Simpan Template</button>
+                                </div>
+                            </form>
                         </div>
 
-                        <!-- Right Column: Styling -->
-                        <div class="space-y-4">
-                            <h4 class="font-bold text-gray-700 border-b pb-2">Gaya & Reka Bentuk</h4>
-                            <div class="grid grid-cols-3 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Warna Utama</label>
-                                    <input type="color" name="primaryColor" value="#004aad" class="w-full h-10 border border-gray-300 rounded-lg cursor-pointer">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Warna Sekunder</label>
-                                    <input type="color" name="secondaryColor" value="#333333" class="w-full h-10 border border-gray-300 rounded-lg cursor-pointer">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Warna Aksen</label>
-                                    <input type="color" name="accentColor" value="#fbbf24" class="w-full h-10 border border-gray-300 rounded-lg cursor-pointer">
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Font</label>
-                                <select name="fontFamily" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
-                                    <option value="Helvetica">Helvetica (Default)</option>
-                                    <option value="Times-Roman">Times Roman</option>
-                                    <option value="Courier">Courier</option>
-                                    <option value="Helvetica-Bold">Helvetica Bold</option>
-                                    <option value="Times-Bold">Times Bold</option>
-                                </select>
-                            </div>
-                            <div class="space-y-2">
-                                <label class="flex items-center gap-2">
-                                    <input type="checkbox" name="showBorder" checked class="w-4 h-4 text-blue-600 rounded">
-                                    <span class="text-sm text-gray-700">Show Border</span>
-                                </label>
-                                <label class="flex items-center gap-2">
-                                    <input type="checkbox" name="showLogo" class="w-4 h-4 text-blue-600 rounded">
-                                    <span class="text-sm text-gray-700">Show Logo</span>
-                                </label>
-                            </div>
+                        <!-- RIGHT: Live Preview with Drag-Drop -->
+                        <div class="w-full lg:w-1/2 overflow-y-auto p-6 bg-gray-100">
+                            <h4 class="font-bold text-gray-700 mb-3 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" /></svg>
+                                Live Preview (Drag elemen untuk ubah posisi)
+                            </h4>
                             
-                            <!-- Background Options -->
-                            <h4 class="font-bold text-gray-700 border-b pb-2 mt-6">Background Sijil</h4>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Background</label>
-                                <select name="backgroundImageType" id="bgType" onchange="toggleBgInputs()" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
-                                    <option value="none">Tiada (Solid Color)</option>
-                                    <option value="url">URL Image</option>
-                                    <option value="r2">Cloudflare R2</option>
-                                </select>
+                            <!-- Preview Container -->
+                            <div id="certificatePreview" class="relative w-full aspect-[1.414] bg-white shadow-lg mx-auto overflow-hidden select-none" style="min-height: 500px;">
+                                <!-- Elements will be rendered here -->
                             </div>
-                            <div id="bgUrlInput" class="hidden">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Background Image URL</label>
-                                <input type="url" name="backgroundImageUrl" placeholder="https://example.com/background.jpg" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
-                            </div>
-                            <div id="bgR2Input" class="hidden">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">R2 Key (contoh: certificates/bg1.png)</label>
-                                <input type="text" name="backgroundR2Key" placeholder="certificates/background.png" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Opacity Background (0.1 - 1.0)</label>
-                                <input type="range" name="backgroundOpacity" min="0.1" max="1" step="0.1" value="1" class="w-full" oninput="document.getElementById('opacityVal').textContent = this.value">
-                                <span class="text-xs text-gray-600">Nilai: <span id="opacityVal">1</span></span>
-                            </div>
-                            
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Logo URL (optional)</label>
-                                <input type="url" name="logoUrl" placeholder="https://example.com/logo.png" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
-                            </div>
-                        </div>
 
-                        <div class="lg:col-span-2 flex justify-end gap-3 pt-6 border-t border-gray-200">
-                            <button type="button" onclick="document.getElementById('createTemplateModal').classList.add('hidden')" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">Batal</button>
-                            <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Simpan Template</button>
+                            <!-- Element Positioning Controls -->
+                            <div class="mt-6 bg-white p-4 rounded-lg shadow-sm">
+                                <h5 class="font-bold text-gray-700 mb-3 text-sm">Kawalan Posisi & Tipografi Elemen</h5>
+                                <div class="grid grid-cols-2 gap-3 text-xs">
+                                    <div>
+                                        <label class="block text-gray-500 mb-1">Elemen</label>
+                                        <select id="elementSelector" class="w-full border border-gray-300 rounded px-2 py-1" onchange="loadElementControls()">
+                                            <option value="title">Tajuk</option>
+                                            <option value="subtitle">Subtitle</option>
+                                            <option value="description">Description</option>
+                                            <option value="athleteName">Nama Atlet</option>
+                                            <option value="icNumber">No. IC</option>
+                                            <option value="negeri">Negeri</option>
+                                            <option value="sukan">Sukan</option>
+                                            <option value="courseName">Nama Kursus</option>
+                                            <option value="date">Tarikh</option>
+                                            <option value="signatory">Penandatangan</option>
+                                            <option value="signatoryTitle">Jawatan Penandatangan</option>
+                                            <option value="footer">Footer</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-500 mb-1">Posisi X (%)</label>
+                                        <input type="number" id="elemPosX" class="w-full border border-gray-300 rounded px-2 py-1" value="50" onchange="updateElementPosition()">
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-500 mb-1">Posisi Y (%)</label>
+                                        <input type="number" id="elemPosY" class="w-full border border-gray-300 rounded px-2 py-1" value="10" onchange="updateElementPosition()">
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-500 mb-1">Saiz Font (px)</label>
+                                        <input type="number" id="elemFontSize" class="w-full border border-gray-300 rounded px-2 py-1" value="36" onchange="updateElementStyle()">
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-500 mb-1">Penjajaran</label>
+                                        <select id="elemAlign" class="w-full border border-gray-300 rounded px-2 py-1" onchange="updateElementStyle()">
+                                            <option value="left">Kiri</option>
+                                            <option value="center">Tengah</option>
+                                            <option value="right">Kanan</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-500 mb-1">Warna</label>
+                                        <input type="color" id="elemColor" class="w-full h-8 border border-gray-300 rounded cursor-pointer" value="#004aad" onchange="updateElementStyle()">
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-500 mb-1">Line Height</label>
+                                        <input type="number" id="elemLineHeight" class="w-full border border-gray-300 rounded px-2 py-1" value="1.2" step="0.1" onchange="updateElementStyle()">
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-500 mb-1">Letter Spacing</label>
+                                        <input type="number" id="elemLetterSpacing" class="w-full border border-gray-300 rounded px-2 py-1" value="0" step="0.5" onchange="updateElementStyle()">
+                                    </div>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-2 italic">💡 Tip: Klik & drag elemen dalam preview untuk ubah posisi dengan cepat</p>
+                            </div>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
 
