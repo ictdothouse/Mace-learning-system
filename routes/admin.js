@@ -135,8 +135,9 @@ router.get('/modules/edit/:id', async (req, res) => {
     try {
         const module = await Module.findById(req.params.id);
         if (!module) return res.redirect('/admin-mace/modules?msg=not_found');
-        res.render('admin-edit-module', { page: 'modules', module });
+        res.render('admin-edit-module', { page: 'modules', module, editMode: 'edit' });
     } catch (err) { 
+        console.error('Edit Module Form Error:', err);
         res.status(500).send('Ralat memuatkan borang.'); 
     }
 });
