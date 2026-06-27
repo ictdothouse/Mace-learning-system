@@ -6,8 +6,8 @@ const MongoStore = require('connect-mongo');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
 
-// 1. IMPORT ROUTES (Pastikan nama folder dan fail betul)
-// Kita ambil '.router' kerana athlete.js export objek { router, getLessonsWithQuiz }
+// 1. IMPORT ROUTES
+// Pastikan path ini betul mengikut struktur folder anda
 const athleteRoutes = require('./routes/athlete').router; 
 const adminRoutes = require('./routes/admin');
 
@@ -22,7 +22,7 @@ const PORT = process.env.PORT || 3000;
 // Ini menyelesaikan error 'X-Forwarded-For' dan memastikan IP user dikesan
 app.set('trust proxy', 1);
 
-// 3. Setup View Engine (EJS)
+// 3. Setup View Engine (EJS) - Wajib untuk render fail .ejs seperti lesson.ejs
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
@@ -30,10 +30,10 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 5. Static Files (Jika ada css/js/images dalam folder public)
+// 5. Static Files (Untuk CSS/JS/Images jika ada dalam folder public)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 6. Rate Limiting (Ditelahurkan sedikit untuk elak block awal)
+// 6. Rate Limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minit
     max: 100, // limit setiap IP ke 100 request
@@ -58,7 +58,6 @@ mongoose.connect(process.env.MONGO_URI)
     .catch(err => {
         console.error('❌ DB Connection Error:', err.message);
         console.log('⚠️ Server tidak dapat dimulakan tanpa database. Semak MONGO_URI dan IP Whitelist.');
-        // Jangan exit process supaya hostinger tak anggap crash total, tapi app takkan respond
     });
 
 function startServer() {
@@ -83,6 +82,7 @@ function startServer() {
 
     // 8. AKTIFKAN ROUTES
     // Route Utama (Login, Dashboard, Lesson, Quiz) - Dari athlete.js
+    // Ini termasuk route /lesson/:id yang diperlukan oleh lesson.ejs
     app.use('/', athleteRoutes);
 
     // Route Admin (Pengurusan) - Dari admin.js
