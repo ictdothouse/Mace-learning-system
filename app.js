@@ -6,129 +6,97 @@ const MongoStore = require('connect-mongo');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
 
-// 1. IMPORT ROUTES
+// 1. IMPORT ROUTES (Pastikan nama folder dan fail betul)
+// Kita ambil '.router' kerana athlete.js export objek { router, getLessonsWithQuiz }
+const athleteRoutes = require('./routes/athlete').router; 
 const adminRoutes = require('./routes/admin');
-// Import route athlete jika ada (untuk handle /access)
-// const athleteRoutes = require('./routes/athlete'); 
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 2. SET TRUST PROXY (Wajib untuk Hostinger)
+// ==========================================
+// KONFIGURASI PENTING HOSTINGER & PROXY
+// ==========================================
+
+// 2. FIX: Set Trust Proxy WAJIB untuk Hostinger (Reverse Proxy)
+// Ini menyelesaikan error 'X-Forwarded-For' dan memastikan IP user dikesan
 app.set('trust proxy', 1);
 
-// 3. SETUP VIEW ENGINE (EJS) - PENTING!
+// 3. Setup View Engine (EJS)
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views')); // Pastikan folder views wujud
+app.set('views', path.join(__dirname, 'views'));
 
-// 4. MIDDLEWARE DASAR
+// 4. Middleware Dasar
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files (css, js, images) jika ada folder public
+// 5. Static Files (Jika ada css/js/images dalam folder public)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 5. RATE LIMITING
+// 6. Rate Limiting (Ditelahurkan sedikit untuk elak block awal)
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, 
-    max: 100, 
+    windowMs: 15 * 60 * 1000, // 15 minit
+    max: 100, // limit setiap IP ke 100 request
     standardHeaders: true,
     legacyHeaders: false,
+    message: 'Terlalu banyak permintaan, sila cuba lagi sebentar lagi.'
 });
 app.use(limiter);
 
-// 6. SAMBUNGAN DB & START SERVER
+// ==========================================
+// SAMBUNGAN DATABASE & START SERVER
+// ==========================================
+
+let isDbConnected = false;
+
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {
-        console.log('✅ DB Connected successfully');
-        startServer();
+        console.log('✅ DB Connected successfully to MongoDB Atlas');
+        isDbConnected = true;
+        startServer(); // Hanya start server bila DB connect
     })
     .catch(err => {
         console.error('❌ DB Connection Error:', err.message);
+        console.log('⚠️ Server tidak dapat dimulakan tanpa database. Semak MONGO_URI dan IP Whitelist.');
+        // Jangan exit process supaya hostinger tak anggap crash total, tapi app takkan respond
     });
 
 function startServer() {
-    // 7. SESSION CONFIG
+    if (!isDbConnected) return;
+
+    // 7. Konfigurasi Session (Wajib selepas DB connect sebab guna MongoStore)
     app.use(session({
-        secret: process.env.SESSION_SECRET || 'rahsia_sulit_hostinger',
+        secret: process.env.SESSION_SECRET || 'rahsia_sulit_hostinger_mace_2024',
         resave: false,
         saveUninitialized: false,
         store: MongoStore.create({
             mongoUrl: process.env.MONGO_URI,
-            ttl: 24 * 60 * 60 
+            ttl: 24 * 60 * 60 // 1 hari
         }),
         cookie: {
-            secure: true, // True untuk HTTPS
+            secure: true, // WAJIB true jika guna HTTPS di Hostinger
             httpOnly: true,
-            maxAge: 24 * 60 * 60 * 1000
+            maxAge: 24 * 60 * 60 * 1000,
+            sameSite: 'lax'
         }
     }));
 
-    // 8. DEFINISI ROUTE UTAMA (HALAMAN LOGIN/ENTRY)
-    app.get('/', (req, res) => {
-        // Ini akan render fail views/entry.ejs
-        res.render('entry', { error: null });
-    });
+    // 8. AKTIFKAN ROUTES
+    // Route Utama (Login, Dashboard, Lesson, Quiz) - Dari athlete.js
+    app.use('/', athleteRoutes);
 
-    // 9. ROUTE UNTUK PROSES LOGIN (ACTION FORM)
-    // Anda perlu pastikan logik ini wujud sama ada di sini atau dalam router terpisah
-    app.post('/access', async (req, res) => {
-        try {
-            const { action, fullName, icNumber, jantina, umur, negeri } = req.body;
-            const Athlete = require('./models/Athlete'); // Pastikan model wujud
-
-            if (action === 'new') {
-                // Logik Daftar Baru
-                const existing = await Athlete.findOne({ icNumber });
-                if (existing) {
-                    return res.render('entry', { error: 'No. IC telah didaftarkan. Sila guna tab "Semak Akaun".' });
-                }
-                
-                const newAthlete = await Athlete.create({
-                    fullName, icNumber, jantina, umur, negeriWakil: negeri,
-                    currentStage: 1, quizScores: { quiz1: 0, quiz2: 0, quiz3: 0 }, watchedLessons: []
-                });
-                
-                // Simpan session user baru
-                req.session.userId = newAthlete._id;
-                req.session.isLoggedIn = true;
-                
-                return res.redirect('/dashboard'); // Redirect ke dashboard atlet (pastikan route ini wujud)
-
-            } else if (action === 'resume') {
-                // Logik Login Semula
-                const athlete = await Athlete.findOne({ fullName, icNumber });
-                if (!athlete) {
-                    return res.render('entry', { error: 'Rekod tidak dijumpai. Sila semak nama dan no. IC.' });
-                }
-
-                req.session.userId = athlete._id;
-                req.session.isLoggedIn = true;
-                
-                return res.redirect('/dashboard'); // Redirect ke dashboard
-
-            } else {
-                return res.render('entry', { error: 'Tindakan tidak sah.' });
-            }
-        } catch (err) {
-            console.error('Error processing access:', err);
-            return res.render('entry', { error: 'Ralat sistem. Sila cuba sebentar lagi.' });
-        }
-    });
-
-    // 10. AKTIFKAN ROUTE ADMIN
+    // Route Admin (Pengurusan) - Dari admin.js
     app.use('/admin-mace', adminRoutes);
 
-    // Route test dashboard ( sementara )
-    app.get('/dashboard', (req, res) => {
-        if (!req.session.isLoggedIn) return res.redirect('/');
-        res.send('Selamat Datang ke Dashboard Atlet! (Page ini perlu dibina)');
+    // 9. Handle 404
+    app.use((req, res) => {
+        res.status(404).send('Halaman tidak dijumpai (404). Sila kembali ke <a href="/">Dashboard</a>.');
     });
 
-    // 11. START SERVER
+    // 10. Start Server
     app.listen(PORT, () => {
         console.log(`🚀 Server running on port ${PORT}`);
-        console.log(`🔗 Access: http://localhost:${PORT}`);
-        console.log(`🔐 Admin: http://localhost:${PORT}/admin-mace`);
+        console.log(`🔐 Admin Panel: http://localhost:${PORT}/admin-mace`);
+        console.log(`🏠 Main App: http://localhost:${PORT}/`);
     });
 }
