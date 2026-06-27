@@ -204,6 +204,7 @@
                                     <th class="px-6 py-3 text-center">K2</th>
                                     <th class="px-6 py-3 text-center">K3</th>
                                     <th class="px-6 py-3">Status</th>
+                                    <th class="px-6 py-3 text-right">Tindakan</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">
@@ -220,11 +221,17 @@
                                             <td class="px-6 py-3 text-center font-mono <%= a.quizScores?.quiz2 > 0 ? 'text-green-600' : 'text-gray-300' %>"><%= a.quizScores?.quiz2 || '-' %></td>
                                             <td class="px-6 py-3 text-center font-mono <%= a.quizScores?.quiz3 > 0 ? 'text-green-600' : 'text-gray-300' %>"><%= a.quizScores?.quiz3 || '-' %></td>
                                             <td class="px-6 py-3"><span class="<%= color %> px-2.5 py-1 rounded-full text-xs font-bold"><%= status %></span></td>
+                                            <td class="px-6 py-3 text-right">
+                                                <a href="/admin-mace/certificate/preview/<%= a._id %>" target="_blank" 
+                                                   class="text-blue-600 hover:text-blue-800 text-sm font-medium hover:underline">
+                                                    📄 Sijil
+                                                </a>
+                                            </td>
                                         </tr>
                                     <% }) %>
                                 <% } else { %>
                                     <tr>
-                                        <td colspan="7" class="px-6 py-12 text-center text-gray-400 italic">Tiada rekod atlet dijumpai.</td>
+                                        <td colspan="8" class="px-6 py-12 text-center text-gray-400 italic">Tiada rekod atlet dijumpai.</td>
                                     </tr>
                                 <% } %>
                             </tbody>

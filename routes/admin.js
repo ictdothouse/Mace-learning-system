@@ -366,3 +366,47 @@ router.post('/templates/delete/:id', async (req, res) => {
 });
 
 module.exports = router;
+// GET: Preview Sijil (HTML untuk Print)
+router.get('/certificate/preview/:id', async (req, res) => {
+    try {
+        const athlete = await Athlete.findById(req.params.id);
+        if (!athlete) {
+            req.flash('error_msg', 'Atlet tidak dijumpai');
+            return res.redirect('/admin-mace');
+        }
+
+        // Cari kursus yang atlet ini sertai
+        const Course = require('../models/Course');
+        const course = await Course.findOne({ 'participants.athlete': athlete._id });
+        
+        // Dapatkan template aktif
+        let template = await CertificateTemplate.findOne({ isActive: true });
+        
+        // Jika tiada template aktif, guna default values
+        if (!template) {
+            template = new CertificateTemplate();
+        }
+
+        // Format tarikh
+        const courseDate = course ? new Date(course.endDate).toLocaleDateString('ms-MY', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        }) : new Date().toLocaleDateString('ms-MY', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        res.render('certificate-print', {
+            layout: false,
+            athlete,
+            course,
+            template,
+            courseDate
+        });
+
+    } catch (err) {
+        console.error('Certificate Preview Error:', err);
+        req.flash('error_msg', 'Ralat memuatkan preview sijil: ' + err.message);
+        res.redirect('/admin-mace');
+    }
+});
+
+module.exports = router;

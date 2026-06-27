@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sijil - <%= athlete.fullName %></title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&family=Great+Vibes&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .no-print {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .no-print button, .no-print a {
+            padding: 12px 24px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-print {
+            background: #004aad;
+            color: white;
+        }
+        
+        .btn-print:hover {
+            background: #003d8c;
+        }
+        
+        .btn-back {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-back:hover {
+            background: #4b5563;
+        }
+        
+        .certificate-container {
+            max-width: 1123px; /* A4 width at 96 DPI */
+            min-height: 794px; /* A4 height at 96 DPI */
+            margin: 0 auto;
+            position: relative;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .certificate-content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            padding: 40px;
+        }
+        
+        /* Background */
+        .bg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+        
+        .bg-color {
+            background-color: <%= template.backgroundColor || '#ffffff' %>;
+        }
+        
+        .bg-image {
+            background-image: url('<%= template.backgroundImageType === "r2" ? "https://imghub-cdn.cloudflare.com/" + template.backgroundR2Key : (template.backgroundImageUrl || "") %>');
+            background-size: cover;
+            background-position: center;
+            opacity: <%= template.backgroundOpacity || 1 %>;
+        }
+        
+        /* Border */
+        .border-frame {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            border: <%= template.showBorder ? (template.borderWidth || 3) + 'px solid ' + (template.borderColor || '#004aad') : 'none' %>;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .border-double {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            right: 30px;
+            bottom: 30px;
+            border: 2px solid <%= template.showBorder ? (template.borderColor || '#004aad') : 'transparent' %>;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        /* Logo */
+        .logo {
+            position: absolute;
+            z-index: 10;
+        }
+        
+        <% if (template.showLogo && template.logoUrl) { %>
+            <% if (template.logoPosition === 'top-left') { %>
+                .logo { top: 40px; left: 40px; }
+            <% } else if (template.logoPosition === 'top-right') { %>
+                .logo { top: 40px; right: 40px; }
+            <% } else if (template.logoPosition === 'bottom-left') { %>
+                .logo { bottom: 40px; left: 40px; }
+            <% } else if (template.logoPosition === 'bottom-right') { %>
+                .logo { bottom: 40px; right: 40px; }
+            <% } else { %>
+                .logo { top: 40px; left: 50%; transform: translateX(-50%); }
+            <% } %>
+        <% } %>
+        
+        /* Content Elements */
+        .element {
+            position: absolute;
+            transform: translateX(-50%);
+            z-index: 5;
+        }
+        
+        .align-left {
+            transform: translateX(0);
+        }
+        
+        .align-right {
+            transform: translateX(-100%);
+        }
+        
+        /* Print Media Query */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .no-print {
+                display: none;
+            }
+            
+            .certificate-container {
+                box-shadow: none;
+                margin: 0;
+                page-break-inside: avoid;
+            }
+            
+            @page {
+                size: A4 landscape;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print">
+        <button onclick="window.print()" class="btn-print">🖨️ Cetak / Simpan PDF</button>
+        <a href="/admin-mace" class="btn-back">← Kembali ke Admin</a>
+    </div>
+
+    <div class="certificate-container">
+        <!-- Background Layers -->
+        <div class="bg-layer bg-color"></div>
+        <% if (template.backgroundImageType !== 'none' && (template.backgroundImageUrl || template.backgroundR2Key)) { %>
+            <div class="bg-layer bg-image"></div>
+        <% } %>
+        
+        <!-- Border Frames -->
+        <% if (template.showBorder) { %>
+            <div class="border-frame"></div>
+            <div class="border-double"></div>
+        <% } %>
+        
+        <!-- Logo -->
+        <% if (template.showLogo && template.logoUrl) { %>
+            <img src="<%= template.logoUrl %>" alt="Logo" class="logo" style="width: <%= template.logoSize?.width || 80 %>px; height: <%= template.logoSize?.height || 80 %>px;">
+        <% } %>
+        
+        <!-- Content Area -->
+        <div class="certificate-content">
+            <% 
+            const elements = template.elements || {};
+            const t = elements.title || {};
+            const sub = elements.subtitle || {};
+            const desc = elements.description || {};
+            const name = elements.athleteName || {};
+            const ic = elements.icNumber || {};
+            const negeri = elements.negeri || {};
+            const sukan = elements.sukan || {};
+            const course = elements.courseName || {};
+            const date = elements.date || {};
+            const sign = elements.signatory || {};
+            const signTitle = elements.signatoryTitle || {};
+            %>
+            
+            <!-- Title -->
+            <% if (template.showTitle) { %>
+                <div class="element align-<%= t.align || 'center' %>" 
+                     style="left: <%= t.positionX || 50 %>%; top: <%= t.positionY || 10 %>%; 
+                            font-size: <%= t.fontSize || 36 %>px; 
+                            color: <%= t.color || '#004aad' %>; 
+                            font-weight: <%= t.fontWeight || 'bold' %>;
+                            line-height: <%= t.lineHeight || 1.2 %>;
+                            letter-spacing: <%= t.letterSpacing || 0 %>px;
+                            font-family: 'Playfair Display', serif;">
+                    <%= template.title %>
+                </div>
+            <% } %>
+            
+            <!-- Subtitle -->
+            <% if (template.showSubtitle) { %>
+                <div class="element align-<%= sub.align || 'center' %>" 
+                     style="left: <%= sub.positionX || 50 %>%; top: <%= sub.positionY || 18 %>%; 
+                            font-size: <%= sub.fontSize || 18 %>px; 
+                            color: <%= sub.color || '#333333' %>; 
+                            font-weight: <%= sub.fontWeight || 'normal' %>;
+                            line-height: <%= sub.lineHeight || 1.3 %>;
+                            letter-spacing: <%= sub.letterSpacing || 0 %>px;">
+                    <%= template.subtitle %>
+                </div>
+            <% } %>
+            
+            <!-- Description -->
+            <% if (template.showDescription) { %>
+                <div class="element align-<%= desc.align || 'center' %>" 
+                     style="left: <%= desc.positionX || 50 %>%; top: <%= desc.positionY || 28 %>%; 
+                            font-size: <%= desc.fontSize || 16 %>px; 
+                            color: <%= desc.color || '#000000' %>; 
+                            font-weight: <%= desc.fontWeight || 'normal' %>;
+                            line-height: <%= desc.lineHeight || 1.4 %>;
+                            letter-spacing: <%= desc.letterSpacing || 0 %>px;">
+                    <%= template.description %>
+                </div>
+            <% } %>
+            
+            <!-- Athlete Name -->
+            <% if (template.showAthleteName) { %>
+                <div class="element align-<%= name.align || 'center' %>" 
+                     style="left: <%= name.positionX || 50 %>%; top: <%= name.positionY || 38 %>%; 
+                            font-size: <%= name.fontSize || 42 %>px; 
+                            color: <%= name.color || '#004aad' %>; 
+                            font-weight: <%= name.fontWeight || 'bold' %>;
+                            line-height: <%= name.lineHeight || 1.2 %>;
+                            letter-spacing: <%= name.letterSpacing || 0 %>px;
+                            font-family: 'Great Vibes', cursive;">
+                    <%= athlete.fullName %>
+                </div>
+            <% } %>
+            
+            <!-- IC Number -->
+            <% if (template.showIcNumber) { %>
+                <div class="element align-<%= ic.align || 'center' %>" 
+                     style="left: <%= ic.positionX || 50 %>%; top: <%= ic.positionY || 48 %>%; 
+                            font-size: <%= ic.fontSize || 14 %>px; 
+                            color: <%= ic.color || '#666666' %>; 
+                            font-weight: <%= ic.fontWeight || 'normal' %>;
+                            line-height: <%= ic.lineHeight || 1.3 %>;
+                            letter-spacing: <%= ic.letterSpacing || 0 %>px;">
+                    No. IC: <%= athlete.icNumber %>
+                </div>
+            <% } %>
+            
+            <!-- Negeri -->
+            <% if (template.showNegeri) { %>
+                <div class="element align-<%= negeri.align || 'center' %>" 
+                     style="left: <%= negeri.positionX || 50 %>%; top: <%= negeri.positionY || 52 %>%; 
+                            font-size: <%= negeri.fontSize || 16 %>px; 
+                            color: <%= negeri.color || '#000000' %>; 
+                            font-weight: <%= negeri.fontWeight || 'normal' %>;
+                            line-height: <%= negeri.lineHeight || 1.3 %>;
+                            letter-spacing: <%= negeri.letterSpacing || 0 %>px;">
+                    Mewakili Negeri: <strong><%= athlete.negeriWakil %></strong>
+                </div>
+            <% } %>
+            
+            <!-- Sukan -->
+            <% if (template.showSukan) { %>
+                <div class="element align-<%= sukan.align || 'center' %>" 
+                     style="left: <%= sukan.positionX || 50 %>%; top: <%= sukan.positionY || 56 %>%; 
+                            font-size: <%= sukan.fontSize || 16 %>px; 
+                            color: <%= sukan.color || '#004aad' %>; 
+                            font-weight: <%= sukan.fontWeight || 'bold' %>;
+                            line-height: <%= sukan.lineHeight || 1.3 %>;
+                            letter-spacing: <%= sukan.letterSpacing || 0 %>px;">
+                    Cabang Sukan: <strong><%= athlete.sukan || '-' %></strong>
+                </div>
+            <% } %>
+            
+            <!-- Course Name -->
+            <% if (template.showCourseName) { %>
+                <div class="element align-<%= course.align || 'center' %>" 
+                     style="left: <%= course.positionX || 50 %>%; top: <%= course.positionY || 60 %>%; 
+                            font-size: <%= course.fontSize || 20 %>px; 
+                            color: <%= course.color || '#004aad' %>; 
+                            font-weight: <%= course.fontWeight || 'bold' %>;
+                            line-height: <%= course.lineHeight || 1.3 %>;
+                            letter-spacing: <%= course.letterSpacing || 0 %>px;">
+                    <%= course.name || template.courseName %>
+                </div>
+            <% } %>
+            
+            <!-- Date -->
+            <% if (template.showDate) { %>
+                <div class="element align-<%= date.align || 'center' %>" 
+                     style="left: <%= date.positionX || 50 %>%; top: <%= date.positionY || 68 %>%; 
+                            font-size: <%= date.fontSize || 14 %>px; 
+                            color: <%= date.color || '#000000' %>; 
+                            font-weight: <%= date.fontWeight || 'normal' %>;
+                            line-height: <%= date.lineHeight || 1.3 %>;
+                            letter-spacing: <%= date.letterSpacing || 0 %>px;">
+                    Tarikh: <%= courseDate %>
+                </div>
+            <% } %>
+            
+            <!-- Signatory -->
+            <% if (template.showSignatory) { %>
+                <div class="element align-<%= sign.align || 'left' %>" 
+                     style="left: <%= sign.positionX || 20 %>%; top: <%= sign.positionY || 80 %>%; 
+                            font-size: <%= sign.fontSize || 14 %>px; 
+                            color: <%= sign.color || '#000000' %>; 
+                            font-weight: <%= sign.fontWeight || 'bold' %>;
+                            line-height: <%= sign.lineHeight || 1.3 %>;
+                            letter-spacing: <%= sign.letterSpacing || 0 %>px;">
+                    <%= template.signatoryName %>
+                </div>
+                
+                <div class="element align-<%= signTitle.align || 'left' %>" 
+                     style="left: <%= signTitle.positionX || 20 %>%; top: <%= signTitle.positionY || 85 %>%; 
+                            font-size: <%= signTitle.fontSize || 12 %>px; 
+                            color: <%= signTitle.color || '#666666' %>; 
+                            font-weight: <%= signTitle.fontWeight || 'normal' %>;
+                            line-height: <%= signTitle.lineHeight || 1.3 %>;
+                            letter-spacing: <%= signTitle.letterSpacing || 0 %>px;">
+                    <%= template.signatoryTitle %>
+                </div>
+            <% } %>
+        </div>
+    </div>
+    
+    <script>
+        // Auto-focus print dialog on load (optional)
+        // window.onload = () => window.print();
+    </script>
+</body>
+</html>
