@@ -2,12 +2,38 @@ const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
 const CertificateTemplate = require('../models/CertificateTemplate');
+const { S3Client } = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+const { GetObjectCommand } = require('@aws-sdk/client-s3');
+
+// Cloudflare R2 Client for background images
+const r2Client = new S3Client({
+    region: 'auto',
+    endpoint: process.env.R2_ENDPOINT || `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+    credentials: {
+        accessKeyId: process.env.R2_ACCESS_KEY_ID,
+        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY
+    }
+});
+
+const getSecureImageUrl = async (key) => {
+    try {
+        const command = new GetObjectCommand({
+            Bucket: process.env.R2_BUCKET_NAME || 'modulmace',
+            Key: key
+        });
+        return await getSignedUrl(r2Client, command, { expiresIn: 3600 });
+    } catch (err) {
+        console.error('❌ Gagal generate signed URL untuk image:', err.message);
+        return null;
+    }
+};
 
 async function generateCertificate(athlete, res, templateId = null) {
     const doc = new PDFDocument({ 
         size: 'A4', 
         layout: 'landscape',
-        margins: { top: 50, bottom: 50, left: 50, right: 50 }
+        margins: { top: 0, bottom: 0, left: 0, right: 0 }
     });
     
     res.header('Content-Type', 'application/pdf');
@@ -35,87 +61,235 @@ async function generateCertificate(athlete, res, templateId = null) {
         primaryColor: '#004aad',
         secondaryColor: '#333333',
         accentColor: '#fbbf24',
+        backgroundColor: '#ffffff',
         fontFamily: 'Helvetica',
         showBorder: true,
-        fontSize: { title: 36, name: 42, body: 16 }
+        showTitle: true,
+        showSubtitle: true,
+        showCourseName: true,
+        showDescription: true,
+        showAthleteName: true,
+        showIcNumber: false,
+        showNegeri: true,
+        showDate: true,
+        showSignatory: true,
+        backgroundImageType: 'none',
+        elements: {
+            title: { fontSize: 36, color: '#004aad', align: 'center', positionX: 50, positionY: 10 },
+            athleteName: { fontSize: 42, color: '#004aad', align: 'center', positionX: 50, positionY: 38 }
+        }
     };
 
-    const primaryColor = config.primaryColor || '#004aad';
-    const secondaryColor = config.secondaryColor || '#333333';
+    const pageWidth = doc.page.width;
+    const pageHeight = doc.page.height;
 
-    // Border luar (double border effect)
-    if (config.showBorder) {
-        doc.lineWidth(3);
-        doc.rect(15, 15, doc.page.width - 30, doc.page.height - 30).stroke(primaryColor);
-        
-        // Border dalam
-        doc.lineWidth(1);
-        doc.rect(25, 25, doc.page.width - 50, doc.page.height - 50).stroke(primaryColor);
-
-        // Hiasan sudut
-        const cornerSize = 30;
-        doc.lineCap('square');
-        // Sudut kiri atas
-        doc.moveTo(35, 55).lineTo(35, 35).lineTo(55, 35).stroke(primaryColor);
-        // Sudut kanan atas
-        doc.moveTo(doc.page.width - 55, 35).lineTo(doc.page.width - 35, 35).lineTo(doc.page.width - 35, 55).stroke(primaryColor);
-        // Sudut kiri bawah
-        doc.moveTo(35, doc.page.height - 55).lineTo(35, doc.page.height - 35).lineTo(55, doc.page.height - 35).stroke(primaryColor);
-        // Sudut kanan bawah
-        doc.moveTo(doc.page.width - 55, doc.page.height - 35).lineTo(doc.page.width - 35, doc.page.height - 35).lineTo(doc.page.width - 35, doc.page.height - 55).stroke(primaryColor);
+    // Draw background
+    if (config.backgroundImageType === 'none' || !config.backgroundImageType) {
+        // Solid color background
+        doc.rect(0, 0, pageWidth, pageHeight).fill(config.backgroundColor || '#ffffff');
+    } else if (config.backgroundImageType === 'url' && config.backgroundImageUrl) {
+        // Background from URL
+        try {
+            doc.opacity(config.backgroundOpacity || 1);
+            doc.image(config.backgroundImageUrl, 0, 0, { width: pageWidth, height: pageHeight });
+            doc.opacity(1);
+        } catch (err) {
+            console.error('Error loading background image from URL:', err.message);
+            doc.rect(0, 0, pageWidth, pageHeight).fill(config.backgroundColor || '#ffffff');
+        }
+    } else if (config.backgroundImageType === 'r2' && config.backgroundR2Key) {
+        // Background from Cloudflare R2
+        try {
+            const imageUrl = await getSecureImageUrl(config.backgroundR2Key);
+            if (imageUrl) {
+                doc.opacity(config.backgroundOpacity || 1);
+                doc.image(imageUrl, 0, 0, { width: pageWidth, height: pageHeight });
+                doc.opacity(1);
+            } else {
+                doc.rect(0, 0, pageWidth, pageHeight).fill(config.backgroundColor || '#ffffff');
+            }
+        } catch (err) {
+            console.error('Error loading background image from R2:', err.message);
+            doc.rect(0, 0, pageWidth, pageHeight).fill(config.backgroundColor || '#ffffff');
+        }
     }
 
-    // Header - Tajuk Utama
-    doc.fontSize(config.fontSize?.title || 36).font('Helvetica-Bold').fillColor(primaryColor).text(config.title || 'SIJIL PENGHARGAAN', { align: 'center' });
-    doc.moveDown(0.5);
-    
+    // Helper function to get text alignment offset
+    const getTextX = (align, positionX, text, fontSize) => {
+        const textWidth = doc.widthOfString(text, { size: fontSize });
+        if (align === 'center') {
+            return (pageWidth * positionX / 100) - (textWidth / 2);
+        } else if (align === 'right') {
+            return (pageWidth * positionX / 100) - textWidth;
+        }
+        return pageWidth * positionX / 100;
+    };
+
+    // Helper function to draw text with custom styling
+    const drawStyledText = (elementKey, text, options = {}) => {
+        const element = config.elements?.[elementKey] || {};
+        const fontSize = options.fontSize || element.fontSize || 16;
+        const color = options.color || element.color || '#000000';
+        const align = options.align || element.align || 'center';
+        const positionX = options.positionX !== undefined ? options.positionX : (element.positionX || 50);
+        const positionY = options.positionY !== undefined ? options.positionY : (element.positionY || 50);
+        const lineHeight = element.lineHeight || 1.3;
+        const letterSpacing = element.letterSpacing || 0;
+        const fontWeight = element.fontWeight || 'normal';
+        
+        // Determine font
+        let fontName = config.fontFamily || 'Helvetica';
+        if (fontWeight === 'bold' && !fontName.includes('Bold')) {
+            fontName = fontName + '-Bold';
+        }
+        
+        doc.fontSize(fontSize)
+           .font(fontName)
+           .fillColor(color);
+        
+        const x = getTextX(align, positionX, text, fontSize);
+        const y = pageHeight * positionY / 100;
+        
+        doc.text(text, x, y, {
+            align: align,
+            lineHeight: lineHeight,
+            characterSpacing: letterSpacing
+        });
+    };
+
+    // Draw border
+    if (config.showBorder) {
+        const borderStyle = config.borderStyle || 'double';
+        const borderColor = config.borderColor || config.primaryColor || '#004aad';
+        const borderWidth = config.borderWidth || 3;
+        
+        if (borderStyle === 'single') {
+            doc.lineWidth(borderWidth);
+            doc.rect(20, 20, pageWidth - 40, pageHeight - 40).stroke(borderColor);
+        } else if (borderStyle === 'double') {
+            doc.lineWidth(borderWidth);
+            doc.rect(15, 15, pageWidth - 30, pageHeight - 30).stroke(borderColor);
+            doc.lineWidth(1);
+            doc.rect(25, 25, pageWidth - 50, pageHeight - 50).stroke(borderColor);
+            
+            // Ornamental corners
+            const cornerSize = 30;
+            doc.lineCap('square');
+            doc.moveTo(35, 55).lineTo(35, 35).lineTo(55, 35).stroke(borderColor);
+            doc.moveTo(pageWidth - 55, 35).lineTo(pageWidth - 35, 35).lineTo(pageWidth - 35, 55).stroke(borderColor);
+            doc.moveTo(35, pageHeight - 55).lineTo(35, pageHeight - 35).lineTo(55, pageHeight - 35).stroke(borderColor);
+            doc.moveTo(pageWidth - 55, pageHeight - 35).lineTo(pageWidth - 35, pageHeight - 35).lineTo(pageWidth - 35, pageHeight - 55).stroke(borderColor);
+        } else if (borderStyle === 'ornate') {
+            // More elaborate border
+            doc.lineWidth(5);
+            doc.rect(10, 10, pageWidth - 20, pageHeight - 20).stroke(borderColor);
+            doc.lineWidth(2);
+            doc.rect(20, 20, pageWidth - 40, pageHeight - 40).stroke(borderColor);
+            doc.lineWidth(1);
+            doc.rect(28, 28, pageWidth - 56, pageHeight - 56).stroke(borderColor);
+        }
+    }
+
+    // Draw logo
+    if (config.showLogo && config.logoUrl) {
+        try {
+            const logoPosition = config.logoPosition || 'top-center';
+            const logoSize = config.logoSize || { width: 80, height: 80 };
+            let logoX, logoY;
+            
+            switch (logoPosition) {
+                case 'top-left':
+                    logoX = 40;
+                    logoY = 30;
+                    break;
+                case 'top-right':
+                    logoX = pageWidth - logoSize.width - 40;
+                    logoY = 30;
+                    break;
+                case 'bottom-left':
+                    logoX = 40;
+                    logoY = pageHeight - logoSize.height - 40;
+                    break;
+                case 'bottom-center':
+                    logoX = (pageWidth - logoSize.width) / 2;
+                    logoY = pageHeight - logoSize.height - 40;
+                    break;
+                case 'bottom-right':
+                    logoX = pageWidth - logoSize.width - 40;
+                    logoY = pageHeight - logoSize.height - 40;
+                    break;
+                case 'top-center':
+                default:
+                    logoX = (pageWidth - logoSize.width) / 2;
+                    logoY = 30;
+            }
+            
+            doc.image(config.logoUrl, logoX, logoY, { width: logoSize.width, height: logoSize.height });
+        } catch (err) {
+            console.error('Error drawing logo:', err.message);
+        }
+    }
+
+    // Draw text elements based on template configuration
+    const elements = config.elements || {};
+
+    // Title
+    if (config.showTitle && config.title) {
+        drawStyledText('title', config.title);
+    }
+
     // Subtitle
-    doc.fontSize(14).font('Helvetica').fillColor(secondaryColor).text(config.subtitle || 'KURSUS eLEARNING ATLET SUKMA', { align: 'center' });
-    doc.moveDown(2);
+    if (config.showSubtitle && config.subtitle) {
+        drawStyledText('subtitle', config.subtitle);
+    }
 
-    // Intro text
-    doc.fontSize(config.fontSize?.body || 16).font('Helvetica').fillColor('#000000').text(config.description || 'Adalah dengan ini diperakui bahawa', { align: 'center' });
-    doc.moveDown(1.5);
+    // Description
+    if (config.showDescription && config.description) {
+        drawStyledText('description', config.description);
+    }
 
-    // Nama Atlet - Highlighted
-    const athleteName = athlete.fullName || 'NAMA TIDAK DIKETAHUI';
-    doc.fontSize(config.fontSize?.name || 42).font('Helvetica-Bold').fillColor(primaryColor).text(athleteName.toUpperCase(), { align: 'center', underline: true });
-    doc.moveDown(1.5);
+    // Athlete Name
+    if (config.showAthleteName && athlete.fullName) {
+        drawStyledText('athleteName', athlete.fullName.toUpperCase());
+    }
 
-    // Negeri Wakil
-    const negeri = athlete.negeriWakil || 'NEGERI TIDAK DIKETAHUI';
-    doc.fontSize(18).font('Helvetica').fillColor('#000000').text(`Mewakili Negeri: ${negeri.toUpperCase()}`, { align: 'center' });
-    doc.moveDown(2);
+    // IC Number
+    if (config.showIcNumber && athlete.icNumber) {
+        drawStyledText('icNumber', `No. IC: ${athlete.icNumber}`);
+    }
 
-    // Body text
-    doc.fontSize(config.fontSize?.body || 16).font('Helvetica').fillColor('#000000').text('Telah berjaya menyelesaikan semua modul dalam', { align: 'center' });
-    doc.moveDown(0.3);
-    doc.fontSize(18).font('Helvetica-Bold').fillColor(primaryColor).text(config.courseName || 'KURSUS eLEARNING ATLET SUKMA', { align: 'center' });
-    doc.moveDown(2);
+    // Negeri
+    if (config.showNegeri && athlete.negeriWakil) {
+        drawStyledText('negeri', `Mewakili Negeri: ${athlete.negeriWakil.toUpperCase()}`);
+    }
 
-    // Tarikh
-    const dateStr = new Date().toLocaleDateString('ms-MY', { 
-        day: 'numeric', 
-        month: 'long', 
-        year: 'numeric' 
-    });
-    doc.fontSize(14).font('Helvetica').fillColor('#000000').text(`Diberikan pada: ${dateStr}`, { align: 'center' });
-    doc.moveDown(2.5);
+    // Course Name
+    if (config.showCourseName && config.courseName) {
+        drawStyledText('courseName', config.courseName);
+    }
 
-    // Footer - Tandatangan
-    const footerY = doc.y;
-    
-    // Lajur Kiri - Pengarah
-    doc.fontSize(12).font('Helvetica-Bold').text(config.signatoryName || 'PENGARAH', { align: 'left' });
-    doc.moveDown(0.5);
-    doc.fontSize(11).font('Helvetica').text(config.signatoryTitle || 'Majlis Sukan Negara', { align: 'left' });
-    
-    // Lajur Kanan - Tarikh & Cop
-    doc.x = doc.page.width - 150;
-    doc.y = footerY;
-    doc.fontSize(10).font('Helvetica-Oblique').fillColor('#666666').text('Sijil ini dijana secara elektronik', { align: 'right' });
-    doc.moveDown(0.5);
-    doc.text('Tidak memerlukan cop rasmi', { align: 'right' });
+    // Date
+    if (config.showDate) {
+        const dateStr = new Date().toLocaleDateString('ms-MY', { 
+            day: 'numeric', 
+            month: 'long', 
+            year: 'numeric' 
+        });
+        drawStyledText('date', `Diberikan pada: ${dateStr}`);
+    }
+
+    // Signatory
+    if (config.showSignatory) {
+        drawStyledText('signatory', config.signatoryName || 'PENGARAH');
+        drawStyledText('signatoryTitle', config.signatoryTitle || 'Majlis Sukan Negara');
+    }
+
+    // Electronic signature note
+    doc.fontSize(10)
+       .font('Helvetica-Oblique')
+       .fillColor('#666666')
+       .text('Sijil ini dijana secara elektronik', pageWidth - 150, pageHeight - 60, { align: 'right' });
+    doc.text('Tidak memerlukan cop rasmi', pageWidth - 150, pageHeight - 45, { align: 'right' });
 
     doc.end();
 }

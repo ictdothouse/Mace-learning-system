@@ -203,26 +203,67 @@ router.get('/templates', async (req, res) => {
 });
 
 // POST: Cipta Template Baru
-router.post('/templates/create', async (req, res) => {
+router.post('/templates/create', upload.single('backgroundImage'), async (req, res) => {
     try {
-        const { name, title, subtitle, courseName, description, signatoryName, signatoryTitle, primaryColor, secondaryColor, accentColor, fontFamily, showBorder, showLogo, logoUrl } = req.body;
-        await CertificateTemplate.create({
+        const { 
+            name, title, showTitle, subtitle, showSubtitle, courseName, showCourseName, 
+            description, showDescription, showAthleteName, showIcNumber, showNegeri, 
+            showDate, signatoryName, showSignatory, signatoryTitle,
+            primaryColor, secondaryColor, accentColor, backgroundColor, fontFamily,
+            showBorder, showLogo, logoUrl, logoPosition, borderStyle, borderColor, borderWidth,
+            backgroundImageType, backgroundImageUrl, backgroundR2Key, backgroundOpacity
+        } = req.body;
+        
+        // Parse elements JSON or use defaults
+        let elements = {};
+        if (req.body.elementsJson) {
+            try { elements = JSON.parse(req.body.elementsJson); } catch(e) {}
+        }
+        
+        const templateData = {
             name,
             title,
+            showTitle: showTitle === 'on',
             subtitle,
+            showSubtitle: showSubtitle === 'on',
             courseName,
+            showCourseName: showCourseName === 'on',
             description,
+            showDescription: showDescription === 'on',
+            showAthleteName: showAthleteName === 'on',
+            showIcNumber: showIcNumber === 'on',
+            showNegeri: showNegeri === 'on',
+            showDate: showDate === 'on',
             signatoryName,
+            showSignatory: showSignatory === 'on',
             signatoryTitle,
             primaryColor,
             secondaryColor,
             accentColor,
+            backgroundColor,
             fontFamily,
             showBorder: showBorder === 'on',
             showLogo: showLogo === 'on',
             logoUrl,
+            logoPosition,
+            borderStyle,
+            borderColor,
+            borderWidth: parseInt(borderWidth) || 3,
+            backgroundImageType,
+            backgroundImageUrl,
+            backgroundR2Key,
+            backgroundOpacity: parseFloat(backgroundOpacity) || 1,
+            elements,
             isActive: false
-        });
+        };
+        
+        // Handle file upload to R2
+        if (req.file && backgroundImageType === 'r2') {
+            // Upload to R2 would go here
+            templateData.backgroundR2Key = `cert-bg-${Date.now()}-${req.file.originalname}`;
+        }
+        
+        await CertificateTemplate.create(templateData);
         res.redirect('/admin-mace/templates?msg=template_created');
     } catch (err) {
         console.error('Create Template Error:', err);
@@ -231,25 +272,64 @@ router.post('/templates/create', async (req, res) => {
 });
 
 // POST: Update Template
-router.post('/templates/update/:id', async (req, res) => {
+router.post('/templates/update/:id', upload.single('backgroundImage'), async (req, res) => {
     try {
-        const { name, title, subtitle, courseName, description, signatoryName, signatoryTitle, primaryColor, secondaryColor, accentColor, fontFamily, showBorder, showLogo, logoUrl, setAsActive } = req.body;
+        const { 
+            name, title, showTitle, subtitle, showSubtitle, courseName, showCourseName,
+            description, showDescription, showAthleteName, showIcNumber, showNegeri,
+            showDate, signatoryName, showSignatory, signatoryTitle,
+            primaryColor, secondaryColor, accentColor, backgroundColor, fontFamily,
+            showBorder, showLogo, logoUrl, logoPosition, borderStyle, borderColor, borderWidth,
+            backgroundImageType, backgroundImageUrl, backgroundR2Key, backgroundOpacity,
+            setAsActive
+        } = req.body;
+        
+        // Parse elements JSON or use defaults
+        let elements = {};
+        if (req.body.elementsJson) {
+            try { elements = JSON.parse(req.body.elementsJson); } catch(e) {}
+        }
+        
         const updateData = {
             name,
             title,
+            showTitle: showTitle === 'on',
             subtitle,
+            showSubtitle: showSubtitle === 'on',
             courseName,
+            showCourseName: showCourseName === 'on',
             description,
+            showDescription: showDescription === 'on',
+            showAthleteName: showAthleteName === 'on',
+            showIcNumber: showIcNumber === 'on',
+            showNegeri: showNegeri === 'on',
+            showDate: showDate === 'on',
             signatoryName,
+            showSignatory: showSignatory === 'on',
             signatoryTitle,
             primaryColor,
             secondaryColor,
             accentColor,
+            backgroundColor,
             fontFamily,
             showBorder: showBorder === 'on',
             showLogo: showLogo === 'on',
-            logoUrl
+            logoUrl,
+            logoPosition,
+            borderStyle,
+            borderColor,
+            borderWidth: parseInt(borderWidth) || 3,
+            backgroundImageType,
+            backgroundImageUrl,
+            backgroundR2Key,
+            backgroundOpacity: parseFloat(backgroundOpacity) || 1,
+            elements
         };
+        
+        // Handle file upload to R2
+        if (req.file && backgroundImageType === 'r2') {
+            templateData.backgroundR2Key = `cert-bg-${Date.now()}-${req.file.originalname}`;
+        }
         
         if (setAsActive === 'on') {
             await CertificateTemplate.setActiveTemplate(req.params.id);
