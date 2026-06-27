@@ -627,8 +627,25 @@ router.get('/certificate/preview/:id', async (req, res) => {
         }
 
         // Cari kursus yang atlet ini sertai
+        let course = null;
         const Course = require('../models/Course');
-        const course = await Course.findOne({ 'participants.athlete': athlete._id });
+        
+        // Cuba cari kursus dengan pelbagai cara
+        course = await Course.findOne({ 'participants.athlete': athlete._id });
+        
+        // Jika tak jumpa, cuba cari semua kursus dan semak manually
+        if (!course) {
+            const allCourses = await Course.find();
+            for (const c of allCourses) {
+                if (c.participants && Array.isArray(c.participants)) {
+                    const found = c.participants.find(p => p.athlete && p.athlete.toString() === athlete._id.toString());
+                    if (found) {
+                        course = c;
+                        break;
+                    }
+                }
+            }
+        }
         
         // Dapatkan template aktif
         let template = await CertificateTemplate.findOne({ isActive: true });
@@ -638,12 +655,17 @@ router.get('/certificate/preview/:id', async (req, res) => {
             template = new CertificateTemplate();
         }
 
-        // Format tarikh
-        const courseDate = course ? new Date(course.endDate).toLocaleDateString('ms-MY', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-        }) : new Date().toLocaleDateString('ms-MY', { year: 'numeric', month: 'long', day: 'numeric' });
+        // Format tarikh - handle jika course tidak wujud
+        let courseDate;
+        if (course && course.endDate) {
+            courseDate = new Date(course.endDate).toLocaleDateString('ms-MY', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        } else {
+            courseDate = new Date().toLocaleDateString('ms-MY', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
 
         res.render('certificate-print', {
             layout: false,
