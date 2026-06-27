@@ -125,6 +125,14 @@
                     </select>
                 </div>
 
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2 text-sm sm:text-base">Sukan *</label>
+                    <input type="text" name="sukan" required id="sukanInput"
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-sm sm:text-base"
+                        placeholder="Contoh: Badminton, Olahraga, Renang">
+                    <p class="text-xs text-gray-500 mt-1">Masukkan nama sukan seperti yang tercatat dalam pendaftaran rasmi</p>
+                </div>
+
                 <button type="submit" 
                     class="w-full bg-blue-600 text-white font-bold py-4 rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl text-sm sm:text-base flex items-center justify-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -199,6 +207,22 @@
                 this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12);
             });
         });
+
+        // Auto-uppercase for fullName
+        const fullNameInput = document.querySelector('form#form-new input[name="fullName"]');
+        if (fullNameInput) {
+            fullNameInput.addEventListener('input', function(e) {
+                this.value = this.value.toUpperCase();
+            });
+        }
+
+        // Auto-uppercase for sukan
+        const sukanInput = document.getElementById('sukanInput');
+        if (sukanInput) {
+            sukanInput.addEventListener('input', function(e) {
+                this.value = this.value.toUpperCase();
+            });
+        }
     </script>
 </body>
 </html>
