@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const Athlete = require('../models/Athlete');
 const Lesson = require('../models/Lesson');
+const CertificateTemplate = require('../models/CertificateTemplate');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
@@ -183,6 +184,105 @@ router.get('/download', async (req, res) => {
         res.attachment(`Data-Atlet-${Date.now()}.csv`);
         res.send(csv);
     } catch (err) { res.send('Error generating CSV'); }
+});
+
+// ==========================================
+// PENGURUSAN TEMPLATE SIJIL
+// ==========================================
+
+// GET: Halaman Template Sijil
+router.get('/templates', async (req, res) => {
+    try {
+        const templates = await CertificateTemplate.find().sort({ createdAt: -1 });
+        const activeTemplate = templates.find(t => t.isActive) || templates[0];
+        res.render('admin', { page: 'templates', templates, activeTemplate, msg: req.query.msg || null });
+    } catch (err) { 
+        console.error('Templates Error:', err);
+        res.status(500).send('Ralat memuatkan template sijil.'); 
+    }
+});
+
+// POST: Cipta Template Baru
+router.post('/templates/create', async (req, res) => {
+    try {
+        const { name, title, subtitle, courseName, description, signatoryName, signatoryTitle, primaryColor, secondaryColor, accentColor, fontFamily, showBorder, showLogo, logoUrl } = req.body;
+        await CertificateTemplate.create({
+            name,
+            title,
+            subtitle,
+            courseName,
+            description,
+            signatoryName,
+            signatoryTitle,
+            primaryColor,
+            secondaryColor,
+            accentColor,
+            fontFamily,
+            showBorder: showBorder === 'on',
+            showLogo: showLogo === 'on',
+            logoUrl,
+            isActive: false
+        });
+        res.redirect('/admin-mace/templates?msg=template_created');
+    } catch (err) {
+        console.error('Create Template Error:', err);
+        res.redirect('/admin-mace/templates?msg=create_error');
+    }
+});
+
+// POST: Update Template
+router.post('/templates/update/:id', async (req, res) => {
+    try {
+        const { name, title, subtitle, courseName, description, signatoryName, signatoryTitle, primaryColor, secondaryColor, accentColor, fontFamily, showBorder, showLogo, logoUrl, setAsActive } = req.body;
+        const updateData = {
+            name,
+            title,
+            subtitle,
+            courseName,
+            description,
+            signatoryName,
+            signatoryTitle,
+            primaryColor,
+            secondaryColor,
+            accentColor,
+            fontFamily,
+            showBorder: showBorder === 'on',
+            showLogo: showLogo === 'on',
+            logoUrl
+        };
+        
+        if (setAsActive === 'on') {
+            await CertificateTemplate.setActiveTemplate(req.params.id);
+        }
+        
+        await CertificateTemplate.findByIdAndUpdate(req.params.id, updateData);
+        res.redirect('/admin-mace/templates?msg=template_updated');
+    } catch (err) {
+        console.error('Update Template Error:', err);
+        res.redirect('/admin-mace/templates?msg=update_error');
+    }
+});
+
+// POST: Set Active Template
+router.post('/templates/set-active/:id', async (req, res) => {
+    try {
+        await CertificateTemplate.setActiveTemplate(req.params.id);
+        res.redirect('/admin-mace/templates?msg=template_activated');
+    } catch (err) {
+        console.error('Set Active Error:', err);
+        res.redirect('/admin-mace/templates?msg=activate_error');
+    }
+});
+
+// POST: Delete Template
+router.post('/templates/delete/:id', async (req, res) => {
+    try {
+        await CertificateTemplate.findByIdAndDelete(req.params.id);
+        res.redirect('/admin-mace/templates?msg=template_deleted');
+    } catch (err) {
+        console.error('Delete Template Error:', err);
+        res.redirect('/admin-mace/templates?msg=delete_error');
+    }
 });
 
 module.exports = router;
