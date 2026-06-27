@@ -62,12 +62,21 @@ if (!dbUri) {
     process.exit(1);
 }
 
-mongoose.connect(dbUri)
-    .then(() => console.log('✅ MongoDB Connected Successfully'))
-    .catch(err => {
-        console.error('❌ MongoDB Connection Error:', err.message);
-        process.exit(1);
-    });
+
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('✅ DB Connected'))
+  .catch(err => {
+      console.error('❌ DB Connection Error:', err);
+      // Jangan process.exit(1) di sini jika nak server tetap hidup walaupun DB down sekejap,
+      // tapi untuk login, DB mesti hidup.
+  });
+
+
+
+
+
+
+
 
 // ==========================================
 // KONFIGURASI SESSION (CONNECT-MONGO V5)
