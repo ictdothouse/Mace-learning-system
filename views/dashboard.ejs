@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <title>Dashboard - <%= athlete.fullName %></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">Tahniah, <%= athlete.fullName.split(' ')[0] %>!</h1>
+                <p class="text-gray-600">Negeri: <%= athlete.negeriWakil %> | Status: Stage <%= athlete.currentStage %></p>
+            </div>
+            <a href="/logout" class="text-red-500 hover:underline">Log Keluar</a>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6 mb-8">
+            <% for(let i=1; i<=3; i++) { 
+                const isLocked = athlete.currentStage < i;
+                const isCompleted = athlete.currentStage > i;
+            %>
+                <div class="bg-white p-6 rounded-xl shadow-md border-l-4 <%= isLocked ? 'border-gray-300' : (isCompleted ? 'border-green-500' : 'border-blue-500') %>">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-xl font-bold">Modul <%= i %></h3>
+                        <% if(isLocked) { %>
+                            <span class="text-2xl">🔒</span>
+                        <% } else if(isCompleted) { %>
+                            <span class="text-2xl text-green-500">✅</span>
+                        <% } else { %>
+                            <span class="text-2xl">📖</span>
+                        <% } %>
+                    </div>
+                    <p class="text-sm text-gray-500 mb-4">
+                        <%= isLocked ? 'Sila lulus kuiz sebelumnya.' : (isCompleted ? 'Selesai' : 'Sedang belajar') %>
+                    </p>
+                    <% if(!isLocked) { %>
+                        <a href="/lesson/<%= i %>" class="block text-center bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+                            <%= isCompleted ? 'Ulang Kaji' : 'Mulakan' %>
+                        </a>
+                    <% } %>
+                </div>
+            <% } %>
+        </div>
+
+        <% if(athlete.currentStage >= 4) { %>
+            <div class="bg-gradient-to-r from-yellow-400 to-orange-500 p-8 rounded-xl text-center text-white shadow-lg">
+                <h2 class="text-3xl font-bold mb-4">🏆 Tahniah! Anda Lulus!</h2>
+                <p class="mb-6">Anda telah menyelesaikan semua modul. Sila muat turun sijil anda.</p>
+                <a href="/certificate/<%= athlete._id %>?print=1" target="_blank" 
+   class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition">
+   📜 Muat Turun Sijil
+</a>
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuiz Modul <%= moduleId %> - SUKMA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-6 md:p-10 font-sans text-gray-800">
+    <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg border border-blue-100 overflow-hidden">
+        <!-- Header Kuiz -->
+        <div class="bg-blue-600 px-6 py-4 flex items-center justify-between">
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                📝 Kuiz Modul <%= moduleId %>
+            </h2>
+            <span class="text-xs bg-blue-500 text-blue-100 px-2 py-1 rounded font-medium">Wajib Lulus 80%</span>
+        </div>
+
+        <div class="p-6 md:p-8">
+            <% if (locals.error) { %>
+                <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded mb-6"><%= error %></div>
+            <% } %>
+            <% if (locals.success) { %>
+                <div class="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded mb-6">
+                    <%= success %>
+                    <button onclick="window.close()" class="mt-2 text-sm underline hover:text-green-800">Tutup Tetingkap Ini</button>
+                </div>
+            <% } %>
+
+            <form action="/submit-quiz/<%= moduleId %>" method="POST" class="space-y-8" target="_top">
+                <% if (lesson.quiz && lesson.quiz.length > 0) { %>
+                    <% lesson.quiz.forEach((q, qIndex) => { %>
+                        <div class="border-b border-gray-100 pb-6 last:border-0">
+                            <p class="font-bold text-gray-900 mb-4 flex items-start gap-3 text-lg">
+                                <span class="bg-gray-100 text-gray-600 text-sm font-bold px-2.5 py-1 rounded-full mt-0.5 shrink-0"><%= qIndex + 1 %></span>
+                                <%= q.q || q.question %>
+                            </p>
+                            
+                            <div class="space-y-2 ml-0 md:ml-12">
+                                <% (q.opts || q.options || []).forEach((opt, optIndex) => { 
+                                    const labelText = typeof opt === 'string' ? opt : (opt.label || opt.text || "");
+                                %>
+                                    <label class="flex items-center p-3.5 rounded-lg hover:bg-blue-50 cursor-pointer transition border border-transparent hover:border-blue-200 group bg-gray-50/50">
+                                        <input type="radio" name="answers[<%= qIndex %>]" value="<%= optIndex %>" required 
+                                            class="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300 mr-3 accent-blue-600 shrink-0">
+                                        <span class="text-gray-700 group-hover:text-blue-700"><%= labelText %></span>
+                                    </label>
+                                <% }) %>
+                            </div>
+                        </div>
+                    <% }) %>
+                    
+                    <div class="pt-4 mt-4 flex gap-3">
+                        <button type="submit" class="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-green-700 transition shadow-md">
+                            Hantar Jawapan
+                        </button>
+                        <button type="button" onclick="window.close()" class="px-6 py-3 rounded-lg font-medium text-gray-600 hover:bg-gray-100 transition border">
+                            Batal
+                        </button>
+                    </div>
+                <% } else { %>
+                    <div class="bg-yellow-50 p-4 rounded border border-yellow-200 text-yellow-800 text-center">
+                        ⚠️ Tiada soalan kuiz tersedia buat masa ini.
+                    </div>
+                <% } %>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

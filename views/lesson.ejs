@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= lesson.title %> - SUKMA eLearning</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: #f1f1f1; } ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; background: #000; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .video-wrapper video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; }
+        .accordion-content { transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out; max-height: 0; opacity: 0; overflow: hidden; }
+        .accordion-content.open { max-height: 2000px; opacity: 1; }
+        .rotate-icon { transition: transform 0.3s ease; } .rotate-icon.active { transform: rotate(180deg); }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen text-gray-800 font-sans">
+    
+    <!-- Header Navigation -->
+    <div class="bg-white shadow-sm border-b sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">Modul <%= moduleId %></span>
+                <h2 class="text-sm md:text-base font-semibold text-gray-700 truncate max-w-[200px] md:max-w-md"><%= lesson.title %></h2>
+            </div>
+            <a href="/dashboard" class="text-sm text-blue-600 hover:text-blue-800 font-medium transition flex items-center gap-1">← Dashboard</a>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 py-8 pb-20">
+        
+        <!-- Video Section -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8 mb-8">
+            <% if (secureVideoUrl) { %>
+                <div class="video-wrapper mb-6">
+                    <video controls preload="metadata" id="main-video" playsinline>
+                        <source src="<%= secureVideoUrl %>" type="video/mp4"> Pelayar anda tidak menyokong tag video.
+                    </video>
+                </div>
+            <% } else { %>
+                <div class="p-8 text-center bg-gray-50 rounded-lg border border-dashed border-gray-300 mb-6">⚠️ Video tidak dapat dimuatkan. Sila refresh halaman.</div>
+            <% } %>
+            
+            <div class="prose max-w-none text-gray-700 leading-relaxed">
+                <% if (lesson.content && lesson.content.rendered) { %> <%- lesson.content.rendered %>
+                <% } else { %> <p class="italic text-gray-500">Tiada teks penerangan tambahan.</p> <% } %>
+            </div>
+        </div>
+
+        <!-- Notifications -->
+        <% if (locals.error) { %> <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-r-lg mb-6 shadow-sm"><%= error %></div> <% } %>
+        <% if (locals.success) { %> <div class="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-r-lg mb-6 shadow-sm"><%= success %></div> <% } %>
+
+        <!-- Accordion Quiz -->
+        <div class="bg-white rounded-xl shadow-md border border-blue-100 overflow-hidden mt-8">
+            <button id="quiz-toggle-btn" class="w-full bg-blue-600 px-6 py-4 flex items-center justify-between transition-colors">
+                <div class="flex items-center gap-3">
+                    <div class="bg-blue-500 p-2 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+                    </div>
+                    <div class="text-left">
+                        <h3 class="text-lg font-bold text-white">Kuiz Pengetahuan</h3>
+                        <p id="quiz-status-text" class="text-xs text-blue-200">Sila tonton video sepenuhnya untuk membuka kuiz</p>
+                    </div>
+                </div>
+                <svg id="quiz-chevron" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white rotate-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+            </button>
+
+            <div id="quiz-accordion-body" class="accordion-content bg-white">
+                <div class="p-6 md:p-8 border-t border-blue-100">
+                    
+                    <!-- Display Quiz Result Banner -->
+                    <% if (quizResult) { %>
+                        <div class="<%= quizResult.passed ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800' %> border p-4 rounded-lg mb-6 flex items-start gap-3">
+                            <% if (quizResult.passed) { %>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <div>
+                                    <p class="font-bold text-lg">Tahniah! Anda Lulus.</p>
+                                    <p class="text-sm">Markah anda: <span class="font-bold"><%= quizResult.score %>%</span></p>
+                                </div>
+                            <% } else { %>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <div>
+                                    <p class="font-bold text-lg">Maaf, Anda Belum Lulus.</p>
+                                    <p class="text-sm">Markah anda: <span class="font-bold"><%= quizResult.score %>%</span>. Perlu 80% untuk lulus.</p>
+                                </div>
+                            <% } %>
+                        </div>
+                    <% } %>
+
+                    <p class="text-gray-600 mb-6 text-sm">Jawab semua soalan di bawah berdasarkan kandungan video yang telah ditonton.</p>
+                    
+                    <form action="/submit-quiz/<%= moduleId %>" method="POST" class="space-y-8">
+                        <% if (lesson.quiz && lesson.quiz.length > 0) { %>
+                            <% lesson.quiz.forEach((q, qIndex) => { 
+                                const userSelectedIndex = quizResult && quizResult.userAnswers ? parseInt(quizResult.userAnswers[qIndex]) : null;
+                            %>
+                                <div class="border-b border-gray-100 pb-6 last:border-0 last:pb-0">
+                                    <p class="font-bold text-gray-900 mb-4 flex items-start gap-3 text-base md:text-lg leading-relaxed">
+                                        <span class="bg-gray-100 text-gray-600 text-sm font-bold px-2.5 py-1 rounded-full mt-0.5 shrink-0"><%= qIndex + 1 %></span>
+                                        <%= q.q || q.question %>
+                                    </p>
+                                    
+                                    <div class="space-y-2 ml-0 md:ml-12">
+                                        <% (q.opts || q.options || []).forEach((opt, optIndex) => { 
+                                            const labelText = typeof opt === 'string' ? opt : (opt.label || opt.text || "");
+                                            const isChecked = userSelectedIndex === optIndex ? 'checked' : '';
+                                        %>
+                                            <label class="flex items-center p-3.5 rounded-lg hover:bg-blue-50 cursor-pointer transition border border-transparent hover:border-blue-200 group bg-gray-50/50">
+                                                <input type="radio" name="answers[<%= qIndex %>]" value="<%= optIndex %>" required <%= isChecked %>
+                                                    class="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300 mr-3 accent-blue-600 shrink-0">
+                                                <span class="text-gray-700 group-hover:text-blue-700 text-sm md:text-base"><%= labelText %></span>
+                                            </label>
+                                        <% }) %>
+                                    </div>
+                                </div>
+                            <% }) %>
+                            
+                            <!-- Dynamic Action Buttons -->
+                            <div class="pt-4 mt-4 flex flex-col sm:flex-row gap-3">
+                                <% if (quizResult && quizResult.passed) { %>
+                                    <% if (moduleId < 3) { %>
+                                        <a href="/lesson/<%= moduleId + 1 %>" class="flex-1 bg-green-600 text-white px-6 py-3.5 rounded-lg font-bold hover:bg-green-700 transition shadow-md active:scale-[0.99] flex items-center justify-center gap-2 text-center">
+                                            Pembelajaran Seterusnya →
+                                        </a>
+                                    <% } else { %>
+                                        <a href="/dashboard" class="flex-1 bg-yellow-600 text-white px-6 py-3.5 rounded-lg font-bold hover:bg-yellow-700 transition shadow-md active:scale-[0.99] flex items-center justify-center gap-2 text-center">
+                                            Pergi Ke Dashboard (Selesai) 🎓
+                                        </a>
+                                    <% } %>
+                                    <button type="submit" class="sm:w-auto bg-gray-100 text-gray-700 px-6 py-3.5 rounded-lg font-medium hover:bg-gray-200 transition border border-gray-200">
+                                        Jawab Semula (Optional)
+                                    </button>
+                                <% } else { %>
+                                    <button type="submit" class="flex-1 bg-blue-600 text-white px-6 py-3.5 rounded-lg font-bold hover:bg-blue-700 transition shadow-md active:scale-[0.99] flex items-center justify-center gap-2">
+                                        <%= quizResult ? 'Jawab Semula Kuiz ↺' : 'Hantar Jawapan & Semak Keputusan →' %>
+                                    </button>
+                                <% } %>
+                            </div>
+                        <% } else { %>
+                            <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200 text-yellow-800 text-center">⚠️ Tiada soalan kuiz tersedia.</div>
+                        <% } %>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Pengesan Video & Accordion Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const video = document.getElementById('main-video');
+            const quizBtn = document.getElementById('quiz-toggle-btn');
+            const quizBody = document.getElementById('quiz-accordion-body');
+            const quizChevron = document.getElementById('quiz-chevron');
+            const quizStatusText = document.getElementById('quiz-status-text');
+            
+            let isUnlocked = false;
+            let isOpen = false;
+
+            const toggleQuiz = () => {
+                if (!isUnlocked) return;
+                isOpen = !isOpen;
+                if (isOpen) {
+                    quizBody.classList.add('open');
+                    quizChevron.classList.add('active');
+                    setTimeout(() => quizBtn.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+                } else {
+                    quizBody.classList.remove('open');
+                    quizChevron.classList.remove('active');
+                }
+            };
+
+            quizBtn.addEventListener('click', toggleQuiz);
+
+            // Auto unlock jika sudah ada hasil kuiz atau video sudah ditonton
+            <% if (quizResult || (athlete.watchedLessons && athlete.watchedLessons.includes(moduleId))) { %>
+                isUnlocked = true;
+                quizBtn.disabled = false;
+                quizBtn.classList.remove('cursor-not-allowed', 'opacity-75');
+                quizBtn.classList.add('hover:bg-blue-700', 'cursor-pointer');
+                quizStatusText.textContent = "Kuiz Aktif";
+                
+                <% if (quizResult) { %>
+                    setTimeout(() => toggleQuiz(), 300);
+                <% } %>
+            <% } else { %>
+                if (!video) {
+                    isUnlocked = true;
+                    quizBtn.disabled = false;
+                    quizBtn.classList.remove('cursor-not-allowed', 'opacity-75');
+                    quizBtn.classList.add('hover:bg-blue-700', 'cursor-pointer');
+                    quizStatusText.textContent = "Klik untuk mula menjawab kuiz";
+                    return;
+                }
+
+                const checkVideoProgress = () => {
+                    if (isUnlocked) return;
+                    if (video.duration > 0 && video.currentTime >= (video.duration * 0.95)) {
+                        isUnlocked = true;
+                        quizBtn.disabled = false;
+                        quizBtn.classList.remove('cursor-not-allowed', 'opacity-75');
+                        quizBtn.classList.add('hover:bg-blue-700', 'cursor-pointer');
+                        quizStatusText.textContent = "Video selesai! Klik untuk buka kuiz";
+                        setTimeout(() => toggleQuiz(), 500);
+                        
+                        fetch(`/api/mark-watched/${<%= moduleId %>}`, { 
+                            method: 'POST', headers: { 'Content-Type': 'application/json' } 
+                        }).catch(e => console.log('Tracking failed', e));
+                    }
+                };
+
+                video.addEventListener('timeupdate', checkVideoProgress);
+                video.addEventListener('ended', checkVideoProgress);
+                video.addEventListener('seeked', checkVideoProgress);
+            <% } %>
+        });
+    </script>
+</body>
+</html>

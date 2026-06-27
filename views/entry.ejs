@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eLearning Atlet SUKMA - Kemasukan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-900 to-blue-700 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-blue-800 mb-2">eLearning Atlet SUKMA</h1>
+            <p class="text-gray-600">Majlis Sukan Negara</p>
+        </div>
+
+        <% if (locals.error) { %>
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
+                <p class="font-bold">Ralat</p>
+                <p><%= error %></p>
+            </div>
+        <% } %>
+
+        <!-- Tab Switcher -->
+        <div class="flex border-b-2 border-gray-200 mb-6">
+            <button onclick="switchTab('new')" id="tab-new" class="flex-1 pb-3 px-4 text-lg font-semibold border-b-4 border-blue-600 text-blue-600 transition">
+                Pengguna Baru
+            </button>
+            <button onclick="switchTab('resume')" id="tab-resume" class="flex-1 pb-3 px-4 text-lg font-semibold text-gray-500 hover:text-gray-700 transition">
+                Semak Akaun
+            </button>
+        </div>
+
+        <!-- Form Pengguna Baru -->
+        <form id="form-new" action="/access" method="POST" class="space-y-4">
+            <input type="hidden" name="action" value="new">
+            
+            <div>
+                <label class="block text-gray-700 font-semibold mb-2">Nama Penuh *</label>
+                <input type="text" name="fullName" required 
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                    placeholder="Contoh: AHMAD BIN ABDULLAH">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-semibold mb-2">No. IC *</label>
+                <input type="text" name="icNumber" required 
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                    placeholder="Contoh: 900101011111">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">Jantina *</label>
+                    <select name="jantina" required 
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                        <option value="">Pilih</option>
+                        <option value="Lelaki">Lelaki</option>
+                        <option value="Perempuan">Perempuan</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">Umur *</label>
+                    <input type="number" name="umur" required min="10" max="60"
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                        placeholder="Umur">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-semibold mb-2">Negeri Wakil *</label>
+                <select name="negeri" required 
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                    <option value="">Pilih Negeri</option>
+                    <option>Johor</option>
+                    <option>Kedah</option>
+                    <option>Kelantan</option>
+                    <option>Melaka</option>
+                    <option>Negeri Sembilan</option>
+                    <option>Pahang</option>
+                    <option>Perak</option>
+                    <option>Perlis</option>
+                    <option>Pulau Pinang</option>
+                    <option>Sabah</option>
+                    <option>Sarawak</option>
+                    <option>Selangor</option>
+                    <option>Terengganu</option>
+                    <option>W.P. Kuala Lumpur</option>
+                </select>
+            </div>
+
+            <button type="submit" 
+                class="w-full bg-blue-600 text-white font-bold py-4 rounded-lg hover:bg-blue-700 transition transform hover:scale-105">
+                Mula Kursus
+            </button>
+        </form>
+
+        <!-- Form Semak Akaun -->
+        <form id="form-resume" action="/access" method="POST" class="space-y-4 hidden">
+            <input type="hidden" name="action" value="resume">
+            
+            <div>
+                <label class="block text-gray-700 font-semibold mb-2">Nama Penuh *</label>
+                <input type="text" name="fullName" required 
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                    placeholder="Nama seperti didaftarkan">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-semibold mb-2">No. IC *</label>
+                <input type="text" name="icNumber" required 
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                    placeholder="No. IC">
+            </div>
+
+            <button type="submit" 
+                class="w-full bg-green-600 text-white font-bold py-4 rounded-lg hover:bg-green-700 transition transform hover:scale-105">
+                Sambung Belajar
+            </button>
+        </form>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            const formNew = document.getElementById('form-new');
+            const formResume = document.getElementById('form-resume');
+            const tabNew = document.getElementById('tab-new');
+            const tabResume = document.getElementById('tab-resume');
+
+            if (tab === 'new') {
+                formNew.classList.remove('hidden');
+                formResume.classList.add('hidden');
+                tabNew.classList.add('border-blue-600', 'text-blue-600');
+                tabNew.classList.remove('text-gray-500');
+                tabResume.classList.remove('border-blue-600', 'text-blue-600');
+                tabResume.classList.add('text-gray-500');
+            } else {
+                formNew.classList.add('hidden');
+                formResume.classList.remove('hidden');
+                tabResume.classList.add('border-blue-600', 'text-blue-600');
+                tabResume.classList.remove('text-gray-500');
+                tabNew.classList.remove('border-blue-600', 'text-blue-600');
+                tabNew.classList.add('text-gray-500');
+            }
+        }
+    </script>
+</body>
+</html>

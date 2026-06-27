@@ -1,0 +1,194 @@
+// routes/athlete.js - VERSI DATABASE DRIVEN (SELEPAS MIGRATION)
+const express = require('express');
+const router = express.Router();
+const Athlete = require('../models/Athlete');
+const Lesson = require('../models/Lesson'); // Import Model Lesson
+const { generateCertificate } = require('../utils/certificate');
+
+// ==========================================
+// KONFIGURASI CLOUDFLARE R2 (VIDEO SULIT)
+// ==========================================
+const { S3Client } = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+const { GetObjectCommand } = require('@aws-sdk/client-s3');
+
+const r2Client = new S3Client({
+    region: 'auto',
+    endpoint: process.env.R2_ENDPOINT || `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+    credentials: {
+        accessKeyId: process.env.R2_ACCESS_KEY_ID,
+        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY
+    }
+});
+
+const getSecureVideoUrl = async (filename) => {
+    try {
+        const command = new GetObjectCommand({
+            Bucket: process.env.R2_BUCKET_NAME || 'modulmace',
+            Key: filename
+        });
+        return await getSignedUrl(r2Client, command, { expiresIn: 3600 });
+    } catch (err) {
+        console.error('❌ Gagal generate signed URL:', err.message);
+        return null;
+    }
+};
+
+// ✅ FUNGSI ASYNC UNTUK AMBIL DATA DARI MONGODB
+const getLessonsWithQuiz = async () => {
+    return await Lesson.find().sort({ order: 1 }).lean();
+};
+
+const checkSession = (req, res, next) => req.session.athleteId ? next() : res.redirect('/');
+
+// ==========================================
+// ROUTES UTAMA
+// ==========================================
+router.get('/', (req, res) => res.render('entry', { error: null }));
+
+router.post('/access', async (req, res) => {
+    const { action, fullName, icNumber, jantina, umur, negeri } = req.body;
+    try {
+        if (action === 'new') {
+            const existing = await Athlete.findOne({ icNumber });
+            if (existing) return res.render('entry', { error: 'No. IC sudah berdaftar. Sila guna "Semak Akaun".' });
+            const newAthlete = await Athlete.create({ fullName, icNumber, jantina, umur, negeriWakil: negeri });
+            req.session.athleteId = newAthlete._id;
+            res.redirect('/dashboard');
+        } else if (action === 'resume') {
+            const athlete = await Athlete.findOne({ icNumber, fullName: { $regex: new RegExp('^' + fullName + '$', 'i') } });
+            if (!athlete) return res.render('entry', { error: 'Rekod tidak dijumpai. Semak Nama & No. IC.' });
+            req.session.athleteId = athlete._id;
+            res.redirect('/dashboard');
+        }
+    } catch (err) {
+        console.error('Access Error:', err);
+        res.render('entry', { error: 'Ralat sistem. Sila cuba lagi.' });
+    }
+});
+
+router.get('/dashboard', checkSession, async (req, res) => {
+    try {
+        const athlete = await Athlete.findById(req.session.athleteId);
+        if (!athlete) { req.session.destroy(); return res.redirect('/'); }
+        
+        // Ambil bilangan modul untuk paparan dashboard dinamik
+        const totalModules = await Lesson.countDocuments();
+        res.render('dashboard', { athlete, totalModules });
+    } catch (err) { res.redirect('/'); }
+});
+
+router.get('/lesson/:id', checkSession, async (req, res) => {
+    try {
+        const athlete = await Athlete.findById(req.session.athleteId);
+        const moduleId = parseInt(req.params.id);
+        if (athlete.currentStage < moduleId) return res.redirect('/dashboard');
+
+        // ✅ AMBIL DATA DARI DATABASE
+        const lessons = await getLessonsWithQuiz();
+        const lesson = lessons[moduleId - 1];
+        if (!lesson) return res.status(404).send('Modul tidak dijumpai');
+
+        let secureVideoUrl = null;
+        if (lesson.videoUrl) secureVideoUrl = await getSecureVideoUrl(lesson.videoUrl);
+
+        const quizResult = req.session.quizResult || null;
+        req.session.quizResult = null;
+
+        res.render('lesson', { 
+            athlete, lesson, moduleId, secureVideoUrl, quizResult,
+            error: req.session.error, success: req.session.success 
+        });
+        
+        req.session.error = null; req.session.success = null;
+    } catch (err) {
+        console.error('Lesson Route Error:', err);
+        res.redirect('/dashboard');
+    }
+});
+
+router.post('/api/mark-watched/:id', checkSession, async (req, res) => {
+    try {
+        const athlete = await Athlete.findById(req.session.athleteId);
+        const moduleId = parseInt(req.params.id);
+        if (!athlete.watchedLessons) athlete.watchedLessons = [];
+        if (!athlete.watchedLessons.includes(moduleId)) {
+            athlete.watchedLessons.push(moduleId);
+            await athlete.save();
+        }
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ error: 'Failed to track' }); }
+});
+
+router.post('/submit-quiz/:id', checkSession, async (req, res) => {
+    try {
+        const athlete = await Athlete.findById(req.session.athleteId);
+        const moduleId = parseInt(req.params.id);
+        
+        // VALIDATE: Wajib tonton video dulu (kecuali sudah pernah lulus)
+        const isAlreadyPassed = 
+            (moduleId === 1 && athlete.quizScores.quiz1 >= 80) ||
+            (moduleId === 2 && athlete.quizScores.quiz2 >= 80) ||
+            (moduleId === 3 && athlete.quizScores.quiz3 >= 80);
+
+        if (!isAlreadyPassed && (!athlete.watchedLessons || !athlete.watchedLessons.includes(moduleId))) {
+            req.session.error = "Sila tonton video modul ini sepenuhnya sebelum menjawab kuiz.";
+            return res.redirect(`/lesson/${moduleId}`);
+        }
+
+        const userAnswers = req.body.answers || {}; 
+        
+        // ✅ AMBIL DATA KUIZ DARI DATABASE
+        const lessons = await getLessonsWithQuiz();
+        const currentLesson = lessons[moduleId - 1];
+        
+        if (!currentLesson || !currentLesson.quizQuestions || currentLesson.quizQuestions.length === 0) {
+            req.session.error = "Soalan kuiz tidak ditemui.";
+            return res.redirect(`/lesson/${moduleId}`);
+        }
+
+        // Kira markah di server
+        let correctCount = 0;
+        currentLesson.quizQuestions.forEach((q, index) => {
+            const userAns = parseInt(userAnswers[index]);
+            if (userAns === q.correctIndex) correctCount++;
+        });
+
+        const totalQ = currentLesson.quizQuestions.length;
+        const score = totalQ > 0 ? Math.round((correctCount / totalQ) * 100) : 0;
+        const passed = score >= (currentLesson.passMark || 80);
+
+        // Simpan keputusan hanya jika lulus atau markah lebih tinggi
+        if (passed) {
+            const updateData = {};
+            if (moduleId === 1) { updateData['quizScores.quiz1'] = score; if (athlete.currentStage < 2) updateData.currentStage = 2; }
+            else if (moduleId === 2) { updateData['quizScores.quiz2'] = score; if (athlete.currentStage < 3) updateData.currentStage = 3; }
+            else if (moduleId === 3) { updateData['quizScores.quiz3'] = score; if (athlete.currentStage < 4) { updateData.currentStage = 4; updateData.completedAt = new Date(); } }
+            
+            await Athlete.findByIdAndUpdate(athlete._id, updateData);
+        }
+
+        req.session.quizResult = { passed, score, userAnswers };
+        res.redirect(`/lesson/${moduleId}`);
+
+    } catch (err) {
+        console.error('Quiz Error:', err);
+        res.redirect('/dashboard');
+    }
+});
+
+router.get('/download-certificate', checkSession, async (req, res) => {
+    try {
+        const athlete = await Athlete.findById(req.session.athleteId);
+        if (athlete.currentStage < 4) return res.redirect('/dashboard');
+        generateCertificate(athlete, res);
+    } catch (err) { res.redirect('/dashboard'); }
+});
+
+router.get('/logout', (req, res) => { req.session.destroy(); res.redirect('/'); });
+
+// ✅ EXPORT OBJEK YANG BETUL
+module.exports = { 
+    router, 
+    getLessonsWithQuiz 
+};

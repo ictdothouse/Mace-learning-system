@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <title>Sijil SUKMA - <%= athlete.fullName %></title>
+    <style>
+        @page { size: A4 landscape; margin: 0; }
+        body { 
+            margin: 0; padding: 40px; 
+            font-family: 'Times New Roman', serif;
+            background: #fff; color: #000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; box-sizing: border-box;
+            border: 20px solid #004aad; outline: 5px solid #004aad; outline-offset: -30px;
+        }
+        h1 { font-size: 48px; color: #004aad; margin-bottom: 10px; text-transform: uppercase; }
+        .subtitle { font-size: 20px; margin-bottom: 40px; }
+        .name { font-size: 56px; font-weight: bold; margin: 30px 0; text-transform: uppercase; }
+        .details { font-size: 18px; line-height: 1.8; text-align: center; }
+        .footer { margin-top: 60px; font-size: 16px; font-style: italic; }
+        .date { margin-top: 20px; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <h1>Sijil Penghargaan</h1>
+    <div class="subtitle">Adalah dengan ini diperakui bahawa</div>
+    <div class="name"><%= athlete.fullName.toUpperCase() %></div>
+    <div class="details">
+        No. IC: <%= athlete.icNumber %><br>
+        Negeri Wakil: <%= athlete.negeriWakil %><br>
+        Telah berjaya menyelesaikan kursus<br>
+        <strong><%= courseName %></strong>
+    </div>
+    <div class="date">Tarikh: <%= new Date().toLocaleDateString('ms-MY', { day: 'numeric', month: 'long', year: 'numeric' }) %></div>
+    <div class="footer">Majlis Sukan Negara Malaysia</div>
+
+    <script>
+        // Auto print bila page load (untuk download button)
+        window.onload = () => {
+            if (window.location.search.includes('print=1')) {
+                setTimeout(() => window.print(), 500);
+            }
+        };
+    </script>
+</body>
+</html>
