@@ -3,6 +3,8 @@ const express = require('express');
 const router = express.Router();
 const Athlete = require('../models/Athlete');
 const Lesson = require('../models/Lesson');
+const Module = require('../models/Module');
+const QuestionBank = require('../models/QuestionBank');
 const CertificateTemplate = require('../models/CertificateTemplate');
 const fs = require('fs');
 const path = require('path');
@@ -89,81 +91,325 @@ router.post('/users/reset/:id', async (req, res) => {
     } catch (err) { res.redirect('/admin-mace/users?msg=reset_error'); }
 });
 
-// 🆕 PENGURUSAN MODUL & KUIZ (ROUTE DIBETULKAN)
-router.get('/manage-lessons', async (req, res) => {
+// 🆕 PENGURUSAN E-LEARNING: MODUL, LESSON & QUIZ
+// GET: Dashboard E-Learning
+router.get('/elearning', async (req, res) => {
     try {
-        const lessons = await Lesson.find().sort({ order: 1 });
-        res.render('admin-manage-lessons', { page: 'manage-lessons', lessons, msg: req.query.msg || null });
-    } catch (err) { res.status(500).send('Ralat memuatkan senarai modul.'); }
+        const modules = await Module.find().sort({ order: 1 });
+        const lessonsCount = await Lesson.countDocuments();
+        const questionsCount = await QuestionBank.countDocuments();
+        res.render('admin', { 
+            page: 'elearning-dashboard', 
+            modules, 
+            stats: { modules: modules.length, lessons: lessonsCount, questions: questionsCount },
+            msg: req.query.msg || null 
+        });
+    } catch (err) { 
+        console.error('E-Learning Dashboard Error:', err);
+        res.status(500).send('Ralat memuatkan dashboard e-learning.'); 
+    }
 });
 
-// Route untuk Cipta Modul Baharu
-router.get('/manage-lessons/new', async (req, res) => {
-    try { res.render('admin-edit-lesson', { page: 'manage-lessons', lesson: null }); }
-    catch (err) { res.status(500).send('Ralat memuatkan borang.'); }
+// ==========================================\n// PENGURUSAN MODUL\n// ==========================================\n\n// GET: Senarai Modul
+router.get('/modules', async (req, res) => {
+    try {
+        const modules = await Module.find().sort({ order: 1 });
+        res.render('admin', { page: 'modules', modules, msg: req.query.msg || null });
+    } catch (err) { 
+        console.error('Modules Error:', err);
+        res.status(500).send('Ralat memuatkan senarai modul.'); 
+    }
 });
 
-// Route untuk Edit Modul Sedia Ada
-router.get('/manage-lessons/edit/:id', async (req, res) => {
+// GET: Form Cipta Modul Baru
+router.get('/modules/new', async (req, res) => {
+    try { 
+        res.render('admin-edit-module', { page: 'modules', module: null }); 
+    } catch (err) { 
+        res.status(500).send('Ralat memuatkan borang.'); 
+    }
+});
+
+// GET: Form Edit Modul
+router.get('/modules/edit/:id', async (req, res) => {
+    try {
+        const module = await Module.findById(req.params.id);
+        if (!module) return res.redirect('/admin-mace/modules?msg=not_found');
+        res.render('admin-edit-module', { page: 'modules', module });
+    } catch (err) { 
+        res.status(500).send('Ralat memuatkan borang.'); 
+    }
+});
+
+// POST: Cipta Modul Baru
+router.post('/modules/new', upload.single('thumbnail'), async (req, res) => {
+    try {
+        const { title, description, order, isActive } = req.body;
+        const moduleData = {
+            title,
+            description, // TinyMCE content
+            order: parseInt(order) || 0,
+            isActive: isActive === 'on'
+        };
+        
+        // Handle thumbnail upload
+        if (req.file) {
+            moduleData.thumbnail = `/uploads/${req.file.filename}`;
+        }
+        
+        await Module.create(moduleData);
+        res.redirect('/admin-mace/modules?msg=module_created');
+    } catch (err) {
+        console.error('Create Module Error:', err);
+        res.redirect('/admin-mace/modules?msg=create_error');
+    }
+});
+
+// POST: Update Modul
+router.post('/modules/edit/:id', upload.single('thumbnail'), async (req, res) => {
+    try {
+        const { title, description, order, isActive } = req.body;
+        const updateData = {
+            title,
+            description,
+            order: parseInt(order) || 0,
+            isActive: isActive === 'on'
+        };
+        
+        // Handle thumbnail upload
+        if (req.file) {
+            updateData.thumbnail = `/uploads/${req.file.filename}`;
+        }
+        
+        await Module.findByIdAndUpdate(req.params.id, updateData);
+        res.redirect('/admin-mace/modules?msg=module_updated');
+    } catch (err) {
+        console.error('Update Module Error:', err);
+        res.redirect('/admin-mace/modules?msg=update_error');
+    }
+});
+
+// POST: Delete Modul
+router.post('/modules/delete/:id', async (req, res) => {
+    try {
+        await Module.findByIdAndDelete(req.params.id);
+        res.redirect('/admin-mace/modules?msg=module_deleted');
+    } catch (err) {
+        console.error('Delete Module Error:', err);
+        res.redirect('/admin-mace/modules?msg=delete_error');
+    }
+});
+
+// ==========================================\n// PENGURUSAN LESSON\n// ==========================================\n\n// GET: Senarai Lesson untuk Modul tertentu
+router.get('/lessons', async (req, res) => {
+    try {
+        const moduleId = req.query.moduleId;
+        if (!moduleId) {
+            const modules = await Module.find().sort({ title: 1 });
+            return res.render('admin', { page: 'lessons-select-module', modules, msg: req.query.msg || null });
+        }
+        
+        const lessons = await Lesson.find({ moduleId }).sort({ order: 1 }).populate('moduleId');
+        const module = await Module.findById(moduleId);
+        res.render('admin', { page: 'lessons', lessons, module, msg: req.query.msg || null });
+    } catch (err) { 
+        console.error('Lessons Error:', err);
+        res.status(500).send('Ralat memuatkan senarai lesson.'); 
+    }
+});
+
+// GET: Form Cipta Lesson Baru
+router.get('/lessons/new', async (req, res) => {
+    try {
+        const modules = await Module.find().sort({ title: 1 });
+        res.render('admin-edit-lesson', { page: 'lessons', lesson: null, modules, editMode: 'create' }); 
+    } catch (err) { 
+        res.status(500).send('Ralat memuatkan borang.'); 
+    }
+});
+
+// GET: Form Edit Lesson
+router.get('/lessons/edit/:id', async (req, res) => {
+    try {
+        const lesson = await Lesson.findById(req.params.id).populate('moduleId');
+        const modules = await Module.find().sort({ title: 1 });
+        if (!lesson) return res.redirect('/admin-mace/lessons?msg=not_found');
+        res.render('admin-edit-lesson', { page: 'lessons', lesson, modules, editMode: 'edit' });
+    } catch (err) { 
+        res.status(500).send('Ralat memuatkan borang.'); 
+    }
+});
+
+// POST: Cipta Lesson Baru
+router.post('/lessons/new', async (req, res) => {
+    try {
+        const { moduleId, title, contentHtml, videoUrl, passMark, order, isActive, questionsJson } = req.body;
+        let quizQuestions = [];
+        try { quizQuestions = JSON.parse(questionsJson || '[]'); } catch(e) {}
+        
+        const lessonData = {
+            moduleId,
+            title,
+            contentHtml, // TinyMCE content
+            videoUrl,
+            passMark: parseInt(passMark) || 80,
+            order: parseInt(order) || 0,
+            isActive: isActive === 'on',
+            quizQuestions
+        };
+        
+        await Lesson.create(lessonData);
+        res.redirect(`/admin-mace/lessons?moduleId=${moduleId}&msg=lesson_created`);
+    } catch (err) {
+        console.error('Create Lesson Error:', err);
+        res.redirect('/admin-mace/lessons?msg=create_error');
+    }
+});
+
+// POST: Update Lesson
+router.post('/lessons/edit/:id', async (req, res) => {
+    try {
+        const { moduleId, title, contentHtml, videoUrl, passMark, order, isActive, questionsJson } = req.body;
+        let quizQuestions = [];
+        try { quizQuestions = JSON.parse(questionsJson || '[]'); } catch(e) {}
+        
+        const updateData = {
+            moduleId,
+            title,
+            contentHtml,
+            videoUrl,
+            passMark: parseInt(passMark) || 80,
+            order: parseInt(order) || 0,
+            isActive: isActive === 'on',
+            quizQuestions
+        };
+        
+        await Lesson.findByIdAndUpdate(req.params.id, updateData);
+        res.redirect(`/admin-mace/lessons?moduleId=${moduleId}&msg=lesson_updated`);
+    } catch (err) {
+        console.error('Update Lesson Error:', err);
+        res.redirect('/admin-mace/lessons?msg=update_error');
+    }
+});
+
+// POST: Delete Lesson
+router.post('/lessons/delete/:id', async (req, res) => {
     try {
         const lesson = await Lesson.findById(req.params.id);
-        if (!lesson) return res.redirect('/admin-mace/manage-lessons?msg=not_found');
-        res.render('admin-edit-lesson', { page: 'manage-lessons', lesson });
-    } catch (err) { res.status(500).send('Ralat memuatkan borang.'); }
-});
-
-// POST untuk cipta baru
-router.post('/manage-lessons/new', async (req, res) => {
-    try {
-        const { title, contentHtml, videoUrl, passMark, questionsJson } = req.body;
-        let quizQuestions = [];
-        try { quizQuestions = JSON.parse(questionsJson || '[]'); } catch(e) {}
-        const maxOrder = await Lesson.findOne().sort('-order');
-        await Lesson.create({ title, contentHtml, videoUrl, passMark: parseInt(passMark) || 80, quizQuestions, order: (maxOrder ? maxOrder.order : 0) + 1 });
-        res.redirect('/admin-mace/manage-lessons?msg=success');
-    } catch (err) { res.status(500).send('Ralat menyimpan modul.'); }
-});
-
-// POST untuk update sedia ada
-router.post('/manage-lessons/edit/:id', async (req, res) => {
-    try {
-        const { title, contentHtml, videoUrl, passMark, questionsJson } = req.body;
-        let quizQuestions = [];
-        try { quizQuestions = JSON.parse(questionsJson || '[]'); } catch(e) {}
-        await Lesson.findByIdAndUpdate(req.params.id, { title, contentHtml, videoUrl, passMark: parseInt(passMark) || 80, quizQuestions });
-        res.redirect('/admin-mace/manage-lessons?msg=success');
-    } catch (err) { res.status(500).send('Ralat menyimpan modul.'); }
-});
-
-// POST: Padam Modul
-router.post('/manage-lessons/delete/:id', async (req, res) => {
-    try {
+        const moduleId = lesson.moduleId;
         await Lesson.findByIdAndDelete(req.params.id);
-        res.redirect('/admin-mace/manage-lessons?msg=deleted');
-    } catch (err) { res.redirect('/admin-mace/manage-lessons?msg=delete_error'); }
+        res.redirect(`/admin-mace/lessons?moduleId=${moduleId}&msg=lesson_deleted`);
+    } catch (err) {
+        console.error('Delete Lesson Error:', err);
+        res.redirect('/admin-mace/lessons?msg=delete_error');
+    }
 });
 
-// MIGRATION DATA STATIK KE DATABASE
-router.get('/migrate-lessons', async (req, res) => {
+// ==========================================\n// PENGURUSAN QUESTION BANK\n// ==========================================\n\n// GET: Senarai Soalan Bank Kuiz
+router.get('/question-bank', async (req, res) => {
+    try {
+        const questions = await QuestionBank.find().sort({ createdAt: -1 }).limit(100);
+        res.render('admin', { page: 'question-bank', questions, msg: req.query.msg || null });
+    } catch (err) { 
+        console.error('Question Bank Error:', err);
+        res.status(500).send('Ralat memuatkan bank soalan.'); 
+    }
+});
+
+// GET: Form Cipta Soalan Baru
+router.get('/question-bank/new', async (req, res) => {
+    try { 
+        res.render('admin-edit-question', { page: 'question-bank', question: null, editMode: 'create' }); 
+    } catch (err) { 
+        res.status(500).send('Ralat memuatkan borang.'); 
+    }
+});
+
+// GET: Form Edit Soalan
+router.get('/question-bank/edit/:id', async (req, res) => {
+    try {
+        const question = await QuestionBank.findById(req.params.id);
+        if (!question) return res.redirect('/admin-mace/question-bank?msg=not_found');
+        res.render('admin-edit-question', { page: 'question-bank', question, editMode: 'edit' });
+    } catch (err) { 
+        res.status(500).send('Ralat memuatkan borang.'); 
+    }
+});
+
+// POST: Cipta Soalan Baru
+router.post('/question-bank/new', async (req, res) => {
+    try {
+        const { text, explanation, options, correctIndex, category, difficulty, tags, isActive } = req.body;
+        const questionData = {
+            text, // TinyMCE content
+            explanation, // TinyMCE content
+            options: JSON.parse(options || '[]'),
+            correctIndex: parseInt(correctIndex) || 0,
+            category: category || 'General',
+            difficulty: difficulty || 'medium',
+            tags: tags ? tags.split(',').map(t => t.trim()) : [],
+            isActive: isActive === 'on'
+        };
+        
+        await QuestionBank.create(questionData);
+        res.redirect('/admin-mace/question-bank?msg=question_created');
+    } catch (err) {
+        console.error('Create Question Error:', err);
+        res.redirect('/admin-mace/question-bank?msg=create_error');
+    }
+});
+
+// POST: Update Soalan
+router.post('/question-bank/edit/:id', async (req, res) => {
+    try {
+        const { text, explanation, options, correctIndex, category, difficulty, tags, isActive } = req.body;
+        const updateData = {
+            text,
+            explanation,
+            options: JSON.parse(options || '[]'),
+            correctIndex: parseInt(correctIndex) || 0,
+            category: category || 'General',
+            difficulty: difficulty || 'medium',
+            tags: tags ? tags.split(',').map(t => t.trim()) : [],
+            isActive: isActive === 'on'
+        };
+        
+        await QuestionBank.findByIdAndUpdate(req.params.id, updateData);
+        res.redirect('/admin-mace/question-bank?msg=question_updated');
+    } catch (err) {
+        console.error('Update Question Error:', err);
+        res.redirect('/admin-mace/question-bank?msg=update_error');
+    }
+});
+
+// POST: Delete Soalan
+router.post('/question-bank/delete/:id', async (req, res) => {
+    try {
+        await QuestionBank.findByIdAndDelete(req.params.id);
+        res.redirect('/admin-mace/question-bank?msg=question_deleted');
+    } catch (err) {
+        console.error('Delete Question Error:', err);
+        res.redirect('/admin-mace/question-bank?msg=delete_error');
+    }
+});
+
+// API: Get Questions by Category (for AJAX selection in lesson editor)
+router.get('/api/questions', async (req, res) => {
+    try {
+        const { category, limit } = req.query;
+        const query = category ? { category } : {};
+        const questions = await QuestionBank.find(query).limit(parseInt(limit) || 50);
+        res.json(questions);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ==========================================\n// MIGRATION DATA STATIK KE DATABASE (LEGACY)\n// ==========================================\nrouter.get('/migrate-lessons', async (req, res) => {
     try {
         const existingCount = await Lesson.countDocuments();
         if (existingCount > 0) return res.send(`❌ Migration sudah dijalankan. Terdapat ${existingCount} modul.`);
-        const { getLessonsWithQuiz } = require('./athlete'); 
-        const staticData = getLessonsWithQuiz();
-        if (!staticData || staticData.length === 0) return res.status(500).send('❌ Tiada data statik ditemui.');
-        let successCount = 0;
-        for (let i = 0; i < staticData.length; i++) {
-            const item = staticData[i];
-            // ✅ PEMBETULAN SINTAKS: q => ({ ... }) tanpa ruang
-            const lessonData = {
-                title: item.title, contentHtml: item.content?.rendered || '', videoUrl: item.videoFile || '',
-                passMark: 80, order: item.id,
-                quizQuestions: (item.quiz || []).map(q => ({ text: q.q, options: q.opts, correctIndex: q.ans, category: 'Default' }))
-            };
-            await Lesson.create(lessonData);
-            successCount++;
-        }
-        res.send(`✅ Migration Berjaya! ${successCount} modul dipindahkan.`);
+        res.send('Sila guna interface E-Learning baharu untuk mencipta modul dan lesson.');
     } catch (err) { res.status(500).send(`❌ Ralat: ${err.message}`); }
 });
 

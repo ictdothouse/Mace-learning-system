@@ -9,12 +9,19 @@ const questionSchema = new mongoose.Schema({
 });
 
 const lessonSchema = new mongoose.Schema({
+    moduleId: { type: mongoose.Schema.Types.ObjectId, ref: 'Module', required: true },
     title: { type: String, required: true },
-    contentHtml: { type: String, required: true },
+    contentHtml: { type: String, required: true }, // TinyMCE HTML content
     videoUrl: { type: String, default: '' },
     quizQuestions: [questionSchema],
     passMark: { type: Number, default: 80 },
-    order: { type: Number, required: true }
+    order: { type: Number, required: true },
+    isActive: { type: Boolean, default: true },
+    resources: [{
+        title: String,
+        url: String,
+        type: String // 'pdf', 'doc', 'link', etc.
+    }]
 }, { timestamps: true });
 
 module.exports = mongoose.model('Lesson', lessonSchema);
