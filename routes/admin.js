@@ -405,12 +405,17 @@ router.get('/api/questions', async (req, res) => {
     }
 });
 
-// ==========================================\n// MIGRATION DATA STATIK KE DATABASE (LEGACY)\n// ==========================================\nrouter.get('/migrate-lessons', async (req, res) => {
+// ==========================================
+// MIGRATION DATA STATIK KE DATABASE (LEGACY)
+// ==========================================
+router.get('/migrate-lessons', async (req, res) => {
     try {
         const existingCount = await Lesson.countDocuments();
         if (existingCount > 0) return res.send(`❌ Migration sudah dijalankan. Terdapat ${existingCount} modul.`);
         res.send('Sila guna interface E-Learning baharu untuk mencipta modul dan lesson.');
-    } catch (err) { res.status(500).send(`❌ Ralat: ${err.message}`); }
+    } catch (err) { 
+        res.status(500).send(`❌ Ralat: ${err.message}`); 
+    }
 });
 
 // DOWNLOAD CSV
