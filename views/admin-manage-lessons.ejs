@@ -1,69 +1,96 @@
-<div class="mb-6 flex justify-between items-center">
-    <div>
-        <h2 class="text-2xl font-bold text-gray-900">Pengurusan Modul & Kuiz</h2>
-        <p class="text-gray-500 text-sm mt-1">Edit tajuk, kandungan video, dan soalan kuiz secara langsung.</p>
-    </div>
-    <a href="/admin-mace/manage-lessons/new" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-sm">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-        Cipta Modul Baharu
-    </a>
-</div>
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengurusan Modul - Admin MSN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .sidebar-link.active { background-color: rgba(255,255,255,0.1); border-left: 4px solid #fbbf24; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex text-gray-800 font-sans">
+    
+    <!-- SIDEBAR MENU (Sama seperti admin.ejs) -->
+    <aside class="w-64 bg-blue-900 text-white flex-shrink-0 hidden md:flex flex-col h-screen sticky top-0 shadow-xl z-20">
+        <div class="p-6 border-b border-blue-800">
+            <h1 class="text-xl font-bold tracking-wider flex items-center gap-2"><span class="text-yellow-400 text-2xl">🏅</span> ADMIN MSN</h1>
+            <p class="text-xs text-blue-300 mt-1">Sistem eLearning Atlet SUKMA v2</p>
+        </div>
+        <nav class="flex-1 py-6 space-y-1">
+            <a href="/admin-mace" class="sidebar-link <%= page === 'dashboard' ? 'active' : '' %> flex items-center px-6 py-3 hover:bg-blue-800 transition border-l-4 border-transparent">Dashboard</a>
+            <a href="/admin-mace/users" class="sidebar-link <%= page === 'users' ? 'active' : '' %> flex items-center px-6 py-3 hover:bg-blue-800 transition border-l-4 border-transparent">Pengurusan Pengguna</a>
+            <a href="/admin-mace/manage-lessons" class="sidebar-link active flex items-center px-6 py-3 hover:bg-blue-800 transition border-l-4 border-transparent">Edit Modul & Kuiz</a>
+            <a href="/admin-mace/settings" class="sidebar-link <%= page === 'settings' ? 'active' : '' %> flex items-center px-6 py-3 hover:bg-blue-800 transition border-l-4 border-transparent">Tetapan Sistem</a>
+        </nav>
+        <div class="p-6 border-t border-blue-800"><a href="/" class="flex items-center text-sm text-blue-300 hover:text-white transition">← Kembali ke Laman Utama</a></div>
+    </aside>
 
-<% if (locals.msg === 'success') { %>
-    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-r-lg mb-6 shadow-sm animate-fade-in">✅ Modul berjaya disimpan/dikemaskini.</div>
-<% } else if (locals.msg === 'deleted') { %>
-    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-r-lg mb-6 shadow-sm animate-fade-in">🗑️ Modul telah dipadam.</div>
-<% } %>
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 p-6 md:p-10 overflow-y-auto h-screen">
+        <div class="mb-6 flex justify-between items-center">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Pengurusan Modul & Kuiz</h2>
+                <p class="text-gray-500 text-sm mt-1">Edit tajuk, kandungan video, dan soalan kuiz secara langsung.</p>
+            </div>
+            <a href="/admin-mace/manage-lessons/new" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-sm">
+                + Cipta Modul Baharu
+            </a>
+        </div>
 
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-    <table class="w-full text-sm text-left">
-        <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-100">
-            <tr>
-                <th class="px-6 py-4">Tajuk Modul</th>
-                <th class="px-6 py-4 text-center">Bil. Soalan</th>
-                <th class="px-6 py-4 text-center">Video</th>
-                <th class="px-6 py-4 text-right">Tindakan</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-            <% if (lessons && lessons.length > 0) { %>
-                <% lessons.forEach(l => { %>
-                    <tr class="hover:bg-blue-50/30 transition group">
-                        <td class="px-6 py-4">
-                            <div class="font-medium text-gray-900"><%= l.title %></div>
-                            <div class="text-xs text-gray-400 mt-1">Order: <%= l.order %></div>
-                        </td>
-                        <td class="px-6 py-4 text-center">
-                            <span class="bg-purple-100 text-purple-700 px-2.5 py-1 rounded-full text-xs font-bold">
-                                <%= l.quizQuestions ? l.quizQuestions.length : 0 %> Soalan
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 text-center">
-                            <% if (l.videoUrl) { %>
-                                <span class="inline-flex items-center gap-1 text-green-600 text-xs font-medium">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg> Ada
-                                </span>
-                            <% } else { %>
-                                <span class="text-gray-400 text-xs italic">Tiada</span>
-                            <% } %>
-                        </td>
-                        <td class="px-6 py-4 text-right">
-                            <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <a href="/admin-mace/manage-lessons/edit/<%= l._id %>" class="text-xs bg-blue-50 text-blue-700 hover:bg-blue-100 px-3 py-1.5 rounded font-medium transition">✏️ Edit</a>
-                                <form action="/admin-mace/manage-lessons/delete/<%= l._id %>" method="POST" onsubmit="return confirm('Padam modul ini?')">
-                                    <button type="submit" class="text-xs bg-red-50 text-red-700 hover:bg-red-100 px-3 py-1.5 rounded font-medium transition">🗑️ Padam</button>
-                                </form>
-                            </div>
-                        </td>
+        <% if (locals.msg === 'success') { %>
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-r-lg mb-6 shadow-sm">✅ Modul berjaya disimpan/dikemaskini.</div>
+        <% } else if (locals.msg === 'deleted') { %>
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-r-lg mb-6 shadow-sm">🗑️ Modul telah dipadam.</div>
+        <% } %>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <table class="w-full text-sm text-left">
+                <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-100">
+                    <tr>
+                        <th class="px-6 py-4">Tajuk Modul</th>
+                        <th class="px-6 py-4 text-center">Bil. Soalan</th>
+                        <th class="px-6 py-4 text-center">Video</th>
+                        <th class="px-6 py-4 text-right">Tindakan</th>
                     </tr>
-                <% }) %>
-            <% } else { %>
-                <tr>
-                    <td colspan="4" class="px-6 py-12 text-center text-gray-400 italic">
-                        Tiada modul ditemui. Sila jalankan migration atau cipta modul baharu.
-                    </td>
-                </tr>
-            <% } %>
-        </tbody>
-    </table>
-</div>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    <% if (lessons && lessons.length > 0) { %>
+                        <% lessons.forEach(l => { %>
+                            <tr class="hover:bg-blue-50/30 transition group">
+                                <td class="px-6 py-4">
+                                    <div class="font-medium text-gray-900"><%= l.title %></div>
+                                    <div class="text-xs text-gray-400 mt-1">Order: <%= l.order %></div>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <span class="bg-purple-100 text-purple-700 px-2.5 py-1 rounded-full text-xs font-bold"><%= l.quizQuestions ? l.quizQuestions.length : 0 %> Soalan</span>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <% if (l.videoUrl) { %>
+                                        <span class="inline-flex items-center gap-1 text-green-600 text-xs font-medium">✓ Ada</span>
+                                    <% } else { %>
+                                        <span class="text-gray-400 text-xs italic">Tiada</span>
+                                    <% } %>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <a href="/admin-mace/manage-lessons/edit/<%= l._id %>" class="text-xs bg-blue-50 text-blue-700 hover:bg-blue-100 px-3 py-1.5 rounded font-medium transition">✏️ Edit</a>
+                                        <form action="/admin-mace/manage-lessons/delete/<%= l._id %>" method="POST" onsubmit="return confirm('Padam modul ini?')">
+                                            <button type="submit" class="text-xs bg-red-50 text-red-700 hover:bg-red-100 px-3 py-1.5 rounded font-medium transition">🗑️ Padam</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr><td colspan="4" class="px-6 py-12 text-center text-gray-400 italic">Tiada modul ditemui. Sila jalankan migration atau cipta modul baharu.</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</body>
+</html>

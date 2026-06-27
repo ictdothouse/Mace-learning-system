@@ -1,4 +1,4 @@
-// routes/athlete.js - VERSI DATABASE DRIVEN (SELEPAS MIGRATION)
+// routes/athlete.js - VERSI DATABASE DRIVEN + R2 SIGNED URL
 const express = require('express');
 const router = express.Router();
 const Athlete = require('../models/Athlete');
@@ -72,7 +72,7 @@ router.get('/dashboard', checkSession, async (req, res) => {
         const athlete = await Athlete.findById(req.session.athleteId);
         if (!athlete) { req.session.destroy(); return res.redirect('/'); }
         
-        // Ambil bilangan modul untuk paparan dashboard dinamik
+        // Ambil bilangan modul dinamik dari DB
         const totalModules = await Lesson.countDocuments();
         res.render('dashboard', { athlete, totalModules });
     } catch (err) { res.redirect('/'); }
@@ -143,7 +143,7 @@ router.post('/submit-quiz/:id', checkSession, async (req, res) => {
         const currentLesson = lessons[moduleId - 1];
         
         if (!currentLesson || !currentLesson.quizQuestions || currentLesson.quizQuestions.length === 0) {
-            req.session.error = "Soalan kuiz tidak ditemui.";
+            req.session.error = "Soalan kuiz tidak ditemui dalam database.";
             return res.redirect(`/lesson/${moduleId}`);
         }
 
