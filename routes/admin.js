@@ -408,13 +408,50 @@ router.get('/api/questions', async (req, res) => {
 // ==========================================
 // MIGRATION DATA STATIK KE DATABASE (LEGACY)
 // ==========================================
+// MIGRASI LESSON KE MODUL
+// ==========================================
 router.get('/migrate-lessons', async (req, res) => {
     try {
-        const existingCount = await Lesson.countDocuments();
-        if (existingCount > 0) return res.send(`❌ Migration sudah dijalankan. Terdapat ${existingCount} modul.`);
-        res.send('Sila guna interface E-Learning baharu untuk mencipta modul dan lesson.');
+        const existingLessons = await Lesson.countDocuments();
+        
+        // Semak jika sudah ada modul
+        const existingModules = await Module.countDocuments();
+        if (existingModules > 0) {
+            return res.send(`ℹ️ Sistem sudah mempunyai ${existingModules} modul. Migration tidak diperlukan.<br><br>
+                <a href="/admin-mace/modules">Kembali ke Pengurusan Modul</a>`);
+        }
+        
+        // Cipta modul induk
+        const parentModule = await Module.create({
+            title: 'Kurikulum Utama MACE',
+            description: 'Modul induk untuk semua lesson dan kuiz sedia ada',
+            order: 1,
+            isActive: true
+        });
+        
+        // Update semua lesson sedia ada dengan moduleId baru
+        if (existingLessons > 0) {
+            const result = await Lesson.updateMany(
+                { moduleId: { $exists: false } }, // Hanya lesson tanpa moduleId
+                { $set: { moduleId: parentModule._id } }
+            );
+            
+            res.send(`✅ Migration berjaya!<br><br>
+                • Modul dicipta: <strong>${parentModule.title}</strong><br>
+                • ${result.modifiedCount} lesson dipindahkan ke modul ini<br>
+                • Semua kuiz dikekalkan<br><br>
+                <a href="/admin-mace/modules">Lihat Modul</a> | 
+                <a href="/admin-mace/elearning">Dashboard E-Learning</a>`);
+        } else {
+            res.send(`ℹ️ Tiada lesson sedia ada untuk dipindahkan.<br>
+                Modul "${parentModule.title}" telah dicipta.<br><br>
+                Anda boleh mula menambah lesson baru melalui dashboard E-Learning.<br><br>
+                <a href="/admin-mace/elearning">Ke Dashboard E-Learning</a>`);
+        }
     } catch (err) { 
-        res.status(500).send(`❌ Ralat: ${err.message}`); 
+        console.error('Migration Error:', err);
+        res.status(500).send(`❌ Ralat Migration: ${err.message}<br><br>
+            <a href="javascript:history.back()">Kembali</a>`); 
     }
 });
 
