@@ -1,1 +1,1 @@
-Nothing should be ignored since the changes only include source files (.ejs templates) without any build artifacts, dependencies, or temporary files.
+Nothing needs to be added to the .gitignore file based on the provided changes, as they only include source code files (.js, .ejs) and no build artifacts, dependencies, or temporary files.
