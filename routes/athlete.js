@@ -185,6 +185,28 @@ router.get('/download-certificate', checkSession, async (req, res) => {
     } catch (err) { res.redirect('/dashboard'); }
 });
 
+// Route untuk preview/download sijil dengan ID
+router.get('/certificate/:id', checkSession, async (req, res) => {
+    try {
+        const athlete = await Athlete.findById(req.params.id);
+        if (!athlete || athlete._id.toString() !== req.session.athleteId.toString()) {
+            return res.status(403).send('Akses ditolak');
+        }
+        if (athlete.currentStage < 4) return res.redirect('/dashboard');
+        
+        // Jika ada parameter print=1, download PDF
+        if (req.query.print === '1') {
+            generateCertificate(athlete, res);
+        } else {
+            // Preview halaman HTML
+            res.render('certificate-preview', { athlete });
+        }
+    } catch (err) { 
+        console.error('Certificate Error:', err);
+        res.redirect('/dashboard'); 
+    }
+});
+
 router.get('/logout', (req, res) => { req.session.destroy(); res.redirect('/'); });
 
 // ✅ EXPORT OBJEK YANG BETUL
