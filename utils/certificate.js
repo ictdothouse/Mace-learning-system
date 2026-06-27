@@ -263,6 +263,11 @@ async function generateCertificate(athlete, res, templateId = null) {
         drawStyledText('negeri', `Mewakili Negeri: ${athlete.negeriWakil.toUpperCase()}`);
     }
 
+    // Sukan
+    if (config.showSukan && athlete.sukan) {
+        drawStyledText('sukan', `Sukan: ${athlete.sukan.toUpperCase()}`);
+    }
+
     // Course Name
     if (config.showCourseName && config.courseName) {
         drawStyledText('courseName', config.courseName);

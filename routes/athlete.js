@@ -47,12 +47,12 @@ const checkSession = (req, res, next) => req.session.athleteId ? next() : res.re
 router.get('/', (req, res) => res.render('entry', { error: null }));
 
 router.post('/access', async (req, res) => {
-    const { action, fullName, icNumber, jantina, umur, negeri } = req.body;
+    const { action, fullName, icNumber, jantina, umur, negeri, sukan } = req.body;
     try {
         if (action === 'new') {
             const existing = await Athlete.findOne({ icNumber });
             if (existing) return res.render('entry', { error: 'No. IC sudah berdaftar. Sila guna "Semak Akaun".' });
-            const newAthlete = await Athlete.create({ fullName, icNumber, jantina, umur, negeriWakil: negeri });
+            const newAthlete = await Athlete.create({ fullName, icNumber, jantina, umur, negeriWakil: negeri, sukan });
             req.session.athleteId = newAthlete._id;
             res.redirect('/dashboard');
         } else if (action === 'resume') {

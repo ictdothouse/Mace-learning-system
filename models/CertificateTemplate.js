@@ -76,6 +76,10 @@ const certificateTemplateSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    showSukan: {
+        type: Boolean,
+        default: false
+    },
     showDate: {
         type: Boolean,
         default: true
@@ -177,6 +181,16 @@ const certificateTemplateSchema = new mongoose.Schema({
             align: { type: String, default: 'center' },
             positionX: { type: Number, default: 50 },
             positionY: { type: Number, default: 52 }
+        },
+        sukan: {
+            fontSize: { type: Number, default: 16 },
+            color: { type: String, default: '#004aad' },
+            lineHeight: { type: Number, default: 1.3 },
+            letterSpacing: { type: Number, default: 0 },
+            fontWeight: { type: String, default: 'bold' },
+            align: { type: String, default: 'center' },
+            positionX: { type: Number, default: 50 },
+            positionY: { type: Number, default: 56 }
         },
         courseName: {
             fontSize: { type: Number, default: 20 },

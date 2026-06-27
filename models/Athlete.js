@@ -27,6 +27,11 @@ const athleteSchema = new mongoose.Schema({
         type: String, 
         required: true 
     },
+    sukan: { 
+        type: String, 
+        required: true,
+        trim: true 
+    },
 
     // Kemajuan Pembelajaran (Sequential Guard)
     currentStage: { 
