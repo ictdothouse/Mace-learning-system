@@ -1,1 +1,5 @@
-(models/Module.js, models/QuestionBank.js, models/Lesson.js, routes/admin.js)
+```
+# Logs and temp files
+*.log
+server.log
+```
