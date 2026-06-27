@@ -1,4 +1,4 @@
-// routes/admin.js - VERSI LENGKAP & DIBETULKAN
+// routes/admin.js - VERSI LENGKAP & DIBETULKAN (Dengan Fallback Password)
 const express = require('express');
 const router = express.Router();
 const Athlete = require('../models/Athlete');
@@ -18,14 +18,36 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// Basic Auth Middleware
+// ==========================================
+// 🔧 BASIC AUTH DIPERBAIKI (DENGAN FALLBACK)
+// ==========================================
 const basicAuth = (req, res, next) => {
-    const b64auth = (req.headers.authorization || '').split(' ')[1] || '';
+    // Ambil dari .env, jika tiada guna nilai default ini
+    const validUser = process.env.ADMIN_USER || 'adminmace';
+    const validPass = process.env.ADMIN_PASS || 'MaceSUKMA2024!';
+
+    const authHeader = req.headers.authorization || '';
+    
+    if (!authHeader.startsWith('Basic ')) {
+        res.set('WWW-Authenticate', 'Basic realm="MSN Admin Panel"');
+        return res.status(401).send('Akses Ditolak. Sila login.');
+    }
+
+    const b64auth = authHeader.split(' ')[1] || '';
     const [login, password] = Buffer.from(b64auth, 'base64').toString().split(':');
-    if (login === process.env.ADMIN_USER && password === process.env.ADMIN_PASS) return next();
+
+    // Debugging (Optional): Boleh lihat di log Hostinger jika masih gagal
+    // console.log(`Login attempt: ${login} vs ${validUser}`); 
+
+    if (login === validUser && password === validPass) {
+        return next();
+    }
+
     res.set('WWW-Authenticate', 'Basic realm="MSN Admin Panel"');
-    res.status(401).send('Akses Ditolak.');
+    res.status(401).send('Akses Ditolak. Username atau Password salah.');
 };
+
+// Gunakan middleware ini untuk semua route admin
 router.use(basicAuth);
 
 // GET: Dashboard Utama
@@ -39,7 +61,10 @@ router.get('/', async (req, res) => {
         ]);
         const athletes = await Athlete.find().sort({ createdAt: -1 }).limit(100);
         res.render('admin', { page: 'dashboard', total, passed, learning: total - passed, byState, athletes, msg: req.query.msg || null, file: req.query.file || null });
-    } catch (err) { res.send('Ralat memuatkan dashboard.'); }
+    } catch (err) { 
+        console.error(err);
+        res.send('Ralat memuatkan dashboard: ' + err.message); 
+    }
 });
 
 // GET: Tetapan Sistem
@@ -51,6 +76,7 @@ router.get('/settings', async (req, res) => {
         res.render('admin', { page: 'settings', uploadedFiles, msg: req.query.msg || null, file: req.query.file || null });
     } catch (err) { res.send('Error loading settings'); }
 });
+
 router.post('/upload-data', upload.single('dataFile'), async (req, res) => {
     try {
         if (!req.file) return res.redirect('/admin-mace/settings?msg=error_no_file');
@@ -72,6 +98,7 @@ router.get('/users', async (req, res) => {
         res.render('admin', { page: 'users', athletes, statesList, currentSearch: req.query.search || '', currentState: req.query.state || 'all', msg: req.query.msg || null });
     } catch (err) { res.send('Error loading users'); }
 });
+
 router.post('/users/update/:id', async (req, res) => {
     try {
         const { fullName, icNumber, jantina, umur, negeriWakil } = req.body;
@@ -81,6 +108,7 @@ router.post('/users/update/:id', async (req, res) => {
         res.redirect('/admin-mace/users?msg=profile_updated');
     } catch (err) { res.redirect('/admin-mace/users?msg=update_error'); }
 });
+
 router.post('/users/reset/:id', async (req, res) => {
     try {
         await Athlete.findByIdAndUpdate(req.params.id, { currentStage: 1, quizScores: { quiz1: 0, quiz2: 0, quiz3: 0 }, watchedLessons: [], completedAt: null });
@@ -88,7 +116,7 @@ router.post('/users/reset/:id', async (req, res) => {
     } catch (err) { res.redirect('/admin-mace/users?msg=reset_error'); }
 });
 
-// 🆕 PENGURUSAN MODUL & KUIZ (ROUTE DIBETULKAN)
+// 🆕 PENGURUSAN MODUL & KUIZ
 router.get('/manage-lessons', async (req, res) => {
     try {
         const lessons = await Lesson.find().sort({ order: 1 });
@@ -96,13 +124,11 @@ router.get('/manage-lessons', async (req, res) => {
     } catch (err) { res.status(500).send('Ralat memuatkan senarai modul.'); }
 });
 
-// Route untuk Cipta Modul Baharu
 router.get('/manage-lessons/new', async (req, res) => {
     try { res.render('admin-edit-lesson', { page: 'manage-lessons', lesson: null }); }
     catch (err) { res.status(500).send('Ralat memuatkan borang.'); }
 });
 
-// Route untuk Edit Modul Sedia Ada
 router.get('/manage-lessons/edit/:id', async (req, res) => {
     try {
         const lesson = await Lesson.findById(req.params.id);
@@ -111,7 +137,6 @@ router.get('/manage-lessons/edit/:id', async (req, res) => {
     } catch (err) { res.status(500).send('Ralat memuatkan borang.'); }
 });
 
-// POST untuk cipta baru
 router.post('/manage-lessons/new', async (req, res) => {
     try {
         const { title, contentHtml, videoUrl, passMark, questionsJson } = req.body;
@@ -123,7 +148,6 @@ router.post('/manage-lessons/new', async (req, res) => {
     } catch (err) { res.status(500).send('Ralat menyimpan modul.'); }
 });
 
-// POST untuk update sedia ada
 router.post('/manage-lessons/edit/:id', async (req, res) => {
     try {
         const { title, contentHtml, videoUrl, passMark, questionsJson } = req.body;
@@ -134,7 +158,6 @@ router.post('/manage-lessons/edit/:id', async (req, res) => {
     } catch (err) { res.status(500).send('Ralat menyimpan modul.'); }
 });
 
-// POST: Padam Modul
 router.post('/manage-lessons/delete/:id', async (req, res) => {
     try {
         await Lesson.findByIdAndDelete(req.params.id);
@@ -147,13 +170,16 @@ router.get('/migrate-lessons', async (req, res) => {
     try {
         const existingCount = await Lesson.countDocuments();
         if (existingCount > 0) return res.send(`❌ Migration sudah dijalankan. Terdapat ${existingCount} modul.`);
+        
+        // Perhatian: getLessonsWithQuiz mungkin perlu dipanggil sebagai fungsi async
         const { getLessonsWithQuiz } = require('./athlete'); 
-        const staticData = getLessonsWithQuiz();
+        const staticData = await getLessonsWithQuiz(); // Tambah await jika fungsi itu async
+        
         if (!staticData || staticData.length === 0) return res.status(500).send('❌ Tiada data statik ditemui.');
+        
         let successCount = 0;
         for (let i = 0; i < staticData.length; i++) {
             const item = staticData[i];
-            // ✅ PEMBETULAN SINTAKS: q => ({ ... }) tanpa ruang
             const lessonData = {
                 title: item.title, contentHtml: item.content?.rendered || '', videoUrl: item.videoFile || '',
                 passMark: 80, order: item.id,
