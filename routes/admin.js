@@ -176,12 +176,15 @@ router.post('/modules/new', upload.single('thumbnail'), async (req, res) => {
 // POST: Update Modul
 router.post('/modules/edit/:id', upload.single('thumbnail'), async (req, res) => {
     try {
-        const { title, description, order, isActive } = req.body;
+        const { title, description, order, isActive, hasLevels, isSequential, minPassingScore } = req.body;
         const updateData = {
             title,
             description,
             order: parseInt(order) || 0,
-            isActive: isActive === 'on'
+            isActive: isActive === 'on',
+            hasLevels: hasLevels === 'on',
+            isSequential: isSequential === 'on',
+            minPassingScore: parseInt(minPassingScore) || 0
         };
         
         // Handle thumbnail upload
