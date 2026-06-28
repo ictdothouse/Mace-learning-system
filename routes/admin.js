@@ -456,7 +456,7 @@ router.get('/settings', async (req, res) => {
         const uploadsDir = path.join(__dirname, '../uploads');
         let uploadedFiles = [];
         if (fs.existsSync(uploadsDir)) uploadedFiles = fs.readdirSync(uploadsDir).map(f => ({ name: f, size: (fs.statSync(path.join(uploadsDir, f)).size / 1024).toFixed(1) + ' KB' }));
-        res.render('admin', { page: 'settings', uploadedFiles, msg: req.query.msg || null, file: req.query.file || null });
+        res.render('admin', { page: 'settings', uploadedFiles, msg: req.query.msg || null, file: req.query.file || null, tab: req.query.tab || 'general' });
     } catch (err) { res.send('Error loading settings'); }
 });
 router.post('/upload-data', upload.single('dataFile'), async (req, res) => {
@@ -464,6 +464,38 @@ router.post('/upload-data', upload.single('dataFile'), async (req, res) => {
         if (!req.file) return res.redirect('/admin-mace/settings?msg=error_no_file');
         res.redirect('/admin-mace/settings?msg=success_upload&file=' + encodeURIComponent(req.file.filename));
     } catch (err) { res.redirect('/admin-mace/settings?msg=error_upload'); }
+});
+
+// POST: Kemaskini Penjenamaan (Branding)
+router.post('/settings/branding', async (req, res) => {
+    try {
+        const { siteName, tagline, primaryColor, dashboardTitle, dashboardSubtitle, logoUrl, faviconUrl } = req.body;
+        const Branding = require('../models/Branding');
+        
+        let branding = await Branding.findOne();
+        if (!branding) {
+            branding = new Branding();
+        }
+        
+        if (siteName !== undefined) branding.siteName = siteName;
+        if (tagline !== undefined) branding.tagline = tagline;
+        if (primaryColor !== undefined) branding.primaryColor = primaryColor;
+        if (dashboardTitle !== undefined) branding.dashboardTitle = dashboardTitle;
+        if (dashboardSubtitle !== undefined) branding.dashboardSubtitle = dashboardSubtitle;
+        if (logoUrl !== undefined) branding.logoUrl = logoUrl;
+        if (faviconUrl !== undefined) branding.faviconUrl = faviconUrl;
+        
+        await branding.save();
+        
+        if (req.refreshBrandingCache) {
+            await req.refreshBrandingCache();
+        }
+        
+        res.redirect('/admin-mace/settings?msg=branding_updated&tab=branding');
+    } catch (err) {
+        console.error('Branding update error:', err);
+        res.redirect('/admin-mace/settings?msg=update_error&tab=branding');
+    }
 });
 
 // 🆕 PENGURUSAN E-LEARNING: MODUL, LESSON & QUIZ

@@ -5,7 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel MSN - SUKMA eLearning</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <% if (locals.branding && locals.branding.faviconUrl) { %>
+    <link rel="icon" href="<%= branding.faviconUrl %>">
+    <% } %>
     <style>
+        :root {
+            --primary-color: <%= locals.branding?.primaryColor || '#1e3a8a' %>;
+        }
+        .bg-blue-900 { background-color: var(--primary-color) !important; }
+        .text-blue-900 { color: var(--primary-color) !important; }
+        
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
@@ -20,9 +29,14 @@
     <aside class="w-64 bg-blue-900 text-white flex-shrink-0 hidden md:flex flex-col h-screen sticky top-0 shadow-xl z-20">
         <div class="p-6 border-b border-blue-800">
             <h1 class="text-xl font-bold tracking-wider flex items-center gap-2">
-                <span class="text-yellow-400 text-2xl">🏅</span> ADMIN MSN
+                <% if (locals.branding && locals.branding.logoUrl) { %>
+                    <img src="<%= branding.logoUrl %>" alt="Logo" class="h-8 w-auto object-contain">
+                <% } else { %>
+                    <span class="text-yellow-400 text-2xl">🏅</span>
+                <% } %>
+                <%= (locals.branding && locals.branding.siteName) ? locals.branding.siteName : 'ADMIN MSN' %>
             </h1>
-            <p class="text-xs text-blue-300 mt-1"><%= __('nav_dashboard') %> — <%= __('dashboard_title') %></p>
+            <p class="text-xs text-blue-300 mt-1"><%= (locals.branding && locals.branding.tagline) ? locals.branding.tagline : __('dashboard_title') %></p>
         </div>
         
         <nav class="flex-1 py-6 space-y-1">
@@ -141,8 +155,8 @@
         <% if (page === 'dashboard' || !page) { %>
             <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-900"><%= __('dashboard_title') %></h2>
-                    <p class="text-gray-500 text-sm mt-1"><%= __('dashboard_subtitle') %></p>
+                    <h2 class="text-2xl font-bold text-gray-900"><%= (locals.branding && locals.branding.dashboardTitle) ? locals.branding.dashboardTitle : __('dashboard_title') %></h2>
+                    <p class="text-gray-500 text-sm mt-1"><%= (locals.branding && locals.branding.dashboardSubtitle) ? locals.branding.dashboardSubtitle : __('dashboard_subtitle') %></p>
                 </div>
                 <a href="/admin-mace/download" class="shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
@@ -510,44 +524,196 @@
         <!-- ========================================== -->
         <% if (page === 'settings') { %>
             <div class="max-w-3xl mx-auto">
-                <h2 class="text-2xl font-bold text-gray-900 mb-2">Tetapan Sistem</h2>
-                <p class="text-gray-500 mb-8">Urus fail backup dan konfigurasi sistem Node.js.</p>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2"><%= __('nav_settings') || 'Tetapan Sistem' %></h2>
+                <p class="text-gray-500 mb-8">Urus tetapan penjenamaan dan fail sandaran (backup).</p>
 
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 mb-8">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
-                        Upload Data Backup (CSV/JSON)
-                    </h3>
-                    <p class="text-sm text-gray-500 mb-6">Muat naik fail export dari WordPress sebagai simpanan keselamatan di server Node.js.</p>
-                    
-                    <form action="/admin-mace/upload-data" method="POST" enctype="multipart/form-data" class="flex flex-col sm:flex-row gap-4 items-end">
-                        <div class="flex-1 w-full">
-                            <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Pilih Fail Export</label>
-                            <input type="file" name="dataFile" accept=".csv,.json" required 
-                                class="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 cursor-pointer border border-gray-200 rounded-lg p-2 focus:ring-2 focus:ring-purple-500 outline-none transition">
-                        </div>
-                        <button type="submit" class="w-full sm:w-auto bg-purple-600 text-white px-8 py-2.5 rounded-lg font-medium hover:bg-purple-700 transition shadow-sm shrink-0">
-                            Muat Naik
-                        </button>
-                    </form>
-
-                    <% if (uploadedFiles && uploadedFiles.length > 0) { %>
-                        <div class="mt-8 pt-6 border-t border-gray-100">
-                            <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Fail Yang Pernah Dimuat Naik:</h4>
-                            <ul class="space-y-2 max-h-40 overflow-y-auto pr-2">
-                                <% uploadedFiles.forEach(f => { %>
-                                    <li class="flex justify-between items-center bg-gray-50 px-4 py-3 rounded-lg text-sm border border-gray-100">
-                                        <span class="flex items-center gap-2 text-gray-700 truncate">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                                            <%= f.name %>
-                                        </span>
-                                        <span class="text-xs text-gray-400 font-mono ml-4 shrink-0"><%= f.size %></span>
-                                    </li>
-                                <% }) %>
-                            </ul>
-                        </div>
-                    <% } %>
+                <!-- Tabs -->
+                <div class="flex border-b border-gray-200 mb-8">
+                    <a href="?tab=general" class="px-4 py-2 border-b-2 font-medium text-sm transition-colors <%= (!locals.tab || tab === 'general') ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' %>">
+                        Umum (Backup)
+                    </a>
+                    <a href="?tab=branding" class="px-4 py-2 border-b-2 font-medium text-sm transition-colors <%= tab === 'branding' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' %>">
+                        Penjenamaan (Branding)
+                    </a>
                 </div>
+
+                <% if (!locals.tab || tab === 'general') { %>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 mb-8">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+                            Upload Data Backup (CSV/JSON)
+                        </h3>
+                        <p class="text-sm text-gray-500 mb-6">Muat naik fail export dari WordPress sebagai simpanan keselamatan di server Node.js.</p>
+                        
+                        <form action="/admin-mace/upload-data" method="POST" enctype="multipart/form-data" class="flex flex-col sm:flex-row gap-4 items-end">
+                            <div class="flex-1 w-full">
+                                <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Pilih Fail Export</label>
+                                <input type="file" name="dataFile" accept=".csv,.json" required 
+                                    class="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 cursor-pointer border border-gray-200 rounded-lg p-2 focus:ring-2 focus:ring-purple-500 outline-none transition">
+                            </div>
+                            <button type="submit" class="w-full sm:w-auto bg-purple-600 text-white px-8 py-2.5 rounded-lg font-medium hover:bg-purple-700 transition shadow-sm shrink-0">
+                                Muat Naik
+                            </button>
+                        </form>
+
+                        <% if (uploadedFiles && uploadedFiles.length > 0) { %>
+                            <div class="mt-8 pt-6 border-t border-gray-100">
+                                <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Fail Yang Pernah Dimuat Naik:</h4>
+                                <ul class="space-y-2 max-h-40 overflow-y-auto pr-2">
+                                    <% uploadedFiles.forEach(f => { %>
+                                        <li class="flex justify-between items-center bg-gray-50 px-4 py-3 rounded-lg text-sm border border-gray-100">
+                                            <span class="flex items-center gap-2 text-gray-700 truncate">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                                <%= f.name %>
+                                            </span>
+                                            <span class="text-xs text-gray-400 font-mono ml-4 shrink-0"><%= f.size %></span>
+                                        </li>
+                                    <% }) %>
+                                </ul>
+                            </div>
+                        <% } %>
+                    </div>
+                <% } %>
+                
+                <% if (tab === 'branding') { %>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 mb-8">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>
+                            Penjenamaan Sistem
+                        </h3>
+                        
+                        <form action="/admin-mace/settings/branding" method="POST" class="space-y-6">
+                            <!-- Site Info -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Nama Tapak (Site Name)</label>
+                                    <input type="text" name="siteName" value="<%= branding.siteName %>" class="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Slogan (Tagline)</label>
+                                    <input type="text" name="tagline" value="<%= branding.tagline %>" class="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
+                                </div>
+                            </div>
+                            
+                            <!-- Dashboard Info -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Tajuk Dashboard</label>
+                                    <input type="text" name="dashboardTitle" value="<%= branding.dashboardTitle %>" class="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Subtajuk Dashboard</label>
+                                    <input type="text" name="dashboardSubtitle" value="<%= branding.dashboardSubtitle %>" class="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
+                                </div>
+                            </div>
+
+                            <!-- Colors & Media -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-gray-100">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Warna Utama</label>
+                                    <div class="flex items-center gap-3">
+                                        <input type="color" name="primaryColor" value="<%= branding.primaryColor %>" class="h-10 w-14 p-1 border border-gray-200 rounded cursor-pointer">
+                                        <span class="text-sm font-mono text-gray-500"><%= branding.primaryColor %></span>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">URL Logo Utama</label>
+                                    <input type="text" name="logoUrl" id="logoUrl" value="<%= branding.logoUrl %>" class="w-full border border-gray-200 rounded-lg p-2 text-sm mb-2" placeholder="https://...">
+                                    <button type="button" onclick="document.getElementById('logoUploadFile').click()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded transition">⬆️ Upload ke R2</button>
+                                    <input type="file" id="logoUploadFile" accept="image/*" class="hidden" onchange="uploadBrandingImage(this, 'logoUrl', 'logoProgress')">
+                                    <div id="logoProgress" class="text-xs text-blue-600 mt-1 hidden">Memuat naik... <span class="pct">0%</span></div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">URL Favicon</label>
+                                    <input type="text" name="faviconUrl" id="faviconUrl" value="<%= branding.faviconUrl %>" class="w-full border border-gray-200 rounded-lg p-2 text-sm mb-2" placeholder="https://...">
+                                    <button type="button" onclick="document.getElementById('faviconUploadFile').click()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded transition">⬆️ Upload ke R2</button>
+                                    <input type="file" id="faviconUploadFile" accept="image/*" class="hidden" onchange="uploadBrandingImage(this, 'faviconUrl', 'faviconProgress')">
+                                    <div id="faviconProgress" class="text-xs text-blue-600 mt-1 hidden">Memuat naik... <span class="pct">0%</span></div>
+                                </div>
+                            </div>
+                            
+                            <div class="pt-6 border-t border-gray-100 flex justify-end">
+                                <button type="submit" class="bg-purple-600 text-white px-8 py-2.5 rounded-lg font-medium hover:bg-purple-700 transition shadow-sm">
+                                    Simpan Penjenamaan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Script for R2 direct upload -->
+                    <script>
+                    async function uploadBrandingImage(fileInput, targetInputId, progressId) {
+                        const file = fileInput.files[0];
+                        if (!file) return;
+                        
+                        const progressEl = document.getElementById(progressId);
+                        progressEl.classList.remove('hidden');
+                        progressEl.classList.replace('text-red-600', 'text-blue-600');
+                        progressEl.innerHTML = 'Memuat naik... <span class="pct">0%</span>';
+                        
+                        try {
+                            const res = await fetch(`/admin-mace/api/presigned-url?filename=${encodeURIComponent(file.name)}&contentType=${encodeURIComponent(file.type)}`);
+                            const data = await res.json();
+                            
+                            if (data.isR2) {
+                                const xhr = new XMLHttpRequest();
+                                xhr.open('PUT', data.uploadUrl, true);
+                                xhr.setRequestHeader('Content-Type', file.type);
+                                
+                                xhr.upload.onprogress = (e) => {
+                                    if (e.lengthComputable) {
+                                        const pct = Math.round((e.loaded / e.total) * 100);
+                                        progressEl.querySelector('.pct').textContent = pct + '%';
+                                    }
+                                };
+                                
+                                xhr.onload = () => {
+                                    if (xhr.status === 200) {
+                                        document.getElementById(targetInputId).value = data.publicUrl;
+                                        progressEl.textContent = '✅ Berjaya!';
+                                    } else {
+                                        progressEl.textContent = '❌ Ralat upload R2';
+                                        progressEl.classList.replace('text-blue-600', 'text-red-600');
+                                    }
+                                };
+                                
+                                xhr.send(file);
+                            } else {
+                                const formData = new FormData();
+                                formData.append('file', file);
+                                formData.append('fileKey', data.fileKey);
+                                
+                                const xhr = new XMLHttpRequest();
+                                xhr.open('POST', data.uploadUrl, true);
+                                
+                                xhr.upload.onprogress = (e) => {
+                                    if (e.lengthComputable) {
+                                        const pct = Math.round((e.loaded / e.total) * 100);
+                                        progressEl.querySelector('.pct').textContent = pct + '%';
+                                    }
+                                };
+                                
+                                xhr.onload = () => {
+                                    if (xhr.status === 200) {
+                                        const result = JSON.parse(xhr.responseText);
+                                        document.getElementById(targetInputId).value = result.url;
+                                        progressEl.textContent = '✅ Berjaya (Lokal)!';
+                                    } else {
+                                        progressEl.textContent = '❌ Ralat upload lokal';
+                                    }
+                                };
+                                
+                                xhr.send(formData);
+                            }
+                        } catch (err) {
+                            console.error('Upload Error:', err);
+                            progressEl.textContent = '❌ Ralat sistem';
+                        }
+                    }
+                    </script>
+                <% } %>
             </div>
         <% } %>
 

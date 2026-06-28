@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - <%= athlete.fullName %></title>
+    <title><%= (locals.branding && locals.branding.siteName) ? locals.branding.siteName : 'Dashboard' %> - <%= athlete.fullName %></title>
+    <% if (locals.branding && locals.branding.faviconUrl) { %>
+    <link rel="icon" href="<%= branding.faviconUrl %>">
+    <% } %>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -37,8 +40,12 @@
         .delay-4 { animation-delay: 0.4s; }
         .delay-5 { animation-delay: 0.5s; }
 
+        :root {
+            --primary-color: <%= locals.branding?.primaryColor || '#0f0c29' %>;
+        }
+
         .hero-gradient {
-            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, #302b63 50%, #24243e 100%);
         }
         .card-glass {
             background: rgba(255,255,255,0.03);
@@ -105,8 +112,12 @@
     <nav class="no-print sticky top-0 z-50 border-b border-white/10 backdrop-blur-xl bg-black/20">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <span class="text-2xl">🏅</span>
-                <span class="font-bold text-white text-sm sm:text-base">MACE eLearning</span>
+                <% if (locals.branding && locals.branding.logoUrl) { %>
+                    <img src="<%= branding.logoUrl %>" alt="Logo" class="h-8 w-auto object-contain filter drop-shadow-md">
+                <% } else { %>
+                    <span class="text-2xl">🏅</span>
+                <% } %>
+                <span class="font-bold text-white text-sm sm:text-base"><%= (locals.branding && locals.branding.siteName) ? locals.branding.siteName : 'MACE eLearning' %></span>
             </div>
             <div class="flex items-center gap-2 sm:gap-3">
                 <!-- Language Toggle -->

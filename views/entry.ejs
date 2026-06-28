@@ -3,19 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= __('site_title') %> - <%= __('welcome') %></title>
+    <title><%= (locals.branding && locals.branding.siteName) ? locals.branding.siteName : __('site_title') %> - <%= __('welcome') %></title>
+    <% if (locals.branding && locals.branding.faviconUrl) { %>
+    <link rel="icon" href="<%= branding.faviconUrl %>">
+    <% } %>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: <%= locals.branding?.primaryColor || '#4f46e5' %>;
+        }
         * { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .tab-active { border-bottom-color: #2563eb; color: #2563eb; font-weight: 600; }
+        .tab-active { border-bottom-color: var(--primary-color); color: var(--primary-color); font-weight: 600; }
         .tab-inactive { color: #6b7280; }
         .tab-inactive:hover { color: #374151; }
         @keyframes fadeInUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
         .fade-in { animation: fadeInUp 0.5s ease-out forwards; }
+        
+        /* Overrides for primary color */
+        .bg-gradient-primary { background: linear-gradient(to right, var(--primary-color), #2563eb); }
+        .text-primary { color: var(--primary-color); }
+        .bg-primary { background-color: var(--primary-color); }
+        .ring-primary:focus { --tw-ring-color: var(--primary-color); }
+        .border-primary:focus { border-color: var(--primary-color); }
     </style>
 </head>
-<body class="bg-gradient-to-br from-indigo-900 via-blue-900 to-blue-800 min-h-screen flex flex-col items-center justify-center p-4 sm:p-6">
+<body class="bg-gradient-to-br from-indigo-900 via-blue-900 to-blue-800 min-h-screen flex flex-col items-center justify-center p-4 sm:p-6" style="background: linear-gradient(to bottom right, #1e3a8a, var(--primary-color));">
 
     <!-- Language Toggle (top right) -->
     <div class="fixed top-4 right-4 z-50 flex gap-1 bg-white/10 backdrop-blur-md rounded-lg p-1 border border-white/20">
@@ -31,16 +44,20 @@
 
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden fade-in">
         <!-- Header -->
-        <div class="bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-8 text-center">
+        <div class="bg-gradient-primary px-6 py-8 text-center">
             <div class="flex justify-center mb-4">
-                <div class="bg-white/20 backdrop-blur-sm p-3 rounded-full">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                </div>
+                <% if (locals.branding && locals.branding.logoUrl) { %>
+                    <img src="<%= branding.logoUrl %>" alt="Logo" class="h-16 w-auto object-contain">
+                <% } else { %>
+                    <div class="bg-white/20 backdrop-blur-sm p-3 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                <% } %>
             </div>
-            <h1 class="text-2xl sm:text-3xl font-extrabold text-white mb-1"><%= __('site_title') %></h1>
-            <p class="text-indigo-100 text-sm"><%= __('site_subtitle') %></p>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-white mb-1"><%= (locals.branding && locals.branding.siteName) ? locals.branding.siteName : __('site_title') %></h1>
+            <p class="text-white/80 text-sm"><%= (locals.branding && locals.branding.tagline) ? locals.branding.tagline : __('site_subtitle') %></p>
         </div>
 
         <!-- Error Message -->

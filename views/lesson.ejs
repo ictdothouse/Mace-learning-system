@@ -3,9 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= lesson.title %> - SUKMA eLearning</title>
+    <title><%= lesson.title %> - <%= (locals.branding && locals.branding.siteName) ? locals.branding.siteName : 'SUKMA eLearning' %></title>
+    <% if (locals.branding && locals.branding.faviconUrl) { %>
+    <link rel="icon" href="<%= branding.faviconUrl %>">
+    <% } %>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        :root {
+            --primary-color: <%= locals.branding?.primaryColor || '#2563eb' %>;
+        }
+        .bg-blue-600 { background-color: var(--primary-color) !important; }
+        .text-blue-600 { color: var(--primary-color) !important; }
+        .bg-blue-700 { filter: brightness(90%); }
         /* Custom scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }

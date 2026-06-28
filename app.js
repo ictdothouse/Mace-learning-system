@@ -7,6 +7,7 @@ const cookieParser = require('cookie-parser');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
 const i18nMiddleware = require('./middleware/i18n');
+const brandingMiddleware = require('./middleware/branding');
 
 // 1. IMPORT ROUTES
 const athleteRoutes = require('./routes/athlete').router; 
@@ -38,7 +39,10 @@ app.use(cookieParser());
 // 4b. i18n Dwibahasa — detect bahasa dari cookie
 app.use(i18nMiddleware);
 
-// 4c. Route tukar bahasa (boleh guna dari mana-mana halaman)
+// 4c. Branding - inject branding info to res.locals
+app.use(brandingMiddleware);
+
+// 4d. Route tukar bahasa (boleh guna dari mana-mana halaman)
 app.post('/set-language', (req, res) => {
     const { lang } = req.body;
     const supported = ['ms', 'en'];
