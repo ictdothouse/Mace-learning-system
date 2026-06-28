@@ -74,8 +74,12 @@ router.get('/dashboard', checkSession, async (req, res) => {
         const athlete = await Athlete.findById(req.session.athleteId);
         if (!athlete) { req.session.destroy(); return res.redirect('/'); }
         
-        // Ambil senarai lesson dengan tajuk sebenar dari DB
-        const lessons = await Lesson.find({ isActive: true }).sort({ order: 1 }).select('title order _id').lean();
+        // Ambil senarai lesson dengan tajuk sebenar dari DB dan populate modul
+        const lessons = await Lesson.find({ isActive: true })
+            .populate('moduleId')
+            .sort({ order: 1 })
+            .lean();
+            
         res.render('dashboard', { athlete, lessons });
     } catch (err) { res.redirect('/'); }
 });
