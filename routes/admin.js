@@ -1,4 +1,4 @@
-// routes/admin.js - VERSI LENGKAP & DIBETULKAN
+﻿// routes/admin.js - VERSI LENGKAP & DIBETULKAN
 const express = require('express');
 const router = express.Router();
 const Athlete = require('../models/Athlete');
@@ -326,7 +326,7 @@ router.post('/api/local-upload', upload.single('file'), async (req, res) => {
     }
 });
 
-// GET: Dashboard Utama (Urusan Kemajuan Atlet SUKMA)
+// GET: Dashboard Utama (Urusan Kemajuan Atlit SUKMA)
 router.get('/', async (req, res) => {
     try {
         const total = await Athlete.countDocuments();
@@ -835,7 +835,7 @@ router.get('/download', async (req, res) => {
             csv += [name, a.icNumber, a.jantina, a.umur, a.negeriWakil, a.quizScores?.quiz1||0, a.quizScores?.quiz2||0, a.quizScores?.quiz3||0, status, date].join(',') + '\n';
         });
         res.header('Content-Type', 'text/csv; charset=utf-8');
-        res.attachment(`Data-Atlet-${Date.now()}.csv`);
+        res.attachment(`Data-Atlit-${Date.now()}.csv`);
         res.send(csv);
     } catch (err) { res.send('Error generating CSV'); }
 });
@@ -1024,7 +1024,7 @@ router.get('/certificate/preview/:id', async (req, res) => {
     try {
         const athlete = await Athlete.findById(req.params.id);
         if (!athlete) {
-            req.flash('error_msg', 'Atlet tidak dijumpai');
+            req.flash('error_msg', 'Atlit tidak dijumpai');
             return res.redirect('/admin-mace');
         }
 
@@ -1234,7 +1234,7 @@ router.get('/users', (req, res) => {
     res.redirect('/admin-mace/students');
 });
 
-// GET: Senarai Pelajar (Student/Atlet)
+// GET: Senarai Pelajar (Student/Atlit)
 router.get('/students', async (req, res) => {
     try {
         // Get all users with student role
@@ -1815,7 +1815,7 @@ router.post("/groups/reset-key/:id", async (req, res) => {
 // ==========================================
 // PENGURUSAN ATLET (LEGACY ATHLETE MODEL)
 // ==========================================
-// POST: Update Atlet (dari halaman students)
+// POST: Update Atlit (dari halaman students)
 router.post('/athletes/update/:id', async (req, res) => {
     try {
         const { fullName, icNumber, jantina, umur, negeriWakil, sukan } = req.body;
@@ -1837,7 +1837,7 @@ router.post('/athletes/update/:id', async (req, res) => {
     }
 });
 
-// POST: Delete Atlet
+// POST: Delete Atlit
 router.post('/athletes/delete/:id', async (req, res) => {
     try {
         await Athlete.findByIdAndDelete(req.params.id);
@@ -1848,7 +1848,7 @@ router.post('/athletes/delete/:id', async (req, res) => {
     }
 });
 
-// POST: Convert Atlet to Student (buat akaun user)
+// POST: Convert Atlit to Student (buat akaun user)
 router.post('/athletes/convert/:id', async (req, res) => {
     try {
         const athlete = await Athlete.findById(req.params.id);

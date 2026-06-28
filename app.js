@@ -3,8 +3,10 @@ const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
+const cookieParser = require('cookie-parser');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
+const i18nMiddleware = require('./middleware/i18n');
 
 // 1. IMPORT ROUTES
 const athleteRoutes = require('./routes/athlete').router; 
@@ -31,6 +33,22 @@ app.set('views', path.join(__dirname, 'views'));
 // 4. Middleware Dasar
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+// 4b. i18n Dwibahasa — detect bahasa dari cookie
+app.use(i18nMiddleware);
+
+// 4c. Route tukar bahasa (boleh guna dari mana-mana halaman)
+app.post('/set-language', (req, res) => {
+    const { lang } = req.body;
+    const supported = ['ms', 'en'];
+    const selected = supported.includes(lang) ? lang : 'ms';
+    // Simpan dalam cookie selama 30 hari
+    res.cookie('lang', selected, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: false });
+    // Redirect kembali ke halaman asal
+    const referer = req.headers.referer || '/';
+    res.redirect(referer);
+});
 
 // 5. Static Files
 app.use(express.static(path.join(__dirname, 'public')));
