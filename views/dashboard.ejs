@@ -219,12 +219,16 @@
         // Gunakan lessons dari DB jika ada, jika tidak fallback ke 3 modul dummy
         const lessonList = (typeof lessons !== 'undefined' && lessons && lessons.length > 0)
             ? lessons
-            : [{ title: 'Pembelajaran 1', order: 1 }, { title: 'Pembelajaran 2', order: 2 }, { title: 'Pembelajaran 3', order: 3 }];
+            : [
+                { title: 'Jom kuasai asas dulu sebelum jadi pro!', order: 1 }, 
+                { title: 'Kenali kesalahan, elak jadi pelaku!', order: 2 }, 
+                { title: 'Ambil tindakan yang betul, laporkan tanpa ragu!', order: 3 }
+              ];
         
         // Group lessons by Module
         const modulesMap = {};
         lessonList.forEach((lesson, idx) => {
-            const moduleName = (lesson.moduleId && lesson.moduleId.title) ? lesson.moduleId.title : 'Modul Umum';
+            const moduleName = (lesson.moduleId && lesson.moduleId.title) ? lesson.moduleId.title : 'MODUL 1 : PLAY SAFE WIN STRONG';
             if (!modulesMap[moduleName]) {
                 modulesMap[moduleName] = [];
             }
@@ -261,7 +265,7 @@
                         <div class="flex items-start justify-between mb-4">
                             <div>
                                 <p class="text-xs font-semibold uppercase tracking-widest mb-1 <%= isLocked ? 'text-white/30' : (isCompleted ? 'text-emerald-400' : 'text-indigo-400') %>">
-                                    <%= lang === 'en' ? 'Lesson' : 'Pembelajaran' %> <%= i %>
+                                    <%= lang === 'en' ? 'Lesson' : 'Pelajaran' %> <%= i %>
                                 </p>
                                 <h3 class="font-bold text-base leading-snug <%= isLocked ? 'text-white/40' : 'text-white' %>">
                                     <%= lesson.title %>
