@@ -34,6 +34,10 @@ const athleteSchema = new mongoose.Schema({
     },
 
     // Kemajuan Pembelajaran (Sequential Guard)
+    enrolledGroups: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Group'
+    }],
     currentStage: { 
         type: Number, 
         default: 1 

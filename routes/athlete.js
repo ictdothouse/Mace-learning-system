@@ -3,6 +3,9 @@ const express = require('express');
 const router = express.Router();
 const Athlete = require('../models/Athlete');
 const Lesson = require('../models/Lesson'); // Import Model Lesson
+const Group = require('../models/Group');
+const User = require('../models/User');
+const Module = require('../models/Module');
 const { generateCertificate } = require('../utils/certificate');
 
 // ==========================================
@@ -80,7 +83,10 @@ router.get('/dashboard', checkSession, async (req, res) => {
             .sort({ order: 1 })
             .lean();
             
-        res.render('dashboard', { athlete, lessons });
+        // Ambil senarai modul untuk dropdown popup
+        const allModules = await Module.find().sort({ order: 1 }).lean();
+            
+        res.render('dashboard', { athlete, lessons, allModules });
     } catch (err) { res.redirect('/'); }
 });
 
@@ -111,6 +117,39 @@ router.get('/lesson/:id', checkSession, async (req, res) => {
     } catch (err) {
         console.error('Lesson Route Error:', err);
         res.redirect('/dashboard');
+    }
+});
+
+// 🆕 POST: Join Group via Enrollment Key
+router.post('/api/join-group', checkSession, async (req, res) => {
+    try {
+        const { enrollmentKey, moduleId } = req.body;
+        if (!enrollmentKey) {
+            return res.status(400).json({ error: 'Enrollment Key diperlukan' });
+        }
+
+        const group = await Group.findOne({ enrollmentKey: enrollmentKey.trim() });
+        if (!group) {
+            return res.status(404).json({ error: 'Enrollment Key tidak sah. Sila semak semula.' });
+        }
+
+        const athleteId = req.session.athleteId;
+        
+        // Tambah ke Athlete
+        await Athlete.findByIdAndUpdate(athleteId, {
+            $addToSet: { enrolledGroups: group._id }
+        });
+        
+        // Tambah ke User jika wujud
+        await User.findOneAndUpdate(
+            { athleteId: athleteId },
+            { $addToSet: { enrolledGroups: group._id } }
+        );
+
+        res.json({ success: true, groupId: group._id, moduleId: moduleId });
+    } catch (err) {
+        console.error('Join Group Error:', err);
+        res.status(500).json({ error: 'Ralat pelayan.' });
     }
 });
 

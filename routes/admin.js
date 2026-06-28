@@ -484,6 +484,7 @@ router.post('/settings/branding', async (req, res) => {
         if (dashboardSubtitle !== undefined) branding.dashboardSubtitle = dashboardSubtitle;
         if (logoUrl !== undefined) branding.logoUrl = logoUrl;
         if (faviconUrl !== undefined) branding.faviconUrl = faviconUrl;
+        branding.allowModuleSelectionInEnrollment = req.body.allowModuleSelectionInEnrollment === 'on';
         
         await branding.save();
         
