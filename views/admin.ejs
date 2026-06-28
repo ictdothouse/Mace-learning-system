@@ -47,7 +47,7 @@
             <!-- Pengurusan Pengguna (Atlet Lama) -->
             <a href="/admin-mace/users" class="sidebar-link <%= page === 'users' ? 'active' : '' %> flex items-center px-6 py-3 hover:bg-blue-800 transition border-l-4 border-transparent">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                Atlet (SUKMA)
+                Pelajar Atlet (SUKMA) Atlet
             </a>
 
             <!-- 🆕 PENGURUSAN KUMPULAN & ENROLLMENT -->
@@ -1170,6 +1170,219 @@
                 </div>
             </div>
         <% } %>
+        <!-- ========================================== -->
+        <!-- HALAMAN: PENGURUSAN GURU / INSTRUKTOR    -->
+        <!-- ========================================== -->
+        <% if (page === 'teachers') { %>
+            <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Pengurusan Guru / Instruktor</h2>
+                    <p class="text-gray-500 text-sm mt-1">Daftar, edit, atau padam akaun guru. Guru boleh mencipta modul, lesson, kuiz, dan kumpulan.</p>
+                </div>
+                <a href="/admin-mace/teachers/new" class="bg-blue-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-blue-700 transition shadow-sm flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                    Tambah Guru Baru
+                </a>
+            </div>
+
+            <% if (msg === 'teacher_created') { %>
+                <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">Guru berjaya didaftarkan!</div>
+            <% } else if (msg === 'teacher_updated') { %>
+                <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">Maklumat guru dikemaskini!</div>
+            <% } else if (msg === 'teacher_deleted') { %>
+                <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">Guru berjaya dipadam!</div>
+            <% } else if (msg === 'password_reset') { %>
+                <div class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg mb-6">Password baru: <strong><%= newPassword %></strong></div>
+            <% } %>
+
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-100">
+                            <tr>
+                                <th class="px-6 py-4">Nama</th>
+                                <th class="px-6 py-4">Email</th>
+                                <th class="px-6 py-4">Tarikh Daftar</th>
+                                <th class="px-6 py-4 text-right">Tindakan</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            <% if (teachers && teachers.length > 0) { %>
+                                <% teachers.forEach(t => { %>
+                                    <tr class="hover:bg-blue-50/30 transition">
+                                        <td class="px-6 py-4 font-medium text-gray-900"><%= t.fullName %></td>
+                                        <td class="px-6 py-4 text-gray-600"><%= t.email %></td>
+                                        <td class="px-6 py-4 text-gray-500"><%= new Date(t.createdAt).toLocaleDateString('ms-MY') %></td>
+                                        <td class="px-6 py-4 text-right">
+                                            <div class="flex items-center justify-end gap-2">
+                                                <a href="/admin-mace/teachers/edit/<%= t._id %>" class="text-blue-600 hover:text-blue-800 text-xs font-medium px-3 py-1.5 rounded hover:bg-blue-50 transition">Edit</a>
+                                                <form action="/admin-mace/teachers/reset-password/<%= t._id %>" method="POST" class="inline" onsubmit="return confirm('Reset password untuk guru ini?')">
+                                                    <button type="submit" class="text-orange-600 hover:text-orange-800 text-xs font-medium px-3 py-1.5 rounded hover:bg-orange-50 transition">Reset PW</button>
+                                                </form>
+                                                <form action="/admin-mace/teachers/delete/<%= t._id %>" method="POST" class="inline" onsubmit="return confirm('PADAM akaun guru ini? Tindakan tidak boleh undur.')">
+                                                    <button type="submit" class="text-red-600 hover:text-red-800 text-xs font-medium px-3 py-1.5 rounded hover:bg-red-50 transition">Padam</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="4" class="px-6 py-12 text-center text-gray-400 italic">Tiada guru berdaftar lagi.</td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        <% } %>
+
+        <!-- ========================================== -->
+        <!-- HALAMAN: PENGURUSAN PELAJAR (STUDENT)    -->
+        <!-- ========================================== -->
+        <% if (page === 'students') { %>
+            <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Pengurusan Pelajar (Student)</h2>
+                    <p class="text-gray-500 text-sm mt-1">Urus akaun pelajar, tetapkan kumpulan, reset password, atau padam akaun.</p>
+                </div>
+            </div>
+
+            <% if (msg === 'student_updated') { %>
+                <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">Maklumat pelajar dikemaskini!</div>
+            <% } else if (msg === 'student_deleted') { %>
+                <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">Pelajar berjaya dipadam!</div>
+            <% } else if (msg === 'password_reset') { %>
+                <div class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg mb-6">Password baru: <strong><%= newPassword %></strong></div>
+            <% } %>
+
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-100">
+                            <tr>
+                                <th class="px-6 py-4">Nama</th>
+                                <th class="px-6 py-4">Email</th>
+                                <th class="px-6 py-4">Kumpulan</th>
+                                <th class="px-6 py-4">Tarikh Daftar</th>
+                                <th class="px-6 py-4 text-right">Tindakan</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            <% if (students && students.length > 0) { %>
+                                <% students.forEach(s => { %>
+                                    <tr class="hover:bg-blue-50/30 transition">
+                                        <td class="px-6 py-4 font-medium text-gray-900"><%= s.fullName %></td>
+                                        <td class="px-6 py-4 text-gray-600"><%= s.email %></td>
+                                        <td class="px-6 py-4">
+                                            <% if (s.groupId) { %>
+                                                <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-bold"><%= s.groupName || 'Group' %></span>
+                                            <% } else { %>
+                                                <span class="text-gray-400 text-xs">Tiada</span>
+                                            <% } %>
+                                        </td>
+                                        <td class="px-6 py-4 text-gray-500"><%= new Date(s.createdAt).toLocaleDateString('ms-MY') %></td>
+                                        <td class="px-6 py-4 text-right">
+                                            <div class="flex items-center justify-end gap-2">
+                                                <a href="/admin-mace/students/edit/<%= s._id %>" class="text-blue-600 hover:text-blue-800 text-xs font-medium px-3 py-1.5 rounded hover:bg-blue-50 transition">Edit</a>
+                                                <form action="/admin-mace/students/reset-password/<%= s._id %>" method="POST" class="inline" onsubmit="return confirm('Reset password untuk pelajar ini?')">
+                                                    <button type="submit" class="text-orange-600 hover:text-orange-800 text-xs font-medium px-3 py-1.5 rounded hover:bg-orange-50 transition">Reset PW</button>
+                                                </form>
+                                                <form action="/admin-mace/students/delete/<%= s._id %>" method="POST" class="inline" onsubmit="return confirm('PADAM akaun pelajar ini? Tindakan tidak boleh undur.')">
+                                                    <button type="submit" class="text-red-600 hover:text-red-800 text-xs font-medium px-3 py-1.5 rounded hover:bg-red-50 transition">Padam</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="5" class="px-6 py-12 text-center text-gray-400 italic">Tiada pelajar berdaftar lagi.</td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        <% } %>
+
+        <!-- ========================================== -->
+        <!-- HALAMAN: PENGURUSAN KUMPULAN & ENROLLMENT -->
+        <!-- ========================================== -->
+        <% if (page === 'groups') { %>
+            <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Pengurusan Kumpulan & Enrollment Key</h2>
+                    <p class="text-gray-500 text-sm mt-1">Cipta kumpulan untuk pelajar, tentukan modul yang boleh diakses, dan kongsi enrollment key.</p>
+                </div>
+                <a href="/admin-mace/groups/new" class="bg-blue-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-blue-700 transition shadow-sm flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                    Cipta Kumpulan Baru
+                </a>
+            </div>
+
+            <% if (msg === 'group_created') { %>
+                <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">Kumpulan berjaya dicipta! Enrollment key: <strong><%= createdKey %></strong></div>
+            <% } else if (msg === 'group_updated') { %>
+                <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">Kumpulan dikemaskini!</div>
+            <% } else if (msg === 'group_deleted') { %>
+                <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">Kumpulan berjaya dipadam!</div>
+            <% } else if (msg === 'key_reset') { %>
+                <div class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg mb-6">Enrollment key baru: <strong><%= newKey %></strong></div>
+            <% } %>
+
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-100">
+                            <tr>
+                                <th class="px-6 py-4">Nama Kumpulan</th>
+                                <th class="px-6 py-4">Enrollment Key</th>
+                                <th class="px-6 py-4">Modul Diberikan</th>
+                                <th class="px-6 py-4">Bilangan Pelajar</th>
+                                <th class="px-6 py-4 text-right">Tindakan</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            <% if (groups && groups.length > 0) { %>
+                                <% groups.forEach(g => { %>
+                                    <tr class="hover:bg-blue-50/30 transition">
+                                        <td class="px-6 py-4 font-medium text-gray-900"><%= g.name %></td>
+                                        <td class="px-6 py-4">
+                                            <code class="bg-gray-100 px-2 py-1 rounded text-sm font-mono text-blue-600"><%= g.enrollmentKey %></code>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <% if (g.modules && g.modules.length > 0) { %>
+                                                <span class="text-xs text-gray-600"><%= g.modules.length %> modul</span>
+                                            <% } else { %>
+                                                <span class="text-gray-400 text-xs">Tiada</span>
+                                            <% } %>
+                                        </td>
+                                        <td class="px-6 py-4 text-gray-500"><%= g.studentCount || 0 %></td>
+                                        <td class="px-6 py-4 text-right">
+                                            <div class="flex items-center justify-end gap-2">
+                                                <a href="/admin-mace/groups/edit/<%= g._id %>" class="text-blue-600 hover:text-blue-800 text-xs font-medium px-3 py-1.5 rounded hover:bg-blue-50 transition">Edit</a>
+                                                <form action="/admin-mace/groups/reset-key/<%= g._id %>" method="POST" class="inline" onsubmit="return confirm('Reset enrollment key? Key lama tidak akan berfungsi.')">
+                                                    <button type="submit" class="text-orange-600 hover:text-orange-800 text-xs font-medium px-3 py-1.5 rounded hover:bg-orange-50 transition">Reset Key</button>
+                                                </form>
+                                                <form action="/admin-mace/groups/delete/<%= g._id %>" method="POST" class="inline" onsubmit="return confirm('PADAM kumpulan ini?')">
+                                                    <button type="submit" class="text-red-600 hover:text-red-800 text-xs font-medium px-3 py-1.5 rounded hover:bg-red-50 transition">Padam</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="5" class="px-6 py-12 text-center text-gray-400 italic">Tiada kumpulan lagi.</td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        <% } %>
+
 
         <!-- Footer -->
         <div class="text-center text-xs text-gray-400 py-8 mt-8 border-t border-gray-200">
