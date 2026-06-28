@@ -339,7 +339,7 @@
                 <p class="text-white/90 text-sm sm:text-base max-w-lg mx-auto mb-6">
                     <%= lang === 'en' 
                         ? 'You have successfully completed all MACE eLearning modules. Download your certificate now!' 
-                        : 'Anda telah berjaya menyelesaikan semua modul eLearning Atlit MACE. Muat turun sijil anda sekarang!' %>
+                        : 'Anda telah berjaya menyelesaikan semua pembelajaran ' + ((locals.branding && locals.branding.siteName) ? locals.branding.siteName : 'sistem') + '. Muat turun sijil anda sekarang!' %>
                 </p>
                 <div class="flex flex-col sm:flex-row gap-3 justify-center">
                     <a href="/certificate/<%= athlete._id %>?print=1" target="_blank"

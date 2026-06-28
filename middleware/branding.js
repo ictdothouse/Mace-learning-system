@@ -16,13 +16,13 @@ async function fetchBranding() {
     } catch (err) {
         console.error('Error fetching branding:', err);
         return {
-            siteName: 'eLearning Atlit SUKMA',
+            siteName: 'eLearning Atlit MACE',
             tagline: 'Majlis Sukan Negara Malaysia',
             logoUrl: '',
             faviconUrl: '',
             primaryColor: '#2563eb',
-            dashboardTitle: 'DASHBOARD ATLET',
-            dashboardSubtitle: 'Pantau kemajuan pembelajaran anda di sini.'
+            dashboardTitle: 'Dashboard Pemantauan',
+            dashboardSubtitle: 'Statistik terkini prestasi atlit MACE secara live.'
         };
     }
 }

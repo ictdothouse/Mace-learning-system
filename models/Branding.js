@@ -1,13 +1,14 @@
 const mongoose = require('mongoose');
 
 const brandingSchema = new mongoose.Schema({
-    siteName: { type: String, default: 'eLearning Atlit SUKMA' },
+    siteName: { type: String, default: 'eLearning Atlit MACE' },
     tagline: { type: String, default: 'Majlis Sukan Negara Malaysia' },
     logoUrl: { type: String, default: '' },
     faviconUrl: { type: String, default: '' },
     primaryColor: { type: String, default: '#2563eb' },
     dashboardTitle: { type: String, default: 'DASHBOARD ATLET' },
-    dashboardSubtitle: { type: String, default: 'Pantau kemajuan pembelajaran anda di sini.' }
+    dashboardSubtitle: { type: String, default: 'Pantau kemajuan pembelajaran anda di sini.' },
+    allowModuleSelectionInEnrollment: { type: Boolean, default: false }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Branding', brandingSchema);
