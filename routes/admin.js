@@ -1268,14 +1268,47 @@ router.post("/groups/new", async (req, res) => {
     try {
         const { name, description, teacherId, moduleIds, enrollmentKey, maxStudents } = req.body;
         
-        if (!name || !teacherId) {
+        if (!name) {
             return res.redirect("/admin-mace/groups?msg=missing_fields");
         }
+
+        // Cari user admin yang login untuk dijadikan guru penanggungjawab default
+        let adminUserId = null;
+        try {
+            // Cuba cari dengan email format ADMIN_USER@mace.edu.my atau cari user dengan role admin
+            const adminUser = await User.findOne({ 
+                $or: [
+                    { email: process.env.ADMIN_USER + "@mace.edu.my" },
+                    { email: process.env.ADMIN_USER },
+                    { role: 'admin' }
+                ]
+            });
+            if (adminUser) {
+                adminUserId = adminUser._id;
+            }
+        } catch (e) {
+            console.error("Error finding admin user:", e);
+        }
+
+        // Jika tiada admin dijumpai, cuba dapatkan user pertama dalam sistem
+        if (!adminUserId) {
+            try {
+                const firstUser = await User.findOne().sort({ createdAt: 1 });
+                if (firstUser) {
+                    adminUserId = firstUser._id;
+                }
+            } catch (e) {
+                console.error("Error finding first user:", e);
+            }
+        }
+
+        // Gunakan teacherId dari form jika ada, jika tidak guna adminUserId
+        const finalTeacherId = teacherId || adminUserId;
 
         const groupData = {
             name,
             description: description || "",
-            teacherId,
+            teacherId: finalTeacherId,
             modules: moduleIds ? (Array.isArray(moduleIds) ? moduleIds : [moduleIds]) : [],
             maxStudents: parseInt(maxStudents) || 0
         };
