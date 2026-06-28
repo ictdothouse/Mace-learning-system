@@ -65,36 +65,6 @@ router.post('/upload-data', upload.single('dataFile'), async (req, res) => {
     } catch (err) { res.redirect('/admin-mace/settings?msg=error_upload'); }
 });
 
-// GET: Pengurusan Pengguna
-router.get('/users', async (req, res) => {
-    try {
-        let query = {};
-        if (req.query.search) {
-            const regex = new RegExp(req.query.search, 'i');
-            query.$or = [{ fullName: regex }, { icNumber: regex }];
-        }
-        if (req.query.state && req.query.state !== 'all') query.negeriWakil = req.query.state;
-        const statesList = await Athlete.distinct('negeriWakil').sort();
-        const athletes = await Athlete.find(query).sort({ fullName: 1 }).limit(50);
-        res.render('admin', { page: 'users', athletes, statesList, currentSearch: req.query.search || '', currentState: req.query.state || 'all', msg: req.query.msg || null });
-    } catch (err) { res.send('Error loading users'); }
-});
-router.post('/users/update/:id', async (req, res) => {
-    try {
-        const { fullName, icNumber, jantina, umur, negeriWakil } = req.body;
-        const existing = await Athlete.findOne({ icNumber, _id: { $ne: req.params.id } });
-        if (existing) return res.redirect(`/admin-mace/users?msg=ic_exists`);
-        await Athlete.findByIdAndUpdate(req.params.id, { fullName, icNumber, jantina, umur, negeriWakil });
-        res.redirect('/admin-mace/users?msg=profile_updated');
-    } catch (err) { res.redirect('/admin-mace/users?msg=update_error'); }
-});
-router.post('/users/reset/:id', async (req, res) => {
-    try {
-        await Athlete.findByIdAndUpdate(req.params.id, { currentStage: 1, quizScores: { quiz1: 0, quiz2: 0, quiz3: 0 }, watchedLessons: [], completedAt: null });
-        res.redirect('/admin-mace/users?msg=reset_success');
-    } catch (err) { res.redirect('/admin-mace/users?msg=reset_error'); }
-});
-
 // 🆕 PENGURUSAN E-LEARNING: MODUL, LESSON & QUIZ
 // GET: Dashboard E-Learning
 router.get('/elearning', async (req, res) => {
@@ -876,15 +846,25 @@ router.post('/teachers/reset-password/:id', async (req, res) => {
 // PENGURUSAN PELAJAR (STUDENT) - ADMIN
 // ==========================================
 
+// GET: Redirect /users to /students (digabungkan)
+router.get('/users', (req, res) => {
+    res.redirect('/admin-mace/students');
+});
+
 // GET: Senarai Pelajar
 router.get('/students', async (req, res) => {
     try {
+        // Include both User model students AND Athlete model (for legacy data)
         const students = await User.find({ role: 'student' })
             .populate('athleteId')
             .populate('enrolledGroups')
             .sort({ createdAt: -1 });
+        
+        // Also get athletes from legacy Athlete collection
+        const athletes = await Athlete.find().sort({ fullName: 1 }).limit(50);
+        
         const groups = await Group.find().sort({ name: 1 });
-        res.render('admin', { page: 'students', students, groups, msg: req.query.msg || null });
+        res.render('admin', { page: 'students', students, athletes, groups, msg: req.query.msg || null });
     } catch (err) {
         console.error('Students Error:', err);
         res.status(500).send('Ralat memuatkan senarai pelajar.');
