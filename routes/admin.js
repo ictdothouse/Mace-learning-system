@@ -387,7 +387,7 @@ router.post('/modules/edit/:id', upload.single('thumbnail'), async (req, res) =>
         let imageUrl = module.thumbnail;
         if (req.file || (featuredImageUrl && featuredImageUrl !== module.thumbnail)) {
             imageUrl = await processAndUploadImage(req.file, featuredImageUrl);
-        } else if (!req.file && (!featuredImageUrl || featuredImageUrl.trim() === '')) {
+        } else if (!req.file && featuredImageUrl !== undefined && featuredImageUrl.trim() === '') {
             imageUrl = ''; // cleared
         }
 

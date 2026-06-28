@@ -60,9 +60,9 @@
                     
                     <div>
                         <span class="block text-xs text-gray-500 mb-1">Masukkan URL Gambar:</span>
-                        <input type="url" name="featuredImageUrl" value="<%= module && module.thumbnail && module.thumbnail.startsWith('http') ? module.thumbnail : '' %>" 
+                        <input type="text" name="featuredImageUrl" value="<%= module ? module.thumbnail : '' %>" 
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-sm"
-                            placeholder="Contoh: https://example.com/gambar.jpg">
+                            placeholder="Contoh: https://example.com/gambar.jpg atau /uploads/gambar.webp">
                     </div>
                 </div>
                 <p class="text-xs text-gray-500 mt-2">Imej akan dipampatkan secara automatik untuk mengoptimumkan saiz storan tanpa menjejaskan kualiti.</p>
