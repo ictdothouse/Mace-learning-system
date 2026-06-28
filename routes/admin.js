@@ -357,16 +357,25 @@ router.get('/', async (req, res) => {
 
         const userIds = users.map(u => u._id);
         const progresses = userIds.length > 0 
-            ? await LessonProgress.find({ userId: { $in: userIds }, isCompleted: true })
+            ? await LessonProgress.find({ userId: { $in: userIds } })
             : [];
 
         const userCompletedCount = {};
+        const userLessonsProgress = {};
         progresses.forEach(p => {
             const uId = p.userId.toString();
             const mId = p.moduleId.toString();
+            const lId = p.lessonId.toString();
+
             if (!userCompletedCount[uId]) userCompletedCount[uId] = {};
             if (!userCompletedCount[uId][mId]) userCompletedCount[uId][mId] = 0;
-            userCompletedCount[uId][mId]++;
+            if (p.isCompleted) {
+                userCompletedCount[uId][mId]++;
+            }
+
+            if (!userLessonsProgress[uId]) userLessonsProgress[uId] = {};
+            if (!userLessonsProgress[uId][mId]) userLessonsProgress[uId][mId] = {};
+            userLessonsProgress[uId][mId][lId] = p;
         });
 
         // === GABUNG DUA SISTEM ===
@@ -380,10 +389,21 @@ router.get('/', async (req, res) => {
             // --- Sistem Baru: User + LessonProgress ---
             if (userId && allModules.length > 0) {
                 allModules.forEach(m => {
-                    const total = moduleLessonCount[m._id.toString()] || 0;
+                    const mIdStr = m._id.toString();
+                    const total = moduleLessonCount[mIdStr] || 0;
                     if (total > 0) {
-                        const completed = (userCompletedCount[userId.toString()] && userCompletedCount[userId.toString()][m._id.toString()]) || 0;
+                        const completed = (userCompletedCount[userId.toString()] && userCompletedCount[userId.toString()][mIdStr]) || 0;
                         const percent = Math.round((completed / total) * 100);
+                        
+                        const mLessons = allLessons.filter(l => l.moduleId && l.moduleId.toString() === mIdStr).map(l => {
+                            const lProg = userLessonsProgress[userId.toString()] && userLessonsProgress[userId.toString()][mIdStr] && userLessonsProgress[userId.toString()][mIdStr][l._id.toString()];
+                            return {
+                                title: l.title,
+                                isCompleted: lProg ? lProg.isCompleted : false,
+                                score: lProg ? lProg.bestScore : 0
+                            };
+                        });
+
                         athleteObj.progress.push({
                             moduleId: m._id,
                             moduleTitle: m.title,
@@ -391,7 +411,8 @@ router.get('/', async (req, res) => {
                             total,
                             percent,
                             isFinished: completed >= total,
-                            source: 'new'
+                            source: 'new',
+                            lessons: mLessons
                         });
                     }
                 });
@@ -413,9 +434,23 @@ router.get('/', async (req, res) => {
                 
                 legacyDefs.forEach((m, i) => {
                     const moduleData = allModules[i];
+                    if (allModules.length > 0 && !moduleData) return;
                     const title = moduleData ? moduleData.title : `Modul ${i + 1}`;
                     const score = scores[m.quizKey] || 0;
                     const isFinished = stage >= m.stagePassed;
+                    
+                    let mLessons = [];
+                    if (moduleData) {
+                        const actualLessons = allLessons.filter(l => l.moduleId && l.moduleId.toString() === moduleData._id.toString());
+                        mLessons = actualLessons.map(l => ({
+                            title: l.title,
+                            isCompleted: isFinished,
+                            score: isFinished ? score : (stage === m.stageRequired ? score : 0)
+                        }));
+                    } else {
+                        mLessons = [{ title: `Kuiz`, isCompleted: isFinished, score: score }];
+                    }
+
                     athleteObj.progress.push({
                         moduleTitle: title,
                         completed: isFinished ? 1 : 0,
@@ -423,7 +458,8 @@ router.get('/', async (req, res) => {
                         percent: score,
                         isFinished,
                         score,
-                        source: 'legacy'
+                        source: 'legacy',
+                        lessons: mLessons
                     });
                 });
                 athleteObj.hasAccount = true;
