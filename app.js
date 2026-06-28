@@ -11,6 +11,8 @@ const athleteRoutes = require('./routes/athlete').router;
 const adminRoutes = require('./routes/admin');
 const authRoutes = require('./routes/auth');
 const teacherRoutes = require('./routes/teacher');
+const levelRoutes = require('./routes/levels');
+const progressRoutes = require('./routes/progress');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -85,6 +87,8 @@ function startServer() {
     app.use('/admin-mace', adminRoutes);
     app.use('/auth', authRoutes);
     app.use('/teacher', teacherRoutes);
+    app.use('/api/levels', levelRoutes);
+    app.use('/api/progress', progressRoutes);
 
     // 9. Handle 404
     app.use((req, res) => {
