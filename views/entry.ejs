@@ -259,12 +259,25 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white px-5 py-4 text-center border-t border-gray-200 z-10 relative">
-        <p class="text-xs text-gray-500">
-            <%= __('entry_footer') %>
-            <span class="mx-2">|</span>
-            <a href="/auth/login" class="text-primary hover:underline font-medium">Admin / Pengajar Login</a>
-        </p>
+    <footer class="bg-white px-5 py-6 text-center border-t border-gray-200 z-10 relative">
+        <div class="max-w-4xl mx-auto flex flex-col items-center gap-3">
+            <p class="text-xs text-gray-500">
+                <%- (locals.branding && branding.footerText) ? branding.footerText : __('entry_footer') %>
+            </p>
+            
+            <% if (locals.branding && branding.footerLinks && branding.footerLinks.length > 0) { %>
+                <div class="flex flex-wrap justify-center gap-3 text-xs text-gray-600 font-medium">
+                    <% branding.footerLinks.forEach((link, idx) => { %>
+                        <a href="<%= link.url %>" class="hover:text-primary transition-colors hover:underline"><%= link.label %></a>
+                        <% if (idx < branding.footerLinks.length - 1) { %><span class="text-gray-300">|</span><% } %>
+                    <% }) %>
+                </div>
+            <% } %>
+            
+            <div class="text-xs text-gray-400 mt-2">
+                <a href="/auth/login" class="hover:text-primary transition-colors">Admin / Pengajar Login</a>
+            </div>
+        </div>
     </footer>
 
     <script>

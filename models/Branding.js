@@ -19,6 +19,12 @@ const brandingSchema = new mongoose.Schema({
     menuLinks: [{
         label: { type: String, required: true },
         url: { type: String, required: true }
+    }],
+    // Footer Customization
+    footerText: { type: String, default: '© 2026 Majlis Sukan Negara Malaysia. Hak Cipta Terpelihara.' },
+    footerLinks: [{
+        label: { type: String, required: true },
+        url: { type: String, required: true }
     }]
 }, { timestamps: true });
 

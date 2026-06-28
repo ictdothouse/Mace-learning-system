@@ -541,7 +541,8 @@ router.post('/settings/branding', async (req, res) => {
     try {
         const { 
             siteName, tagline, primaryColor, dashboardTitle, dashboardSubtitle, logoUrl, faviconUrl,
-            homeBannerTitle, homeBannerImage, homeBgImage, homeLeftColumnHtml, menuLinksJson 
+            homeBannerTitle, homeBannerImage, homeBgImage, homeLeftColumnHtml, menuLinksJson,
+            footerText, footerLinksJson
         } = req.body;
         const Branding = require('../models/Branding');
         
@@ -569,6 +570,15 @@ router.post('/settings/branding', async (req, res) => {
                 branding.menuLinks = JSON.parse(menuLinksJson);
             } catch (e) {
                 console.error("Failed to parse menu links:", e);
+            }
+        }
+        
+        if (footerText !== undefined) branding.footerText = footerText;
+        if (footerLinksJson) {
+            try {
+                branding.footerLinks = JSON.parse(footerLinksJson);
+            } catch (e) {
+                console.error("Failed to parse footer links:", e);
             }
         }
 

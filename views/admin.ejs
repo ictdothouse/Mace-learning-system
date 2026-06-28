@@ -730,8 +730,25 @@
                                 <textarea id="homeLeftColumnHtml" name="homeLeftColumnHtml" class="w-full border border-gray-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-purple-500 outline-none min-h-[150px]"><%= branding.homeLeftColumnHtml %></textarea>
                             </div>
                             
+                            <!-- Footer Customization Section -->
+                            <div class="pt-6 border-t border-gray-100">
+                                <h4 class="text-md font-bold text-gray-800 mb-4">Penyesuaian Footer (Bahagian Bawah)</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Teks Hak Cipta (Copyright)</label>
+                                        <input type="text" name="footerText" value="<%= branding.footerText || '© 2026 Majlis Sukan Negara Malaysia. Hak Cipta Terpelihara.' %>" class="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                                        <label class="block text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Pautan Tambahan Footer</label>
+                                        <div id="footer-links-container" class="space-y-3 mb-3"></div>
+                                        <button type="button" onclick="addFooterLink()" class="text-xs bg-purple-100 text-purple-700 hover:bg-purple-200 px-3 py-2 rounded-lg font-medium transition">+ Tambah Pautan Footer</button>
+                                        <input type="hidden" name="footerLinksJson" id="footerLinksJson">
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <div class="pt-6 border-t border-gray-100 flex justify-end">
-                                <button type="submit" onclick="saveMenuLinks()" class="bg-purple-600 text-white px-8 py-2.5 rounded-lg font-medium hover:bg-purple-700 transition shadow-sm">
+                                <button type="submit" onclick="saveMenuLinks(); saveFooterLinks();" class="bg-purple-600 text-white px-8 py-2.5 rounded-lg font-medium hover:bg-purple-700 transition shadow-sm">
                                     Simpan Halaman Utama
                                 </button>
                             </div>
@@ -775,7 +792,26 @@
                         function removeMenu(idx) { menuLinks.splice(idx, 1); renderMenuLinks(); }
                         function saveMenuLinks() { document.getElementById('menuLinksJson').value = JSON.stringify(menuLinks); }
                         
-                        document.addEventListener('DOMContentLoaded', renderMenuLinks);
+                        let footerLinks = <%- JSON.stringify(branding.footerLinks || []) %>;
+                        function renderFooterLinks() {
+                            const container = document.getElementById('footer-links-container');
+                            container.innerHTML = '';
+                            footerLinks.forEach((link, idx) => {
+                                container.innerHTML += `
+                                    <div class="flex items-center gap-3 bg-white p-2 rounded border border-gray-200">
+                                        <input type="text" value="${link.label}" onchange="updateFooter(${idx}, 'label', this.value)" class="flex-1 text-sm border-none bg-transparent outline-none p-1" placeholder="Label Menu">
+                                        <input type="text" value="${link.url}" onchange="updateFooter(${idx}, 'url', this.value)" class="flex-2 text-sm border-none bg-transparent outline-none p-1 text-blue-600" placeholder="URL Pautan (cth: https://...)">
+                                        <button type="button" onclick="removeFooter(${idx})" class="text-red-500 hover:text-red-700 p-1">✕</button>
+                                    </div>
+                                `;
+                            });
+                        }
+                        function updateFooter(idx, field, val) { footerLinks[idx][field] = val; }
+                        function addFooterLink() { footerLinks.push({ label: 'Link Baru', url: '#' }); renderFooterLinks(); }
+                        function removeFooter(idx) { footerLinks.splice(idx, 1); renderFooterLinks(); }
+                        function saveFooterLinks() { document.getElementById('footerLinksJson').value = JSON.stringify(footerLinks); }
+                        
+                        document.addEventListener('DOMContentLoaded', () => { renderMenuLinks(); renderFooterLinks(); });
                     </script>
                     
                     <!-- Script for R2 direct upload -->
