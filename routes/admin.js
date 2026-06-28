@@ -1443,10 +1443,20 @@ router.post('/students/edit/:id', async (req, res) => {
         if (isAthleteRecord) {
             // Update Athlete record
             const updateData = { fullName, isActive: isActive === 'on' };
+            const unsetData = {};
+            
             if (email && email.trim() !== '' && email !== '-') {
                 updateData.email = email;
+            } else {
+                unsetData.email = 1;
             }
-            await Athlete.findByIdAndUpdate(req.params.id, updateData);
+            
+            const updateOperation = { $set: updateData };
+            if (Object.keys(unsetData).length > 0) {
+                updateOperation.$unset = unsetData;
+            }
+            
+            await Athlete.findByIdAndUpdate(req.params.id, updateOperation);
         } else {
             // Update User account
             if (email !== student.email) {
