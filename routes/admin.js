@@ -1180,8 +1180,7 @@ router.get('/certificate/preview/:id', async (req, res) => {
     try {
         const athlete = await Athlete.findById(req.params.id);
         if (!athlete) {
-            req.flash('error_msg', 'Atlit tidak dijumpai');
-            return res.redirect('/admin-mace');
+            return res.redirect('/admin-mace?msg=not_found');
         }
 
         // Cari modul atau kursus yang atlet ini sertai
@@ -1191,24 +1190,6 @@ router.get('/certificate/preview/:id', async (req, res) => {
             const module = await Module.findById(moduleId);
             if (module) {
                 course = { name: module.title };
-            }
-        }
-        
-        if (!course) {
-            const Course = require('../models/Course');
-            course = await Course.findOne({ 'participants.athlete': athlete._id });
-            
-            if (!course) {
-                const allCourses = await Course.find();
-                for (const c of allCourses) {
-                    if (c.participants && Array.isArray(c.participants)) {
-                        const found = c.participants.find(p => p.athlete && p.athlete.toString() === athlete._id.toString());
-                        if (found) {
-                            course = c;
-                            break;
-                        }
-                    }
-                }
             }
         }
         
@@ -1246,8 +1227,7 @@ router.get('/certificate/preview/:id', async (req, res) => {
 
     } catch (err) {
         console.error('Certificate Preview Error:', err);
-        req.flash('error_msg', 'Ralat memuatkan preview sijil: ' + err.message);
-        res.redirect('/admin-mace');
+        res.redirect('/admin-mace?msg=preview_error');
     }
 });
 
