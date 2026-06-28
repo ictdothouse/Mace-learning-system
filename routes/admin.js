@@ -1,4 +1,4 @@
-﻿// routes/admin.js - VERSI LENGKAP & DIBETULKAN
+// routes/admin.js - VERSI LENGKAP & DIBETULKAN
 const express = require('express');
 const router = express.Router();
 const Athlete = require('../models/Athlete');
@@ -338,30 +338,28 @@ router.get('/', async (req, res) => {
 
         const athletes = await Athlete.find().sort({ createdAt: -1 }).limit(100);
         
-        // 1. Dapatkan akaun User pelajar untuk atlet-atlet ini
+        // === SISTEM BARU: LessonProgress ===
         const athleteIds = athletes.map(a => a._id);
         const users = await User.find({ athleteId: { $in: athleteIds } });
         
-        // Peta athleteId -> userId
         const athleteUserMap = {};
         users.forEach(u => {
-            athleteUserMap[u.athleteId.toString()] = u._id;
+            if (u.athleteId) athleteUserMap[u.athleteId.toString()] = u._id;
         });
 
-        // 2. Dapatkan semua modul dan bilangan lesson aktif bagi setiap modul
         const allModules = await Module.find({ isActive: true }).sort({ order: 1 });
         const allLessons = await Lesson.find({ isActive: true });
         
         const moduleLessonCount = {};
         allModules.forEach(m => {
-            moduleLessonCount[m._id.toString()] = allLessons.filter(l => l.moduleId.toString() === m._id.toString()).length;
+            moduleLessonCount[m._id.toString()] = allLessons.filter(l => l.moduleId && l.moduleId.toString() === m._id.toString()).length;
         });
 
-        // 3. Dapatkan kemajuan LessonProgress yang telah disiapkan (isCompleted: true)
         const userIds = users.map(u => u._id);
-        const progresses = await LessonProgress.find({ userId: { $in: userIds }, isCompleted: true });
+        const progresses = userIds.length > 0 
+            ? await LessonProgress.find({ userId: { $in: userIds }, isCompleted: true })
+            : [];
 
-        // Peta userId -> moduleId -> jumlah lesson selesai
         const userCompletedCount = {};
         progresses.forEach(p => {
             const uId = p.userId.toString();
@@ -371,7 +369,7 @@ router.get('/', async (req, res) => {
             userCompletedCount[uId][mId]++;
         });
 
-        // 4. Masukkan data kemajuan modul ke dalam setiap objek atlet
+        // === GABUNG DUA SISTEM ===
         const athletesWithProgress = athletes.map(a => {
             const athleteObj = a.toObject();
             const userId = athleteUserMap[a._id.toString()];
@@ -379,7 +377,8 @@ router.get('/', async (req, res) => {
             athleteObj.progress = [];
             athleteObj.hasAccount = !!userId;
 
-            if (userId) {
+            // --- Sistem Baru: User + LessonProgress ---
+            if (userId && allModules.length > 0) {
                 allModules.forEach(m => {
                     const total = moduleLessonCount[m._id.toString()] || 0;
                     if (total > 0) {
@@ -391,11 +390,43 @@ router.get('/', async (req, res) => {
                             completed,
                             total,
                             percent,
-                            isFinished: completed === total
+                            isFinished: completed >= total,
+                            source: 'new'
                         });
                     }
                 });
             }
+
+            // --- Sistem Lama: Athlete.quizScores + currentStage ---
+            // Jika tiada progress dari sistem baru, paparkan dari sistem lama
+            if (athleteObj.progress.length === 0) {
+                const stage = athleteObj.currentStage || 1;
+                const scores = athleteObj.quizScores || {};
+                
+                // Bina progress dari sistem lama (3 modul tetap)
+                const legacyModules = [
+                    { title: 'Modul 1', quizKey: 'quiz1', stageRequired: 1, stagePassed: 2 },
+                    { title: 'Modul 2', quizKey: 'quiz2', stageRequired: 2, stagePassed: 3 },
+                    { title: 'Modul 3', quizKey: 'quiz3', stageRequired: 3, stagePassed: 4 }
+                ];
+                
+                legacyModules.forEach((m, i) => {
+                    const score = scores[m.quizKey] || 0;
+                    const isFinished = stage >= m.stagePassed;
+                    const inProgress = stage >= m.stageRequired && !isFinished;
+                    athleteObj.progress.push({
+                        moduleTitle: m.title,
+                        completed: isFinished ? 1 : (inProgress ? 0 : 0),
+                        total: 1,
+                        percent: score,
+                        isFinished,
+                        score,
+                        source: 'legacy'
+                    });
+                });
+                athleteObj.hasAccount = true; // sistem lama tak perlu akaun
+            }
+
             return athleteObj;
         });
 
@@ -414,6 +445,7 @@ router.get('/', async (req, res) => {
         res.send('Ralat memuatkan dashboard.'); 
     }
 });
+
 
 // GET: Tetapan Sistem
 router.get('/settings', async (req, res) => {
