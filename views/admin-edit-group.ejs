@@ -74,11 +74,12 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Guru Penanggungjawab</label>
                         <select name="teacherId" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                            <option value="">-- Pilih Guru (Auto-assign jika kosong) --</option>
+                            <option value="">-- Auto-assign kepada Admin (boleh edit kemudian) --</option>
                             <% (teachers || []).forEach(t => { %>
                                 <option value="<%= t._id %>"><%= t.fullName %> (<%= t.email %>)</option>
                             <% }) %>
                         </select>
+                        <p class="text-xs text-gray-500 mt-1">Jika tidak dipilih, kumpulan akan dipertanggungjawabkan kepada admin yang mencipta. Boleh ditukar kemudian.</p>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Modul Diberikan</label>
