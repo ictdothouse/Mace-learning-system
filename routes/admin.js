@@ -13,9 +13,12 @@ const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const crypto = require('crypto');
-const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const sharp = require('sharp');
 const axios = require('axios');
+const { execFile } = require('child_process');
+const ffmpegPath = require('ffmpeg-static');
 
 // Cloudflare R2 client for Featured Images upload
 const r2Client = new S3Client({
@@ -89,6 +92,144 @@ const processAndUploadImage = async (file, urlInput) => {
         console.error('Error processing image:', err);
         if (file) {
             return `/uploads/${file.filename}`;
+        }
+        return urlInput || null;
+    }
+};
+
+const getSecureVideoUrl = async (filename) => {
+    if (!filename) return null;
+    if (filename.startsWith('/uploads/') || filename.startsWith('http')) return filename;
+    try {
+        const command = new GetObjectCommand({
+            Bucket: process.env.R2_BUCKET_NAME || 'modulmace',
+            Key: filename
+        });
+        return await getSignedUrl(r2Client, command, { expiresIn: 3600 });
+    } catch (err) {
+        console.error('Error generating secure url:', err);
+        return `/uploads/${filename}`;
+    }
+};
+
+const compressVideo = (inputPath, outputPath) => {
+    return new Promise((resolve, reject) => {
+        // We compress the video using ffmpeg:
+        // -crf 28: good compression ratio, keeping great quality
+        // -preset veryfast: extremely fast compression, safe from HTTP timeout limits
+        execFile(ffmpegPath, [
+            '-i', inputPath,
+            '-vcodec', 'libx264',
+            '-crf', '28',
+            '-preset', 'veryfast',
+            '-maxrate', '1.5M',
+            '-bufsize', '3M',
+            '-acodec', 'aac',
+            '-b:a', '128k',
+            '-y',
+            outputPath
+        ], (error, stdout, stderr) => {
+            if (error) {
+                console.error('FFmpeg error:', error);
+                return reject(error);
+            }
+            resolve(outputPath);
+        });
+    });
+};
+
+const processAndUploadVideo = async (file, urlInput) => {
+    let inputPath = null;
+    let originalName = 'video.mp4';
+    let isTempFile = false;
+
+    if (file) {
+        inputPath = file.path;
+        originalName = file.originalname;
+    } else if (urlInput && urlInput.trim() !== '') {
+        if (urlInput.startsWith('http')) {
+            try {
+                const tempFilename = `temp-download-${Date.now()}.mp4`;
+                const tempPath = path.join(__dirname, '../uploads', tempFilename);
+                const writer = fs.createWriteStream(tempPath);
+                
+                const response = await axios({
+                    url: urlInput,
+                    method: 'GET',
+                    responseType: 'stream'
+                });
+                
+                response.data.pipe(writer);
+                
+                await new Promise((resolve, reject) => {
+                    writer.on('finish', resolve);
+                    writer.on('error', reject);
+                });
+                
+                inputPath = tempPath;
+                originalName = urlInput.split('/').pop() || 'downloaded-video.mp4';
+                isTempFile = true;
+            } catch (err) {
+                console.error('Error downloading video from URL:', err.message);
+                return urlInput; // Fallback to raw URL
+            }
+        } else {
+            return urlInput;
+        }
+    }
+
+    if (!inputPath) return null;
+
+    const compressedFilename = `compressed-${Date.now()}-${path.parse(originalName).name}.mp4`;
+    const compressedPath = path.join(__dirname, '../uploads', compressedFilename);
+
+    try {
+        console.log(`Starting video compression for: ${inputPath}`);
+        await compressVideo(inputPath, compressedPath);
+        console.log(`Video compression finished: ${compressedPath}`);
+        
+        // Clean up input file
+        if (file || isTempFile) {
+            try {
+                fs.unlinkSync(inputPath);
+            } catch (err) {
+                console.error('Error deleting input video file:', err);
+            }
+        }
+
+        const hasR2 = process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_ACCOUNT_ID;
+        if (hasR2) {
+            const bucketName = process.env.R2_BUCKET_NAME || 'modulmace';
+            const compressedBuffer = fs.readFileSync(compressedPath);
+            
+            await r2Client.send(new PutObjectCommand({
+                Bucket: bucketName,
+                Key: compressedFilename,
+                Body: compressedBuffer,
+                ContentType: 'video/mp4'
+            }));
+            
+            try {
+                fs.unlinkSync(compressedPath);
+            } catch (err) {
+                console.error('Error deleting compressed video file:', err);
+            }
+            
+            return compressedFilename;
+        } else {
+            return `/uploads/${compressedFilename}`;
+        }
+    } catch (err) {
+        console.error('Error processing/compressing video:', err);
+        if (file) {
+            const fallbackFilename = `original-${Date.now()}-${originalName}`;
+            const fallbackPath = path.join(__dirname, '../uploads', fallbackFilename);
+            try {
+                fs.renameSync(inputPath, fallbackPath);
+                return `/uploads/${fallbackFilename}`;
+            } catch (renameErr) {
+                return `/uploads/${file.filename}`;
+            }
         }
         return urlInput || null;
     }
@@ -295,7 +436,7 @@ router.get('/lessons', async (req, res) => {
 router.get('/lessons/new', async (req, res) => {
     try {
         const modules = await Module.find().sort({ title: 1 });
-        res.render('admin-edit-lesson', { page: 'lessons', lesson: null, modules, editMode: 'create' }); 
+        res.render('admin-edit-lesson', { page: 'lessons', lesson: null, modules, editMode: 'create', secureVideoUrl: null }); 
     } catch (err) { 
         res.status(500).send('Ralat memuatkan borang.'); 
     }
@@ -307,24 +448,33 @@ router.get('/lessons/edit/:id', async (req, res) => {
         const lesson = await Lesson.findById(req.params.id).populate('moduleId');
         const modules = await Module.find().sort({ title: 1 });
         if (!lesson) return res.redirect('/admin-mace/lessons?msg=not_found');
-        res.render('admin-edit-lesson', { page: 'lessons', lesson, modules, editMode: 'edit' });
+        
+        let secureVideoUrl = null;
+        if (lesson.videoUrl) {
+            secureVideoUrl = await getSecureVideoUrl(lesson.videoUrl);
+        }
+        
+        res.render('admin-edit-lesson', { page: 'lessons', lesson, modules, editMode: 'edit', secureVideoUrl });
     } catch (err) { 
         res.status(500).send('Ralat memuatkan borang.'); 
     }
 });
 
 // POST: Cipta Lesson Baru
-router.post('/lessons/new', async (req, res) => {
+router.post('/lessons/new', upload.single('videoFile'), async (req, res) => {
     try {
         const { moduleId, title, contentHtml, videoUrl, passMark, order, isActive, questionsJson } = req.body;
         let quizQuestions = [];
         try { quizQuestions = JSON.parse(questionsJson || '[]'); } catch(e) {}
         
+        // Handle Video upload or compression
+        const finalVideoUrl = await processAndUploadVideo(req.file, videoUrl);
+        
         const lessonData = {
             moduleId,
             title,
             contentHtml, // TinyMCE content
-            videoUrl,
+            videoUrl: finalVideoUrl || '',
             passMark: parseInt(passMark) || 80,
             order: parseInt(order) || 0,
             isActive: isActive === 'on',
@@ -340,17 +490,26 @@ router.post('/lessons/new', async (req, res) => {
 });
 
 // POST: Update Lesson
-router.post('/lessons/edit/:id', async (req, res) => {
+router.post('/lessons/edit/:id', upload.single('videoFile'), async (req, res) => {
     try {
         const { moduleId, title, contentHtml, videoUrl, passMark, order, isActive, questionsJson } = req.body;
         let quizQuestions = [];
         try { quizQuestions = JSON.parse(questionsJson || '[]'); } catch(e) {}
         
+        const lesson = await Lesson.findById(req.params.id);
+        if (!lesson) return res.redirect('/admin-mace/lessons?msg=not_found');
+
+        // Only upload/process if a new video file is uploaded or the text input has changed
+        let finalVideoUrl = lesson.videoUrl;
+        if (req.file || (videoUrl !== undefined && videoUrl !== lesson.videoUrl)) {
+            finalVideoUrl = await processAndUploadVideo(req.file, videoUrl);
+        }
+
         const updateData = {
             moduleId,
             title,
             contentHtml,
-            videoUrl,
+            videoUrl: finalVideoUrl || '',
             passMark: parseInt(passMark) || 80,
             order: parseInt(order) || 0,
             isActive: isActive === 'on',

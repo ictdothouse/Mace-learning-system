@@ -20,7 +20,7 @@
         </div>
 
         <!-- Form -->
-        <form action="" method="POST" class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 space-y-6">
+        <form action="" method="POST" enctype="multipart/form-data" class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 space-y-6">
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Pilihan Silibus/Modul Induk -->
@@ -43,35 +43,61 @@
                 </div>
             </div>
 
+            <!-- Video Upload & Preview Section (Di Bawah Tajuk) -->
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-6 space-y-4">
+                <h3 class="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                    🎥 Video Pembelajaran (Maksimum 50MB, Sasaran ~30MB)
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Muat Naik Fail Video -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">Pilihan A: Muat Naik Fail Video (.mp4, .webm, dll.)</label>
+                        <input type="file" name="videoFile" id="videoFile" accept="video/*" 
+                            class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition cursor-pointer border border-gray-300 rounded-lg p-1 bg-white">
+                        <p class="text-[10px] text-gray-400 mt-1">Video akan dimampatkan secara automatik sebelum disimpan di Cloud.</p>
+                    </div>
+
+                    <!-- Input Nama Fail atau URL manual -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">Pilihan B: Nama Fail R2 / URL Video Luaran</label>
+                        <input type="text" name="videoUrl" id="videoUrl" value="<%= lesson ? lesson.videoUrl : '' %>" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition text-sm font-mono"
+                            placeholder="Cth: video_videos_1pengenalan.mp4 atau https://...">
+                        <p class="text-[10px] text-gray-400 mt-1">Masukkan jika tidak mahu memuat naik fail baru secara terus.</p>
+                    </div>
+                </div>
+
+                <!-- Preview Pemain Video -->
+                <div id="video-preview-container" class="mt-4 <%= secureVideoUrl ? '' : 'hidden' %>">
+                    <span class="block text-xs font-semibold text-gray-500 mb-1">Preview Video Aktif:</span>
+                    <div class="max-w-md bg-black rounded-lg overflow-hidden shadow border border-gray-300 relative">
+                        <video id="video-preview" controls controlsList="nodownload" oncontextmenu="return false;" class="w-full max-h-60 object-contain">
+                            <% if (secureVideoUrl) { %>
+                                <source src="<%= secureVideoUrl %>" type="video/mp4">
+                            <% } %>
+                            Pelayar anda tidak menyokong preview video.
+                        </video>
+                    </div>
+                </div>
+            </div>
+
             <!-- Kandungan Utama (TinyMCE) -->
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Kandungan Pelajaran *</label>
                 <textarea id="contentHtml" name="contentHtml"><%= lesson ? lesson.contentHtml : '' %></textarea>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Video URL (R2 Cloudflare Filename) -->
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">URL Video / Nama Fail (Cloudflare R2)</label>
-                    <input type="text" name="videoUrl" value="<%= lesson ? lesson.videoUrl : '' %>" 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition font-mono text-sm"
-                        placeholder="Contoh: video_videos_1pengenalan.mp4">
-                    <p class="text-xs text-gray-400 mt-1">Masukkan nama fail video yang telah dimuat naik ke storan Cloud.</p>
-                </div>
-
-                <!-- Susunan Order & Pass Mark -->
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Order (Susunan)</label>
-                    <input type="number" name="order" value="<%= lesson ? lesson.order : 0 %>" min="0"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-blue-50/50 rounded-xl border border-blue-100">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-blue-50/50 rounded-xl border border-blue-100">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Had Kelulusan Kuiz (%)</label>
                     <input type="number" name="passMark" value="<%= lesson ? lesson.passMark : 80 %>" min="0" max="100"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Order (Susunan)</label>
+                    <input type="number" name="order" value="<%= lesson ? lesson.order : 0 %>" min="0"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white">
                 </div>
                 <div class="flex items-center mt-8">
                     <input type="checkbox" name="isActive" id="isActive" value="on" <%= (lesson === null || lesson.isActive) ? 'checked' : '' %>
@@ -326,6 +352,84 @@
 
         // Initialize editor
         renderQuizEditor();
+
+        // Video preview and upload progress logic
+        const videoFileInput = document.getElementById('videoFile');
+        const videoUrlInput = document.getElementById('videoUrl');
+        const videoPreview = document.getElementById('video-preview');
+        const videoPreviewContainer = document.getElementById('video-preview-container');
+
+        videoFileInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                if (file.size > 50 * 1024 * 1024) {
+                    alert('Amaran: Saiz video melebihi had 50MB. Sila mampatkan video anda terlebih dahulu.');
+                    this.value = '';
+                    return;
+                }
+                
+                const localUrl = URL.createObjectURL(file);
+                videoPreview.innerHTML = '';
+                const source = document.createElement('source');
+                source.src = localUrl;
+                source.type = file.type || 'video/mp4';
+                videoPreview.appendChild(source);
+                
+                videoPreview.load();
+                videoPreviewContainer.classList.remove('hidden');
+                videoUrlInput.value = ''; // clear url input
+            }
+        });
+
+        videoUrlInput.addEventListener('change', function() {
+            const val = this.value.trim();
+            if (val) {
+                if (val.startsWith('http') || val.length > 3) {
+                    videoPreview.innerHTML = '';
+                    const source = document.createElement('source');
+                    source.src = val.startsWith('http') ? val : `/uploads/${val}`;
+                    source.type = 'video/mp4';
+                    videoPreview.appendChild(source);
+                    
+                    videoPreview.load();
+                    videoPreviewContainer.classList.remove('hidden');
+                    videoFileInput.value = ''; // clear file input
+                }
+            } else {
+                if (!videoFileInput.files[0]) {
+                    videoPreviewContainer.classList.add('hidden');
+                    videoPreview.pause();
+                }
+            }
+        });
+
+        // Form submit overlay for upload & compress progress
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const file = videoFileInput.files[0];
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                \${file ? 'Sedang Memampat & Memuat Naik Video...' : 'Sedang Menyimpan...'}
+            `;
+            
+            if (file) {
+                const overlay = document.createElement('div');
+                overlay.className = 'fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex flex-col items-center justify-center text-white z-[9999]';
+                overlay.innerHTML = `
+                    <div class="bg-white text-gray-800 p-8 rounded-xl shadow-xl max-w-sm w-full text-center space-y-4 mx-4">
+                        <div class="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                        <h3 class="font-bold text-lg">Memproses Video Anda</h3>
+                        <p class="text-sm text-gray-500 font-medium">Video sedang dimampatkan ke saiz optimum (~30MB) dan dihantar ke Cloud. Sila tunggu sehingga selesai...</p>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+            }
+        });
     </script>
 </body>
 </html>

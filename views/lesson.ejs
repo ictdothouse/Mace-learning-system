@@ -56,7 +56,7 @@
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8 mb-8">
             <% if (secureVideoUrl) { %>
                 <div class="video-wrapper mb-6">
-                    <video controls preload="metadata" id="main-video" playsinline>
+                    <video controls controlsList="nodownload" oncontextmenu="return false;" preload="metadata" id="main-video" playsinline>
                         <source src="<%= secureVideoUrl %>" type="video/mp4"> Pelayar anda tidak menyokong tag video.
                     </video>
                 </div>

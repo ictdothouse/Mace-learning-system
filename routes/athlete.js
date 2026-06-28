@@ -22,6 +22,8 @@ const r2Client = new S3Client({
 });
 
 const getSecureVideoUrl = async (filename) => {
+    if (!filename) return null;
+    if (filename.startsWith('/uploads/') || filename.startsWith('http')) return filename;
     try {
         const command = new GetObjectCommand({
             Bucket: process.env.R2_BUCKET_NAME || 'modulmace',
@@ -29,8 +31,8 @@ const getSecureVideoUrl = async (filename) => {
         });
         return await getSignedUrl(r2Client, command, { expiresIn: 3600 });
     } catch (err) {
-        console.error('❌ Gagal generate signed URL:', err.message);
-        return null;
+        console.error('Error generating secure url:', err);
+        return `/uploads/${filename}`;
     }
 };
 
