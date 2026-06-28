@@ -235,13 +235,10 @@
                             <tbody class="divide-y divide-gray-100">
                                 <% if (athletes && athletes.length > 0) { %>
                                     <% athletes.forEach(a => { 
-                                        const totalModules = a.progress ? a.progress.length : 0;
-                                        const finishedModules = a.                                        
-                                        let statusText = 'Sedang Belajar';
-                                        let statusColor = 'bg-orange-100 text-orange-700';
-                                        
                                         const finishedCount = a.progress ? a.progress.filter(p => p.isFinished).length : 0;
                                         const totalCount = a.progress ? a.progress.length : 0;
+                                        let statusText = 'Belum Mula';
+                                        let statusColor = 'bg-gray-100 text-gray-500';
 
                                         if (finishedCount > 0 && finishedCount === totalCount) {
                                             statusText = 'Lulus Semua ✓';
