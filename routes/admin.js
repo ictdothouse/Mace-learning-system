@@ -149,12 +149,15 @@ router.get('/modules/edit/:id', async (req, res) => {
 // POST: Cipta Modul Baru
 router.post('/modules/new', upload.single('thumbnail'), async (req, res) => {
     try {
-        const { title, description, order, isActive } = req.body;
+        const { title, description, order, isActive, hasLevels, isSequential, minPassingScore } = req.body;
         const moduleData = {
             title,
             description, // TinyMCE content
             order: parseInt(order) || 0,
-            isActive: isActive === 'on'
+            isActive: isActive === 'on',
+            hasLevels: hasLevels === 'on',
+            isSequential: isSequential === 'on',
+            minPassingScore: parseInt(minPassingScore) || 0
         };
         
         // Handle thumbnail upload
@@ -671,7 +674,6 @@ router.post('/templates/delete/:id', async (req, res) => {
     }
 });
 
-module.exports = router;
 // GET: Preview Sijil (HTML untuk Print)
 router.get('/certificate/preview/:id', async (req, res) => {
     try {
@@ -1265,3 +1267,4 @@ router.post("/groups/reset-key/:id", async (req, res) => {
     }
 });
 
+module.exports = router;
