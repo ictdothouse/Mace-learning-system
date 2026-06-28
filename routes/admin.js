@@ -279,7 +279,10 @@ router.get('/api/presigned-url', async (req, res) => {
 
             // Pre-signed URL valid for 15 minutes (900 seconds)
             const uploadUrl = await getSignedUrl(r2Client, command, { expiresIn: 900 });
-            const publicUrlBase = process.env.R2_PUBLIC_URL || `https://pub-${process.env.R2_ACCOUNT_ID}.r2.dev`;
+            let publicUrlBase = process.env.R2_PUBLIC_URL || `https://pub-${process.env.R2_ACCOUNT_ID}.r2.dev`;
+            if (publicUrlBase && !publicUrlBase.startsWith('http://') && !publicUrlBase.startsWith('https://')) {
+                publicUrlBase = 'https://' + publicUrlBase;
+            }
             const publicUrl = `${publicUrlBase}/${uniqueFilename}`;
 
             res.json({
