@@ -13,6 +13,86 @@ const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const crypto = require('crypto');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const sharp = require('sharp');
+const axios = require('axios');
+
+// Cloudflare R2 client for Featured Images upload
+const r2Client = new S3Client({
+    region: 'auto',
+    endpoint: process.env.R2_ENDPOINT || (process.env.R2_ACCOUNT_ID ? `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com` : undefined),
+    credentials: {
+        accessKeyId: process.env.R2_ACCESS_KEY_ID,
+        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY
+    }
+});
+
+const processAndUploadImage = async (file, urlInput) => {
+    let inputBuffer = null;
+    let originalName = 'image.png';
+
+    if (file) {
+        // Read file from disk
+        inputBuffer = fs.readFileSync(file.path);
+        originalName = file.originalname;
+        // Clean up temporary file
+        try {
+            fs.unlinkSync(file.path);
+        } catch (err) {
+            console.error('Error deleting temp file:', err);
+        }
+    } else if (urlInput && urlInput.trim() !== '') {
+        try {
+            const response = await axios.get(urlInput, { responseType: 'arraybuffer' });
+            inputBuffer = Buffer.from(response.data);
+            const urlParts = urlInput.split('/');
+            originalName = urlParts[urlParts.length - 1].split('?')[0] || 'url-image.png';
+        } catch (err) {
+            console.error('Error fetching image from URL:', err.message);
+            return urlInput; // Fallback to raw URL
+        }
+    }
+
+    if (!inputBuffer) return null;
+
+    try {
+        // Compress and convert to webp using sharp
+        const compressedBuffer = await sharp(inputBuffer)
+            .resize({ width: 1200, height: 800, fit: 'inside', withoutEnlargement: true })
+            .webp({ quality: 80 })
+            .toBuffer();
+
+        const filename = `${Date.now()}-${path.parse(originalName).name}.webp`;
+
+        // Check if R2 is configured
+        const hasR2 = process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_ACCOUNT_ID;
+        if (hasR2) {
+            const bucketName = process.env.R2_BUCKET_NAME || 'modulmace';
+            await r2Client.send(new PutObjectCommand({
+                Bucket: bucketName,
+                Key: filename,
+                Body: compressedBuffer,
+                ContentType: 'image/webp'
+            }));
+            
+            return `https://pub-${process.env.R2_ACCOUNT_ID}.r2.dev/${filename}`;
+        } else {
+            // Local fallback
+            const localPath = path.join(__dirname, '../uploads', filename);
+            const dir = path.dirname(localPath);
+            if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+            
+            fs.writeFileSync(localPath, compressedBuffer);
+            return `/uploads/${filename}`;
+        }
+    } catch (err) {
+        console.error('Error processing image:', err);
+        if (file) {
+            return `/uploads/${file.filename}`;
+        }
+        return urlInput || null;
+    }
+};
 
 // Setup Multer
 const storage = multer.diskStorage({
@@ -119,7 +199,7 @@ router.get('/modules/edit/:id', async (req, res) => {
 // POST: Cipta Modul Baru
 router.post('/modules/new', upload.single('thumbnail'), async (req, res) => {
     try {
-        const { title, description, order, isActive, hasLevels, isSequential, minPassingScore } = req.body;
+        const { title, description, order, isActive, hasLevels, isSequential, minPassingScore, featuredImageUrl } = req.body;
         const moduleData = {
             title,
             description, // TinyMCE content
@@ -130,9 +210,10 @@ router.post('/modules/new', upload.single('thumbnail'), async (req, res) => {
             minPassingScore: parseInt(minPassingScore) || 0
         };
         
-        // Handle thumbnail upload
-        if (req.file) {
-            moduleData.thumbnail = `/uploads/${req.file.filename}`;
+        // Handle Featured Image upload (either file or URL input)
+        const imageUrl = await processAndUploadImage(req.file, featuredImageUrl);
+        if (imageUrl) {
+            moduleData.thumbnail = imageUrl;
         }
         
         await Module.create(moduleData);
@@ -146,7 +227,11 @@ router.post('/modules/new', upload.single('thumbnail'), async (req, res) => {
 // POST: Update Modul
 router.post('/modules/edit/:id', upload.single('thumbnail'), async (req, res) => {
     try {
-        const { title, description, order, isActive, hasLevels, isSequential, minPassingScore } = req.body;
+        const { title, description, order, isActive, hasLevels, isSequential, minPassingScore, featuredImageUrl } = req.body;
+        
+        const module = await Module.findById(req.params.id);
+        if (!module) return res.redirect('/admin-mace/modules?msg=not_found');
+
         const updateData = {
             title,
             description,
@@ -157,9 +242,16 @@ router.post('/modules/edit/:id', upload.single('thumbnail'), async (req, res) =>
             minPassingScore: parseInt(minPassingScore) || 0
         };
         
-        // Handle thumbnail upload
-        if (req.file) {
-            updateData.thumbnail = `/uploads/${req.file.filename}`;
+        // Handle Featured Image upload or URL updates
+        let imageUrl = module.thumbnail;
+        if (req.file || (featuredImageUrl && featuredImageUrl !== module.thumbnail)) {
+            imageUrl = await processAndUploadImage(req.file, featuredImageUrl);
+        } else if (!req.file && (!featuredImageUrl || featuredImageUrl.trim() === '')) {
+            imageUrl = ''; // cleared
+        }
+
+        if (imageUrl !== undefined) {
+            updateData.thumbnail = imageUrl;
         }
         
         await Module.findByIdAndUpdate(req.params.id, updateData);
