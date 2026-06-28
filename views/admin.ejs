@@ -863,7 +863,7 @@
                         <h2 class="text-2xl font-bold text-gray-900 mb-2">🎨 Template Sijil</h2>
                         <p class="text-gray-500">Urus dan customize template sijil untuk atlit dengan live preview & drag-drop.</p>
                     </div>
-                    <button onclick="document.getElementById('createTemplateModal').classList.remove('hidden')" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition flex items-center gap-2 shadow-sm">
+                    <button onclick="openCreateModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition flex items-center gap-2 shadow-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
                         Cipta Template Baru
                     </button>
@@ -2042,8 +2042,73 @@
             updatePreview();
         }
 
+        function openCreateModal() {
+            const form = document.getElementById('createTemplateForm');
+            form.reset();
+            form.action = '/admin-mace/templates/create';
+            document.querySelector('#createTemplateModal h3').innerText = 'Cipta Template Baharu - Live Preview & Drag-Drop';
+            
+            // Reset elements position to default
+            templateData.elements = {
+                title: { positionX: 50, positionY: 15, fontSize: 32, align: 'center', color: '#004aad' },
+                subtitle: { positionX: 50, positionY: 25, fontSize: 18, align: 'center', color: '#333333' },
+                description: { positionX: 50, positionY: 35, fontSize: 14, align: 'center', color: '#333333' },
+                athleteName: { positionX: 50, positionY: 45, fontSize: 36, align: 'center', color: '#004aad' },
+                icNumber: { positionX: 50, positionY: 53, fontSize: 14, align: 'center', color: '#333333' },
+                negeri: { positionX: 50, positionY: 60, fontSize: 16, align: 'center', color: '#fbbf24' },
+                sukan: { positionX: 50, positionY: 65, fontSize: 16, align: 'center', color: '#fbbf24' },
+                courseName: { positionX: 50, positionY: 72, fontSize: 20, align: 'center', color: '#004aad' },
+                date: { positionX: 20, positionY: 85, fontSize: 12, align: 'left', color: '#333333' },
+                signatory: { positionX: 80, positionY: 85, fontSize: 14, align: 'right', color: '#333333' }
+            };
+            
+            document.getElementById('createTemplateModal').classList.remove('hidden');
+            updatePreview();
+        }
+
         function editTemplate(id, jsonStr) {
-            alert('Fungsi Edit Template akan datang...');
+            const data = JSON.parse(decodeURIComponent(jsonStr.replace(/&quot;/g, '"')));
+            const form = document.getElementById('createTemplateForm');
+            form.action = '/admin-mace/templates/update/' + id;
+            document.querySelector('#createTemplateModal h3').innerText = 'Edit Template Sijil';
+            
+            // Populate text inputs
+            const fields = ['name', 'title', 'subtitle', 'courseName', 'description', 'signatoryName', 'signatoryTitle', 'primaryColor', 'secondaryColor', 'accentColor', 'fontFamily', 'logoUrl', 'backgroundImageType', 'backgroundImageUrl', 'backgroundR2Key', 'backgroundOpacity'];
+            fields.forEach(f => {
+                const input = form.querySelector(`[name="${f}"]`);
+                if (input && data[f] !== undefined) input.value = data[f];
+            });
+            
+            // Populate checkboxes
+            const checkboxes = ['showTitle', 'showSubtitle', 'showCourseName', 'showDescription', 'showAthleteName', 'showIcNumber', 'showNegeri', 'showSukan', 'showDate', 'showSignatory', 'showBorder', 'showLogo'];
+            checkboxes.forEach(f => {
+                const input = form.querySelector(`[name="${f}"]`);
+                if (input) {
+                    if (['showBorder', 'showLogo', 'showIcNumber', 'showSukan'].includes(f)) {
+                        input.checked = data[f] === true;
+                    } else {
+                        input.checked = data[f] !== false;
+                    }
+                }
+            });
+            
+            const setActive = form.querySelector('[name="setAsActive"]');
+            if (setActive) setActive.checked = data.isActive === true;
+            
+            // Load saved positions
+            if (data.elementsJson) {
+                try {
+                    const savedElements = JSON.parse(data.elementsJson);
+                    for (const key in templateData.elements) {
+                        if (savedElements[key]) {
+                            templateData.elements[key] = { ...templateData.elements[key], ...savedElements[key] };
+                        }
+                    }
+                } catch(e) { console.error('Error parsing elements JSON', e); }
+            }
+            
+            document.getElementById('createTemplateModal').classList.remove('hidden');
+            updatePreview();
         }
 
         document.addEventListener('DOMContentLoaded', () => {
