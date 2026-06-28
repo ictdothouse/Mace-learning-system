@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ms">
+<html lang="<%= lang || 'ms' %>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -43,10 +43,23 @@
     <div class="bg-white shadow-sm border-b sticky top-0 z-50">
         <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">Modul <%= moduleId %></span>
+                <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide"><%= __('lesson_module_label') %> <%= moduleId %></span>
                 <h2 class="text-sm md:text-base font-semibold text-gray-700 truncate max-w-[200px] md:max-w-md"><%= lesson.title %></h2>
             </div>
-            <a href="/dashboard" class="text-sm text-blue-600 hover:text-blue-800 font-medium transition flex items-center gap-1">← Dashboard</a>
+            <div class="flex items-center gap-3">
+                <!-- Language Toggle -->
+                <div class="flex gap-1 bg-gray-100 rounded-lg p-1">
+                    <form method="POST" action="/set-language" class="inline">
+                        <input type="hidden" name="lang" value="ms">
+                        <button type="submit" class="text-xs px-2 py-0.5 rounded font-semibold transition <%= lang === 'ms' ? 'bg-white shadow text-blue-700' : 'text-gray-400 hover:text-gray-600' %>">🇲🇾 BM</button>
+                    </form>
+                    <form method="POST" action="/set-language" class="inline">
+                        <input type="hidden" name="lang" value="en">
+                        <button type="submit" class="text-xs px-2 py-0.5 rounded font-semibold transition <%= lang === 'en' ? 'bg-white shadow text-blue-700' : 'text-gray-400 hover:text-gray-600' %>">🇬🇧 EN</button>
+                    </form>
+                </div>
+                <a href="/dashboard" class="text-sm text-blue-600 hover:text-blue-800 font-medium transition flex items-center gap-1"><%= __('lesson_nav_back') %></a>
+            </div>
         </div>
     </div>
 
@@ -57,16 +70,16 @@
             <% if (secureVideoUrl) { %>
                 <div class="video-wrapper mb-6">
                     <video controls controlsList="nodownload" oncontextmenu="return false;" preload="metadata" id="main-video" playsinline>
-                        <source src="<%= secureVideoUrl %>" type="video/mp4"> Pelayar anda tidak menyokong tag video.
+                        <source src="<%= secureVideoUrl %>" type="video/mp4"> <%= __('lesson_video_unsupported') %>
                     </video>
                 </div>
             <% } else { %>
-                <div class="p-8 text-center bg-gray-50 rounded-lg border border-dashed border-gray-300 mb-6">⚠️ Video tidak dapat dimuatkan.</div>
+                <div class="p-8 text-center bg-gray-50 rounded-lg border border-dashed border-gray-300 mb-6"><%= __('lesson_video_unavailable') %></div>
             <% } %>
             
             <div class="prose max-w-none text-gray-700 leading-relaxed">
                 <% if (lesson.contentHtml) { %> <%- lesson.contentHtml %>
-                <% } else { %> <p class="italic text-gray-500">Tiada teks penerangan tambahan.</p> <% } %>
+                <% } else { %> <p class="italic text-gray-500"><%= __('lesson_no_description') %></p> <% } %>
             </div>
         </div>
 
@@ -82,8 +95,8 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
                     </div>
                     <div class="text-left">
-                        <h3 class="text-lg font-bold text-white">Kuiz Pengetahuan</h3>
-                        <p id="quiz-status-text" class="text-xs text-blue-200">Sila tonton video sepenuhnya untuk membuka kuiz</p>
+                        <h3 class="text-lg font-bold text-white"><%= __('lesson_quiz_title') %></h3>
+                        <p id="quiz-status-text" class="text-xs text-blue-200"><%= __('lesson_quiz_locked') %></p>
                     </div>
                 </div>
                 <svg id="quiz-chevron" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white rotate-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
@@ -97,15 +110,15 @@
                         <div class="<%= quizResult.passed ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800' %> border p-4 rounded-lg mb-6 flex items-start gap-3">
                             <% if (quizResult.passed) { %>
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                <div><p class="font-bold text-lg">Tahniah! Anda Lulus.</p><p class="text-sm">Markah: <span class="font-bold"><%= quizResult.score %>%</span></p></div>
+                                <div><p class="font-bold text-lg"><%= __('lesson_passed_title') %></p><p class="text-sm"><%= __('lesson_score_label') %> <span class="font-bold"><%= quizResult.score %>%</span></p></div>
                             <% } else { %>
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                <div><p class="font-bold text-lg">Belum Lulus.</p><p class="text-sm">Markah: <span class="font-bold"><%= quizResult.score %>%</span>. Perlu <%= lesson.passMark || 80 %>%.</p></div>
+                                <div><p class="font-bold text-lg"><%= __('lesson_failed_title') %></p><p class="text-sm"><%= __('lesson_score_label') %> <span class="font-bold"><%= quizResult.score %>%</span>. <%= __('lesson_need_label') %> <%= lesson.passMark || 80 %>%.</p></div>
                             <% } %>
                         </div>
                     <% } %>
 
-                    <p class="text-gray-600 mb-6 text-sm">Jawab semua soalan di bawah berdasarkan kandungan video.</p>
+                    <p class="text-gray-600 mb-6 text-sm"><%= __('lesson_quiz_intro') %></p>
                     
                     <form action="/submit-quiz/<%= moduleId %>" method="POST" class="space-y-8 pb-8"> <!-- ✅ Tambah pb-8 untuk ruang bawah form -->
                         <% if (lesson.quizQuestions && lesson.quizQuestions.length > 0) { %>
@@ -253,14 +266,14 @@
                 quizBtn.disabled = false;
                 quizBtn.classList.remove('cursor-not-allowed', 'opacity-75');
                 quizBtn.classList.add('hover:bg-blue-700', 'cursor-pointer');
-                quizStatusText.textContent = "Kuiz Aktif";
+                quizStatusText.textContent = "<%= __('lesson_quiz_active') %>";
                 <% if (quizResult) { %> setTimeout(() => toggleQuiz(), 300); <% } %>
             <% } else { %>
                 if (!video) {
                     isUnlocked = true; quizBtn.disabled = false; 
                     quizBtn.classList.remove('cursor-not-allowed', 'opacity-75');
                     quizBtn.classList.add('hover:bg-blue-700', 'cursor-pointer');
-                    quizStatusText.textContent = "Klik untuk mula menjawab kuiz"; return;
+                    quizStatusText.textContent = "<%= __('lesson_quiz_click') %>"; return;
                 }
                 const checkVideoProgress = () => {
                     if (isUnlocked) return;
@@ -268,7 +281,7 @@
                         isUnlocked = true; quizBtn.disabled = false;
                         quizBtn.classList.remove('cursor-not-allowed', 'opacity-75');
                         quizBtn.classList.add('hover:bg-blue-700', 'cursor-pointer');
-                        quizStatusText.textContent = "Video selesai! Klik untuk buka kuiz";
+                        quizStatusText.textContent = "<%= __('lesson_quiz_done_video') %>";
                         setTimeout(() => toggleQuiz(), 500);
                         fetch(`/api/mark-watched/${<%= moduleId %>}`, { method: 'POST', headers: { 'Content-Type': 'application/json' } }).catch(e => console.log(e));
                     }
