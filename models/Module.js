@@ -6,6 +6,16 @@ const moduleSchema = new mongoose.Schema({
   thumbnail: { type: String, default: '' }, // URL or Cloudflare R2
   order: { type: Number, default: 0 },
   isActive: { type: Boolean, default: true },
+  
+  // Group yang mempunyai akses kepada modul ini (untuk sistem e-learning)
+  accessibleByGroups: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Group'
+  }],
+  
+  // Jika empty = semua pelajar boleh akses, jika ada group = hanya group tertentu
+  isRestricted: { type: Boolean, default: false },
+  
   createdAt: { type: Date, default: Date.now }
 });
 
