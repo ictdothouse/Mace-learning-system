@@ -1097,3 +1097,171 @@ router.post('/levels/delete/:id', async (req, res) => {
         res.redirect('/admin-mace/modules?msg=delete_error');
     }
 });
+
+
+// ==========================================
+// PENGURUSAN GROUP & ENROLLMENT (ADMIN)
+// ==========================================
+
+// GET: Senarai Group
+router.get("/groups", async (req, res) => {
+    try {
+        const groups = await Group.find()
+            .sort({ name: 1 })
+            .populate("teacherId", "fullName email")
+            .populate("modules", "title")
+            .populate("students", "fullName email");
+        
+        res.render("admin", { 
+            page: "groups", 
+            groups, 
+            msg: req.query.msg || null 
+        });
+    } catch (err) {
+        console.error("Groups Error:", err);
+        res.status(500).send("Ralat memuatkan senarai group.");
+    }
+});
+
+// GET: Form Cipta Group Baru
+router.get("/groups/new", async (req, res) => {
+    try {
+        const teachers = await User.find({ role: "teacher" }).sort({ fullName: 1 });
+        const modules = await Module.find().sort({ title: 1 });
+        res.render("admin-edit-group", { 
+            page: "groups", 
+            group: null, 
+            teachers, 
+            modules,
+            editMode: "create" 
+        });
+    } catch (err) {
+        res.status(500).send("Ralat memuatkan borang.");
+    }
+});
+
+// POST: Cipta Group Baru
+router.post("/groups/new", async (req, res) => {
+    try {
+        const { name, description, teacherId, moduleIds, enrollmentKey, maxStudents } = req.body;
+        
+        if (!name || !teacherId) {
+            return res.redirect("/admin-mace/groups?msg=missing_fields");
+        }
+
+        const groupData = {
+            name,
+            description: description || "",
+            teacherId,
+            modules: moduleIds ? (Array.isArray(moduleIds) ? moduleIds : [moduleIds]) : [],
+            maxStudents: parseInt(maxStudents) || 0
+        };
+
+        // Jika admin nak set enrollment key sendiri
+        if (enrollmentKey && enrollmentKey.trim() !== "") {
+            groupData.enrollmentKey = enrollmentKey.trim().toUpperCase();
+        }
+
+        await Group.create(groupData);
+        res.redirect("/admin-mace/groups?msg=group_created");
+    } catch (err) {
+        console.error("Create Group Error:", err);
+        res.redirect("/admin-mace/groups?msg=create_error");
+    }
+});
+
+// GET: Form Edit Group
+router.get("/groups/edit/:id", async (req, res) => {
+    try {
+        const group = await Group.findById(req.params.id)
+            .populate("teacherId", "fullName email")
+            .populate("modules");
+        
+        if (!group) {
+            return res.redirect("/admin-mace/groups?msg=not_found");
+        }
+
+        const teachers = await User.find({ role: "teacher" }).sort({ fullName: 1 });
+        const modules = await Module.find().sort({ title: 1 });
+        
+        res.render("admin-edit-group", { 
+            page: "groups", 
+            group, 
+            teachers, 
+            modules,
+            editMode: "edit" 
+        });
+    } catch (err) {
+        console.error("Edit Group Form Error:", err);
+        res.redirect("/admin-mace/groups?msg=error");
+    }
+});
+
+// POST: Update Group
+router.post("/groups/edit/:id", async (req, res) => {
+    try {
+        const { name, description, teacherId, moduleIds, enrollmentKey, maxStudents, isActive } = req.body;
+
+        const group = await Group.findById(req.params.id);
+        if (!group) {
+            return res.redirect("/admin-mace/groups?msg=not_found");
+        }
+
+        const updateData = {
+            name,
+            description,
+            teacherId,
+            modules: moduleIds ? (Array.isArray(moduleIds) ? moduleIds : [moduleIds]) : [],
+            maxStudents: parseInt(maxStudents) || 0,
+            isActive: isActive === "on"
+        };
+
+        // Update enrollment key jika ada perubahan
+        if (enrollmentKey && enrollmentKey.trim() !== "" && enrollmentKey !== group.enrollmentKey) {
+            updateData.enrollmentKey = enrollmentKey.trim().toUpperCase();
+        }
+
+        await Group.findByIdAndUpdate(req.params.id, updateData);
+        res.redirect("/admin-mace/groups?msg=group_updated");
+    } catch (err) {
+        console.error("Update Group Error:", err);
+        res.redirect("/admin-mace/groups?msg=update_error");
+    }
+});
+
+// POST: Delete Group
+router.post("/groups/delete/:id", async (req, res) => {
+    try {
+        const group = await Group.findById(req.params.id);
+        if (!group) {
+            return res.redirect("/admin-mace/groups?msg=not_found");
+        }
+
+        // Remove group reference from students
+        await User.updateMany(
+            { enrolledGroups: req.params.id },
+            { $pull: { enrolledGroups: req.params.id } }
+        );
+
+        await Group.findByIdAndDelete(req.params.id);
+        res.redirect("/admin-mace/groups?msg=group_deleted");
+    } catch (err) {
+        console.error("Delete Group Error:", err);
+        res.redirect("/admin-mace/groups?msg=delete_error");
+    }
+});
+
+// POST: Reset Enrollment Key
+router.post("/groups/reset-key/:id", async (req, res) => {
+    try {
+        const crypto = require("crypto");
+        const newKey = "GRP-" + crypto.randomBytes(4).toString("hex").toUpperCase();
+        
+        await Group.findByIdAndUpdate(req.params.id, { enrollmentKey: newKey });
+        res.redirect("/admin-mace/groups?msg=key_reset&newKey=" + encodeURIComponent(newKey));
+    } catch (err) {
+        console.error("Reset Key Error:", err);
+        res.redirect("/admin-mace/groups?msg=reset_error");
+    }
+});
+
