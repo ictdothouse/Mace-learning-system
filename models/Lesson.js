@@ -3,8 +3,15 @@ const mongoose = require('mongoose');
 
 const questionSchema = new mongoose.Schema({
     text: { type: String, required: true },
-    options: [{ type: String, required: true }],
-    correctIndex: { type: Number, required: true, min: 0 },
+    type: { 
+        type: String, 
+        enum: ['multiple-choice', 'true-false', 'short-answer'], 
+        default: 'multiple-choice' 
+    },
+    options: [{ type: String }],
+    correctIndex: { type: Number, min: 0 },
+    correctAnswerText: { type: String, trim: true },
+    points: { type: Number, default: 1, min: 0 },
     category: { type: String, default: 'General' }
 });
 

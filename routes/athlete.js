@@ -147,15 +147,33 @@ router.post('/submit-quiz/:id', checkSession, async (req, res) => {
             return res.redirect(`/lesson/${moduleId}`);
         }
 
-        // Kira markah di server
-        let correctCount = 0;
+        // Kira markah di server berasaskan mata/points
+        let totalPoints = 0;
+        let earnedPoints = 0;
+        
         currentLesson.quizQuestions.forEach((q, index) => {
-            const userAns = parseInt(userAnswers[index]);
-            if (userAns === q.correctIndex) correctCount++;
+            const points = q.points !== undefined ? q.points : 1;
+            totalPoints += points;
+            
+            const qType = q.type || 'multiple-choice';
+            const userAns = userAnswers[index];
+            
+            if (qType === 'multiple-choice' || qType === 'true-false') {
+                const userAnsIndex = parseInt(userAns);
+                if (userAnsIndex === q.correctIndex) {
+                    earnedPoints += points;
+                }
+            } else if (qType === 'short-answer') {
+                // Padanan jawapan pendek (case-insensitive & trimmed)
+                const userAnsText = (userAns || '').toString().trim().toLowerCase();
+                const correctAnsText = (q.correctAnswerText || '').toString().trim().toLowerCase();
+                if (userAnsText && correctAnsText && userAnsText === correctAnsText) {
+                    earnedPoints += points;
+                }
+            }
         });
 
-        const totalQ = currentLesson.quizQuestions.length;
-        const score = totalQ > 0 ? Math.round((correctCount / totalQ) * 100) : 0;
+        const score = totalPoints > 0 ? Math.round((earnedPoints / totalPoints) * 100) : 0;
         const passed = score >= (currentLesson.passMark || 80);
 
         // Simpan keputusan hanya jika lulus atau markah lebih tinggi
