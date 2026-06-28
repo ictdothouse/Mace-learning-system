@@ -9,6 +9,8 @@ const rateLimit = require('express-rate-limit');
 // 1. IMPORT ROUTES
 const athleteRoutes = require('./routes/athlete').router; 
 const adminRoutes = require('./routes/admin');
+const authRoutes = require('./routes/auth');
+const teacherRoutes = require('./routes/teacher');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -81,6 +83,8 @@ function startServer() {
     // 8. AKTIFKAN ROUTES
     app.use('/', athleteRoutes);
     app.use('/admin-mace', adminRoutes);
+    app.use('/auth', authRoutes);
+    app.use('/teacher', teacherRoutes);
 
     // 9. Handle 404
     app.use((req, res) => {

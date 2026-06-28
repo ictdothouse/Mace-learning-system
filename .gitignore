@@ -1,1 +1,16 @@
-Nothing needs to be added to the .gitignore file based on the provided changes. The only modified file is 'routes/admin.js', which is a source code file and should not be ignored.
+```
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Logs and temp files
+*.log
+*.tmp
+
+# Editors
+.vscode/
+```
