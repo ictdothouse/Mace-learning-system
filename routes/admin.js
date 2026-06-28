@@ -65,34 +65,11 @@ router.post('/upload-data', upload.single('dataFile'), async (req, res) => {
     } catch (err) { res.redirect('/admin-mace/settings?msg=error_upload'); }
 });
 
-// GET: Pengurusan Pengguna
+// GET: Pengurusan Pengguna (Users -> Students/Athletes)
+// Nota: Route /users telah digabungkan dengan /students untuk urus pelajar/atlet sahaja
 router.get('/users', async (req, res) => {
-    try {
-        let query = {};
-        if (req.query.search) {
-            const regex = new RegExp(req.query.search, 'i');
-            query.$or = [{ fullName: regex }, { icNumber: regex }];
-        }
-        if (req.query.state && req.query.state !== 'all') query.negeriWakil = req.query.state;
-        const statesList = await Athlete.distinct('negeriWakil').sort();
-        const athletes = await Athlete.find(query).sort({ fullName: 1 }).limit(50);
-        res.render('admin', { page: 'users', athletes, statesList, currentSearch: req.query.search || '', currentState: req.query.state || 'all', msg: req.query.msg || null });
-    } catch (err) { res.send('Error loading users'); }
-});
-router.post('/users/update/:id', async (req, res) => {
-    try {
-        const { fullName, icNumber, jantina, umur, negeriWakil } = req.body;
-        const existing = await Athlete.findOne({ icNumber, _id: { $ne: req.params.id } });
-        if (existing) return res.redirect(`/admin-mace/users?msg=ic_exists`);
-        await Athlete.findByIdAndUpdate(req.params.id, { fullName, icNumber, jantina, umur, negeriWakil });
-        res.redirect('/admin-mace/users?msg=profile_updated');
-    } catch (err) { res.redirect('/admin-mace/users?msg=update_error'); }
-});
-router.post('/users/reset/:id', async (req, res) => {
-    try {
-        await Athlete.findByIdAndUpdate(req.params.id, { currentStage: 1, quizScores: { quiz1: 0, quiz2: 0, quiz3: 0 }, watchedLessons: [], completedAt: null });
-        res.redirect('/admin-mace/users?msg=reset_success');
-    } catch (err) { res.redirect('/admin-mace/users?msg=reset_error'); }
+    // Redirect ke /students untuk konsistensi
+    return res.redirect('/admin-mace/students');
 });
 
 // 🆕 PENGURUSAN E-LEARNING: MODUL, LESSON & QUIZ
@@ -1112,12 +1089,17 @@ router.get("/groups", async (req, res) => {
         const groups = await Group.find()
             .sort({ name: 1 })
             .populate("teacherId", "fullName email")
-            .populate("modules", "title")
-            .populate("students", "fullName email");
+            .populate("modules", "title");
+        
+        // Count students in each group
+        const groupsWithCount = await Promise.all(groups.map(async (g) => {
+            const studentCount = g.students ? g.students.length : 0;
+            return { ...g.toObject(), studentCount };
+        }));
         
         res.render("admin", { 
             page: "groups", 
-            groups, 
+            groups: groupsWithCount, 
             msg: req.query.msg || null 
         });
     } catch (err) {
@@ -1139,6 +1121,7 @@ router.get("/groups/new", async (req, res) => {
             editMode: "create" 
         });
     } catch (err) {
+        console.error("New Group Form Error:", err);
         res.status(500).send("Ralat memuatkan borang.");
     }
 });
@@ -1148,14 +1131,26 @@ router.post("/groups/new", async (req, res) => {
     try {
         const { name, description, teacherId, moduleIds, enrollmentKey, maxStudents } = req.body;
         
-        if (!name || !teacherId) {
+        if (!name) {
             return res.redirect("/admin-mace/groups?msg=missing_fields");
+        }
+
+        // Default teacherId to admin jika kosong atau tidak valid
+        let finalTeacherId = teacherId;
+        if (!finalTeacherId || finalTeacherId.trim() === "") {
+            // Cari admin pertama sebagai default
+            const adminUser = await User.findOne({ role: 'admin' }).sort({ createdAt: 1 });
+            if (adminUser) {
+                finalTeacherId = adminUser._id;
+            } else {
+                return res.redirect("/admin-mace/groups?msg=no_teacher_available");
+            }
         }
 
         const groupData = {
             name,
             description: description || "",
-            teacherId,
+            teacherId: finalTeacherId,
             modules: moduleIds ? (Array.isArray(moduleIds) ? moduleIds : [moduleIds]) : [],
             maxStudents: parseInt(maxStudents) || 0
         };
@@ -1164,9 +1159,10 @@ router.post("/groups/new", async (req, res) => {
         if (enrollmentKey && enrollmentKey.trim() !== "") {
             groupData.enrollmentKey = enrollmentKey.trim().toUpperCase();
         }
+        // Jika tidak, akan auto-generate oleh pre-save hook
 
-        await Group.create(groupData);
-        res.redirect("/admin-mace/groups?msg=group_created");
+        const newGroup = await Group.create(groupData);
+        res.redirect(`/admin-mace/groups?msg=group_created&key=${encodeURIComponent(newGroup.enrollmentKey)}`);
     } catch (err) {
         console.error("Create Group Error:", err);
         res.redirect("/admin-mace/groups?msg=create_error");
