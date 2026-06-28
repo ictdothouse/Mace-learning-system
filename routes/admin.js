@@ -1305,6 +1305,11 @@ router.post("/groups/new", async (req, res) => {
         // Gunakan teacherId dari form jika ada, jika tidak guna adminUserId
         const finalTeacherId = teacherId || adminUserId;
 
+        if (!finalTeacherId) {
+            console.error("No teacher or admin user found to assign as group owner");
+            return res.redirect("/admin-mace/groups?msg=no_teacher_available");
+        }
+
         const groupData = {
             name,
             description: description || "",
