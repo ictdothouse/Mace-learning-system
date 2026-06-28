@@ -274,35 +274,47 @@
                                             <td class="px-6 py-3.5 font-mono text-xs text-gray-500"><%= a.icNumber %></td>
                                             <td class="px-6 py-3.5 text-gray-600"><%= a.negeriWakil %></td>
                                             <td class="px-6 py-3.5">
-                                                <div class="flex flex-wrap gap-1.5 max-w-md">
+                                                <div class="flex flex-col gap-2 max-w-sm">
                                                     <% if (a.progress && a.progress.length > 0) { %>
                                                         <% a.progress.forEach(p => { %>
-                                                            <% if (p.isFinished) { %>
-                                                                <span class="inline-flex items-center gap-1 bg-green-50 text-green-700 border border-green-200 px-2.5 py-1 rounded-lg text-xs font-semibold" title="<%= p.moduleTitle %>: Lengkap">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
-                                                                    <%= p.moduleTitle %>
-                                                                    <% if (p.source === 'legacy' && p.score) { %><span class="bg-green-200 text-green-800 px-1 rounded text-[10px]"><%= p.score %>%</span><% } %>
-                                                                    <% if (p.source === 'new') { %><span class="text-[10px] text-green-600">(<%= p.completed %>/<%= p.total %>)</span><% } %>
-                                                                    <% if (p.moduleId) { %>
-                                                                        <a href="/admin-mace/certificate/preview/<%= a._id %>?moduleId=<%= p.moduleId %>" target="_blank" class="ml-1 text-[10px] bg-green-200 hover:bg-green-300 text-green-800 px-1 rounded font-bold">🖨️</a>
+                                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 p-2 rounded-lg border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow">
+                                                                <span class="text-xs font-semibold text-gray-700 truncate max-w-[150px]" title="<%= p.moduleTitle %>"><%= p.moduleTitle %></span>
+                                                                <div class="flex items-center gap-1">
+                                                                    <% if (p.isFinished) { %>
+                                                                        <span class="inline-flex items-center gap-1 bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 rounded text-[10px] font-bold">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
+                                                                            <% if (p.source === 'new') { %>
+                                                                                Selesai (<%= p.completed %>/<%= p.total %>)
+                                                                            <% } else { %>
+                                                                                Selesai (<%= p.score %>%)
+                                                                            <% } %>
+                                                                        </span>
+                                                                        <% if (p.moduleId) { %>
+                                                                            <a href="/admin-mace/certificate/preview/<%= a._id %>?moduleId=<%= p.moduleId %>" target="_blank" class="bg-green-100 hover:bg-green-200 text-green-800 p-1 rounded transition-colors" title="Cetak Sijil">🖨️</a>
+                                                                        <% } %>
+                                                                    <% } else if (p.percent > 0) { %>
+                                                                        <span class="inline-flex items-center gap-1 bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded text-[10px] font-bold">
+                                                                            <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                                                                            <% if (p.source === 'new') { %>
+                                                                                Sedang Belajar (<%= p.completed %>/<%= p.total %>)
+                                                                            <% } else { %>
+                                                                                Sedang Belajar (<%= p.percent %>%)
+                                                                            <% } %>
+                                                                        </span>
+                                                                    <% } else { %>
+                                                                        <span class="inline-flex items-center gap-1 bg-gray-50 text-gray-500 border border-gray-200 px-2 py-0.5 rounded text-[10px] font-medium">
+                                                                            <% if (p.source === 'new') { %>
+                                                                                Belum Mula (0/<%= p.total %>)
+                                                                            <% } else { %>
+                                                                                Belum Mula
+                                                                            <% } %>
+                                                                        </span>
                                                                     <% } %>
-                                                                </span>
-                                                            <% } else if (p.percent > 0) { %>
-                                                                <span class="inline-flex items-center gap-1 bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-lg text-xs font-semibold">
-                                                                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
-                                                                    <%= p.moduleTitle %>
-                                                                    <% if (p.source === 'legacy') { %><span class="text-[10px] text-blue-500"><%= p.percent %>%</span><% } %>
-                                                                    <% if (p.source === 'new') { %><span class="text-[10px] text-blue-500">(<%= p.completed %>/<%= p.total %>)</span><% } %>
-                                                                </span>
-                                                            <% } else { %>
-                                                                <span class="inline-flex items-center gap-1 bg-gray-50 text-gray-400 border border-gray-200 px-2.5 py-1 rounded-lg text-xs">
-                                                                    <%= p.moduleTitle %>
-                                                                    <% if (p.source === 'new') { %><span class="text-[10px]">(0/<%= p.total %>)</span><% } %>
-                                                                </span>
-                                                            <% } %>
+                                                                </div>
+                                                            </div>
                                                         <% }) %>
                                                     <% } else { %>
-                                                        <span class="text-gray-400 text-xs italic">Tiada data</span>
+                                                        <span class="text-xs text-gray-400 italic">Tiada Data</span>
                                                     <% } %>
                                                 </div>
                                             </td>

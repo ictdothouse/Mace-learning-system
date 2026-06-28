@@ -412,8 +412,8 @@ router.get('/', async (req, res) => {
                 ];
                 
                 legacyDefs.forEach((m, i) => {
-                    const lessonData = sortedLessons[i];
-                    const title = lessonData ? lessonData.title : `Pembelajaran ${i + 1}`;
+                    const moduleData = allModules[i];
+                    const title = moduleData ? moduleData.title : `Modul ${i + 1}`;
                     const score = scores[m.quizKey] || 0;
                     const isFinished = stage >= m.stagePassed;
                     athleteObj.progress.push({
