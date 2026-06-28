@@ -98,7 +98,7 @@ router.get('/modules', async (req, res) => {
 // GET: Form Cipta Modul Baru
 router.get('/modules/new', async (req, res) => {
     try { 
-        res.render('admin-edit-module', { page: 'modules', module: null }); 
+        res.render('admin-edit-module', { page: 'modules', module: null, editMode: 'create' }); 
     } catch (err) { 
         res.status(500).send('Ralat memuatkan borang.'); 
     }
