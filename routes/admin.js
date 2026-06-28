@@ -403,20 +403,22 @@ router.get('/', async (req, res) => {
                 const stage = athleteObj.currentStage || 1;
                 const scores = athleteObj.quizScores || {};
                 
-                // Bina progress dari sistem lama (3 modul tetap)
-                const legacyModules = [
-                    { title: 'Modul 1', quizKey: 'quiz1', stageRequired: 1, stagePassed: 2 },
-                    { title: 'Modul 2', quizKey: 'quiz2', stageRequired: 2, stagePassed: 3 },
-                    { title: 'Modul 3', quizKey: 'quiz3', stageRequired: 3, stagePassed: 4 }
+                // Ambil tajuk sebenar dari lessons (sorted by order), fallback ke "Pembelajaran N"
+                const sortedLessons = allLessons.slice().sort((a, b) => (a.order || 0) - (b.order || 0));
+                const legacyDefs = [
+                    { quizKey: 'quiz1', stageRequired: 1, stagePassed: 2 },
+                    { quizKey: 'quiz2', stageRequired: 2, stagePassed: 3 },
+                    { quizKey: 'quiz3', stageRequired: 3, stagePassed: 4 }
                 ];
                 
-                legacyModules.forEach((m, i) => {
+                legacyDefs.forEach((m, i) => {
+                    const lessonData = sortedLessons[i];
+                    const title = lessonData ? lessonData.title : `Pembelajaran ${i + 1}`;
                     const score = scores[m.quizKey] || 0;
                     const isFinished = stage >= m.stagePassed;
-                    const inProgress = stage >= m.stageRequired && !isFinished;
                     athleteObj.progress.push({
-                        moduleTitle: m.title,
-                        completed: isFinished ? 1 : (inProgress ? 0 : 0),
+                        moduleTitle: title,
+                        completed: isFinished ? 1 : 0,
                         total: 1,
                         percent: score,
                         isFinished,
@@ -424,8 +426,9 @@ router.get('/', async (req, res) => {
                         source: 'legacy'
                     });
                 });
-                athleteObj.hasAccount = true; // sistem lama tak perlu akaun
+                athleteObj.hasAccount = true;
             }
+
 
             return athleteObj;
         });

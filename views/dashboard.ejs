@@ -201,10 +201,18 @@
 
         <!-- MODULE CARDS -->
         <h2 class="fade-up delay-2 text-white/60 text-xs uppercase tracking-widest font-semibold mb-4">
-            <%= lang === 'en' ? 'Learning Modules' : 'Modul Pembelajaran' %>
+            <%= __('dashboard_modules') %>
         </h2>
+        <%
+        // Gunakan lessons dari DB jika ada, jika tidak fallback ke 3 modul dummy
+        const lessonList = (typeof lessons !== 'undefined' && lessons && lessons.length > 0)
+            ? lessons
+            : [{ title: 'Pembelajaran 1', order: 1 }, { title: 'Pembelajaran 2', order: 2 }, { title: 'Pembelajaran 3', order: 3 }];
+        const totalLessons = lessonList.length;
+        %>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mb-8 sm:mb-10">
-            <% for(let i=1; i<=3; i++) { 
+            <% lessonList.forEach((lesson, idx) => {
+                const i = lesson.order || (idx + 1);
                 const isLocked = athlete.currentStage < i;
                 const isCompleted = athlete.currentStage > i;
                 const isCurrent = athlete.currentStage === i;
@@ -216,27 +224,21 @@
                 const bgGrad = isLocked 
                     ? 'bg-white/3' 
                     : (isCompleted ? 'bg-emerald-950/40' : 'bg-indigo-950/50');
-                const delayClass = 'delay-' + (i+1);
+                const delayNum = Math.min(idx + 2, 5);
             %>
-            <div class="fade-up <%= delayClass %> module-card <%= cardClass %> rounded-2xl p-5 sm:p-6 border <%= borderGrad %> <%= bgGrad %>">
+            <div class="fade-up delay-<%= delayNum %> module-card <%= cardClass %> rounded-2xl p-5 sm:p-6 border <%= borderGrad %> <%= bgGrad %>">
                 
                 <!-- Card Header -->
                 <div class="flex items-start justify-between mb-4">
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-widest mb-1 <%= isLocked ? 'text-white/30' : (isCompleted ? 'text-emerald-400' : 'text-indigo-400') %>">
-                            <%= lang === 'en' ? 'Module' : 'Modul' %> <%= i %>
+                            <%= lang === 'en' ? 'Lesson' : 'Pembelajaran' %> <%= i %>
                         </p>
-                        <h3 class="font-bold text-lg <%= isLocked ? 'text-white/40' : 'text-white' %>">
-                            <% if (i === 1) { %>
-                                <%= lang === 'en' ? 'Introduction' : 'Pengenalan' %>
-                            <% } else if (i === 2) { %>
-                                <%= lang === 'en' ? 'Core Content' : 'Kandungan Utama' %>
-                            <% } else { %>
-                                <%= lang === 'en' ? 'Assessment' : 'Penilaian' %>
-                            <% } %>
+                        <h3 class="font-bold text-base leading-snug <%= isLocked ? 'text-white/40' : 'text-white' %>">
+                            <%= lesson.title %>
                         </h3>
                     </div>
-                    <div class="text-3xl flex-shrink-0">
+                    <div class="text-3xl flex-shrink-0 ml-2">
                         <% if (isLocked) { %>🔒
                         <% } else if (isCompleted) { %>✅
                         <% } else { %>📖
@@ -249,7 +251,7 @@
                 <div class="mb-4">
                     <div class="flex justify-between text-xs font-medium mb-1.5">
                         <span class="<%= isCompleted ? 'text-emerald-400' : 'text-white/60' %>">
-                            <%= isCompleted ? (lang === 'en' ? 'Completed' : 'Selesai') : (lang === 'en' ? 'In Progress' : 'Sedang Belajar') %>
+                            <%= isCompleted ? __('progress_completed') : __('progress_in_progress') %>
                         </span>
                         <span class="<%= isCompleted ? 'text-emerald-300 font-bold' : 'text-white/60' %>">
                             <%= isCompleted ? quizScore + '%' : '—' %>
@@ -266,11 +268,11 @@
                 <!-- Status Text -->
                 <p class="text-xs mb-4 <%= isLocked ? 'text-white/25' : (isCompleted ? 'text-emerald-400/80' : 'text-white/50') %>">
                     <% if (isLocked) { %>
-                        🔐 <%= lang === 'en' ? 'Complete previous module first' : 'Sila selesaikan modul sebelumnya' %>
+                        🔐 <%= __('dashboard_locked_hint') %>
                     <% } else if (isCompleted) { %>
                         🎯 <%= lang === 'en' ? 'Score: ' + quizScore + '%' : 'Skor: ' + quizScore + '%' %>
                     <% } else { %>
-                        ▶ <%= lang === 'en' ? 'Watch video & pass the quiz (≥80%)' : 'Tonton video & lulus kuiz (≥80%)' %>
+                        ▶ <%= __('dashboard_active_hint') %>
                     <% } %>
                 </p>
 
@@ -278,17 +280,15 @@
                 <% if (!isLocked) { %>
                     <a href="/lesson/<%= i %>" 
                        class="block text-center py-2.5 rounded-xl text-sm font-bold transition-all duration-300 <%= isCompleted ? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 hover:border-emerald-400' : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-900/50 hover:shadow-indigo-800/50' %>">
-                        <%= isCompleted 
-                            ? (lang === 'en' ? '🔄 Review' : '🔄 Ulang Kaji') 
-                            : (lang === 'en' ? '▶ Start Now' : '▶ Mula Sekarang') %>
+                        <%= isCompleted ? __('dashboard_btn_review') : __('dashboard_btn_start') %>
                     </a>
                 <% } else { %>
                     <button disabled class="block w-full text-center py-2.5 rounded-xl text-sm font-bold bg-white/3 text-white/20 cursor-not-allowed border border-white/5">
-                        🔒 <%= lang === 'en' ? 'Locked' : 'Terkunci' %>
+                        <%= __('dashboard_btn_locked') %>
                     </button>
                 <% } %>
             </div>
-            <% } %>
+            <% }) %>
         </div>
 
         <!-- CERTIFICATE SECTION (if completed) -->
