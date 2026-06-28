@@ -1185,6 +1185,8 @@
                 <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">Maklumat guru dikemaskini!</div>
             <% } else if (msg === 'teacher_deleted') { %>
                 <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">Guru berjaya dipadam!</div>
+            <% } else if (msg === 'create_error') { %>
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-r-lg mb-6 shadow-sm flex items-center gap-2 animate-fade-in">❌ Ralat: Gagal menambah guru baru. Sila cuba lagi.</div>
             <% } else if (msg === 'password_reset') { %>
                 <div class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg mb-6">Password baru: <strong><%= newPassword %></strong></div>
             <% } %>
