@@ -325,7 +325,7 @@ router.post('/api/local-upload', upload.single('file'), async (req, res) => {
     }
 });
 
-// GET: Dashboard Utama
+// GET: Dashboard Utama (Urusan Kemajuan Atlet SUKMA)
 router.get('/', async (req, res) => {
     try {
         const total = await Athlete.countDocuments();
@@ -334,9 +334,84 @@ router.get('/', async (req, res) => {
             { $group: { _id: '$negeriWakil', total: { $sum: 1 }, passed: { $sum: { $cond: [{ $eq: ['$currentStage', 4] }, 1, 0] } } } },
             { $sort: { total: -1 } }
         ]);
+
         const athletes = await Athlete.find().sort({ createdAt: -1 }).limit(100);
-        res.render('admin', { page: 'dashboard', total, passed, learning: total - passed, byState, athletes, msg: req.query.msg || null, file: req.query.file || null });
-    } catch (err) { res.send('Ralat memuatkan dashboard.'); }
+        
+        // 1. Dapatkan akaun User pelajar untuk atlet-atlet ini
+        const athleteIds = athletes.map(a => a._id);
+        const users = await User.find({ athleteId: { $in: athleteIds } });
+        
+        // Peta athleteId -> userId
+        const athleteUserMap = {};
+        users.forEach(u => {
+            athleteUserMap[u.athleteId.toString()] = u._id;
+        });
+
+        // 2. Dapatkan semua modul dan bilangan lesson aktif bagi setiap modul
+        const allModules = await Module.find({ isActive: true }).sort({ order: 1 });
+        const allLessons = await Lesson.find({ isActive: true });
+        
+        const moduleLessonCount = {};
+        allModules.forEach(m => {
+            moduleLessonCount[m._id.toString()] = allLessons.filter(l => l.moduleId.toString() === m._id.toString()).length;
+        });
+
+        // 3. Dapatkan kemajuan LessonProgress yang telah disiapkan (isCompleted: true)
+        const userIds = users.map(u => u._id);
+        const progresses = await LessonProgress.find({ userId: { $in: userIds }, isCompleted: true });
+
+        // Peta userId -> moduleId -> jumlah lesson selesai
+        const userCompletedCount = {};
+        progresses.forEach(p => {
+            const uId = p.userId.toString();
+            const mId = p.moduleId.toString();
+            if (!userCompletedCount[uId]) userCompletedCount[uId] = {};
+            if (!userCompletedCount[uId][mId]) userCompletedCount[uId][mId] = 0;
+            userCompletedCount[uId][mId]++;
+        });
+
+        // 4. Masukkan data kemajuan modul ke dalam setiap objek atlet
+        const athletesWithProgress = athletes.map(a => {
+            const athleteObj = a.toObject();
+            const userId = athleteUserMap[a._id.toString()];
+            
+            athleteObj.progress = [];
+            athleteObj.hasAccount = !!userId;
+
+            if (userId) {
+                allModules.forEach(m => {
+                    const total = moduleLessonCount[m._id.toString()] || 0;
+                    if (total > 0) {
+                        const completed = (userCompletedCount[userId.toString()] && userCompletedCount[userId.toString()][m._id.toString()]) || 0;
+                        const percent = Math.round((completed / total) * 100);
+                        athleteObj.progress.push({
+                            moduleId: m._id,
+                            moduleTitle: m.title,
+                            completed,
+                            total,
+                            percent,
+                            isFinished: completed === total
+                        });
+                    }
+                });
+            }
+            return athleteObj;
+        });
+
+        res.render('admin', { 
+            page: 'dashboard', 
+            total, 
+            passed, 
+            learning: total - passed, 
+            byState, 
+            athletes: athletesWithProgress, 
+            msg: req.query.msg || null, 
+            file: req.query.file || null 
+        });
+    } catch (err) { 
+        console.error('Dashboard Load Error:', err);
+        res.send('Ralat memuatkan dashboard.'); 
+    }
 });
 
 // GET: Tetapan Sistem
@@ -952,22 +1027,29 @@ router.get('/certificate/preview/:id', async (req, res) => {
             return res.redirect('/admin-mace');
         }
 
-        // Cari kursus yang atlet ini sertai
+        // Cari modul atau kursus yang atlet ini sertai
         let course = null;
-        const Course = require('../models/Course');
+        const moduleId = req.query.moduleId;
+        if (moduleId) {
+            const module = await Module.findById(moduleId);
+            if (module) {
+                course = { name: module.title };
+            }
+        }
         
-        // Cuba cari kursus dengan pelbagai cara
-        course = await Course.findOne({ 'participants.athlete': athlete._id });
-        
-        // Jika tak jumpa, cuba cari semua kursus dan semak manually
         if (!course) {
-            const allCourses = await Course.find();
-            for (const c of allCourses) {
-                if (c.participants && Array.isArray(c.participants)) {
-                    const found = c.participants.find(p => p.athlete && p.athlete.toString() === athlete._id.toString());
-                    if (found) {
-                        course = c;
-                        break;
+            const Course = require('../models/Course');
+            course = await Course.findOne({ 'participants.athlete': athlete._id });
+            
+            if (!course) {
+                const allCourses = await Course.find();
+                for (const c of allCourses) {
+                    if (c.participants && Array.isArray(c.participants)) {
+                        const found = c.participants.find(p => p.athlete && p.athlete.toString() === athlete._id.toString());
+                        if (found) {
+                            course = c;
+                            break;
+                        }
                     }
                 }
             }
