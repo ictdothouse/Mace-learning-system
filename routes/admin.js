@@ -2,13 +2,17 @@
 const express = require('express');
 const router = express.Router();
 const Athlete = require('../models/Athlete');
+const User = require('../models/User');
+const Group = require('../models/Group');
 const Lesson = require('../models/Lesson');
 const Module = require('../models/Module');
+const Level = require('../models/Level');
 const QuestionBank = require('../models/QuestionBank');
 const CertificateTemplate = require('../models/CertificateTemplate');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
+const crypto = require('crypto');
 
 // Setup Multer
 const storage = multer.diskStorage({
@@ -734,3 +738,362 @@ router.get('/certificate/preview/:id', async (req, res) => {
 });
 
 module.exports = router;
+
+// ==========================================
+// PENGURUSAN TEACHER (ADMIN SAHAJA)
+// ==========================================
+
+// GET: Senarai Teacher
+router.get('/teachers', async (req, res) => {
+    try {
+        const teachers = await User.find({ role: 'teacher' }).sort({ createdAt: -1 });
+        res.render('admin', { page: 'teachers', teachers, msg: req.query.msg || null });
+    } catch (err) {
+        console.error('Teachers Error:', err);
+        res.status(500).send('Ralat memuatkan senarai teacher.');
+    }
+});
+
+// GET: Form Cipta Teacher Baru
+router.get('/teachers/new', async (req, res) => {
+    res.render('admin-edit-teacher', { page: 'teachers', teacher: null, editMode: 'create' });
+});
+
+// POST: Cipta Teacher Baru
+router.post('/teachers/new', async (req, res) => {
+    try {
+        const { fullName, email, password } = req.body;
+        
+        if (!fullName || !email || !password) {
+            return res.redirect('/admin-mace/teachers?msg=missing_fields');
+        }
+        
+        // Check if email already exists
+        const existing = await User.findOne({ email });
+        if (existing) {
+            return res.redirect('/admin-mace/teachers?msg=email_exists');
+        }
+        
+        await User.create({
+            fullName,
+            email,
+            password,
+            role: 'teacher',
+            isActive: true
+        });
+        
+        res.redirect('/admin-mace/teachers?msg=teacher_created');
+    } catch (err) {
+        console.error('Create Teacher Error:', err);
+        res.redirect('/admin-mace/teachers?msg=create_error');
+    }
+});
+
+// GET: Form Edit Teacher
+router.get('/teachers/edit/:id', async (req, res) => {
+    try {
+        const teacher = await User.findById(req.params.id);
+        if (!teacher || teacher.role !== 'teacher') {
+            return res.redirect('/admin-mace/teachers?msg=not_found');
+        }
+        res.render('admin-edit-teacher', { page: 'teachers', teacher, editMode: 'edit' });
+    } catch (err) {
+        console.error('Edit Teacher Form Error:', err);
+        res.redirect('/admin-mace/teachers?msg=error');
+    }
+});
+
+// POST: Update Teacher
+router.post('/teachers/edit/:id', async (req, res) => {
+    try {
+        const { fullName, email, password, isActive } = req.body;
+        
+        const teacher = await User.findById(req.params.id);
+        if (!teacher || teacher.role !== 'teacher') {
+            return res.redirect('/admin-mace/teachers?msg=not_found');
+        }
+        
+        if (email !== teacher.email) {
+            const existing = await User.findOne({ email, _id: { $ne: req.params.id } });
+            if (existing) {
+                return res.redirect('/admin-mace/teachers?msg=email_exists');
+            }
+        }
+        
+        const updateData = { fullName, email, isActive: isActive === 'on' };
+        
+        if (password && password.trim() !== '') {
+            updateData.password = password;
+        }
+        
+        await User.findByIdAndUpdate(req.params.id, updateData);
+        res.redirect('/admin-mace/teachers?msg=teacher_updated');
+    } catch (err) {
+        console.error('Update Teacher Error:', err);
+        res.redirect('/admin-mace/teachers?msg=update_error');
+    }
+});
+
+// POST: Delete Teacher
+router.post('/teachers/delete/:id', async (req, res) => {
+    try {
+        const teacher = await User.findById(req.params.id);
+        if (!teacher || teacher.role !== 'teacher') {
+            return res.redirect('/admin-mace/teachers?msg=not_found');
+        }
+        
+        await User.findByIdAndDelete(req.params.id);
+        res.redirect('/admin-mace/teachers?msg=teacher_deleted');
+    } catch (err) {
+        console.error('Delete Teacher Error:', err);
+        res.redirect('/admin-mace/teachers?msg=delete_error');
+    }
+});
+
+// POST: Reset Password Teacher
+router.post('/teachers/reset-password/:id', async (req, res) => {
+    try {
+        const teacher = await User.findById(req.params.id);
+        if (!teacher || teacher.role !== 'teacher') {
+            return res.redirect('/admin-mace/teachers?msg=not_found');
+        }
+        
+        const newPassword = crypto.randomBytes(4).toString('hex').toUpperCase();
+        teacher.password = newPassword;
+        await teacher.save();
+        
+        res.redirect('/admin-mace/teachers?msg=password_reset&newPassword=' + encodeURIComponent(newPassword));
+    } catch (err) {
+        console.error('Reset Password Error:', err);
+        res.redirect('/admin-mace/teachers?msg=reset_error');
+    }
+});
+
+// ==========================================
+// PENGURUSAN PELAJAR (STUDENT) - ADMIN
+// ==========================================
+
+// GET: Senarai Pelajar
+router.get('/students', async (req, res) => {
+    try {
+        const students = await User.find({ role: 'student' })
+            .populate('athleteId')
+            .populate('enrolledGroups')
+            .sort({ createdAt: -1 });
+        const groups = await Group.find().sort({ name: 1 });
+        res.render('admin', { page: 'students', students, groups, msg: req.query.msg || null });
+    } catch (err) {
+        console.error('Students Error:', err);
+        res.status(500).send('Ralat memuatkan senarai pelajar.');
+    }
+});
+
+// GET: Form Edit Pelajar
+router.get('/students/edit/:id', async (req, res) => {
+    try {
+        const student = await User.findById(req.params.id)
+            .populate('athleteId')
+            .populate('enrolledGroups');
+        if (!student || student.role !== 'student') {
+            return res.redirect('/admin-mace/students?msg=not_found');
+        }
+        const groups = await Group.find().sort({ name: 1 });
+        res.render('admin-edit-student', { page: 'students', student, groups, editMode: 'edit' });
+    } catch (err) {
+        console.error('Edit Student Form Error:', err);
+        res.redirect('/admin-mace/students?msg=error');
+    }
+});
+
+// POST: Update Pelajar
+router.post('/students/edit/:id', async (req, res) => {
+    try {
+        const { fullName, email, password, isActive, groupIds } = req.body;
+        
+        const student = await User.findById(req.params.id);
+        if (!student || student.role !== 'student') {
+            return res.redirect('/admin-mace/students?msg=not_found');
+        }
+        
+        if (email !== student.email) {
+            const existing = await User.findOne({ email, _id: { $ne: req.params.id } });
+            if (existing) {
+                return res.redirect('/admin-mace/students?msg=email_exists');
+            }
+        }
+        
+        const updateData = { fullName, email, isActive: isActive === 'on' };
+        
+        if (password && password.trim() !== '') {
+            updateData.password = password;
+        }
+        
+        await User.findByIdAndUpdate(req.params.id, updateData);
+        
+        if (groupIds) {
+            const groups = Array.isArray(groupIds) ? groupIds : (groupIds ? [groupIds] : []);
+            student.enrolledGroups = groups;
+            await student.save();
+            
+            await Group.updateMany(
+                { _id: { $in: groups } },
+                { $addToSet: { students: student._id } }
+            );
+            
+            await Group.updateMany(
+                { _id: { $nin: groups }, students: student._id },
+                { $pull: { students: student._id } }
+            );
+        }
+        
+        res.redirect('/admin-mace/students?msg=student_updated');
+    } catch (err) {
+        console.error('Update Student Error:', err);
+        res.redirect('/admin-mace/students?msg=update_error');
+    }
+});
+
+// POST: Delete Pelajar
+router.post('/students/delete/:id', async (req, res) => {
+    try {
+        const student = await User.findById(req.params.id);
+        if (!student || student.role !== 'student') {
+            return res.redirect('/admin-mace/students?msg=not_found');
+        }
+        
+        await Group.updateMany(
+            { students: student._id },
+            { $pull: { students: student._id } }
+        );
+        
+        await User.findByIdAndDelete(req.params.id);
+        res.redirect('/admin-mace/students?msg=student_deleted');
+    } catch (err) {
+        console.error('Delete Student Error:', err);
+        res.redirect('/admin-mace/students?msg=delete_error');
+    }
+});
+
+// POST: Reset Password Pelajar
+router.post('/students/reset-password/:id', async (req, res) => {
+    try {
+        const student = await User.findById(req.params.id);
+        if (!student || student.role !== 'student') {
+            return res.redirect('/admin-mace/students?msg=not_found');
+        }
+        
+        const newPassword = crypto.randomBytes(4).toString('hex').toUpperCase();
+        student.password = newPassword;
+        await student.save();
+        
+        res.redirect('/admin-mace/students?msg=password_reset&newPassword=' + encodeURIComponent(newPassword));
+    } catch (err) {
+        console.error('Reset Password Error:', err);
+        res.redirect('/admin-mace/students?msg=reset_error');
+    }
+});
+
+// ==========================================
+// PENGURUSAN LEVEL DALAM MODUL (ADMIN)
+// ==========================================
+
+// GET: Manage Levels untuk Modul tertentu
+router.get('/modules/:moduleId/levels', async (req, res) => {
+    try {
+        const module = await Module.findById(req.params.moduleId);
+        if (!module) {
+            return res.redirect('/admin-mace/modules?msg=not_found');
+        }
+        
+        const levels = await Level.find({ moduleId: req.params.moduleId }).sort({ order: 1 });
+        
+        res.render('admin-manage-levels', { 
+            page: 'modules', 
+            module, 
+            levels, 
+            msg: req.query.msg || null 
+        });
+    } catch (err) {
+        console.error('Manage Levels Error:', err);
+        res.status(500).send('Ralat memuatkan levels.');
+    }
+});
+
+// POST: Update Module Level Settings
+router.post('/modules/:moduleId/level-settings', async (req, res) => {
+    try {
+        const { hasLevels, isSequential, minPassingScore } = req.body;
+        
+        const module = await Module.findById(req.params.moduleId);
+        if (!module) {
+            return res.redirect('/admin-mace/modules?msg=not_found');
+        }
+        
+        module.hasLevels = hasLevels === 'on';
+        module.isSequential = isSequential === 'on';
+        module.minPassingScore = parseInt(minPassingScore) || 0;
+        
+        await module.save();
+        res.redirect('/admin-mace/modules/' + req.params.moduleId + '/levels?msg=settings_updated');
+    } catch (err) {
+        console.error('Update Level Settings Error:', err);
+        res.redirect('/admin-mace/modules?msg=update_error');
+    }
+});
+
+// POST: Create Level
+router.post('/modules/:moduleId/levels/create', async (req, res) => {
+    try {
+        const { name, description, order } = req.body;
+        
+        const module = await Module.findById(req.params.moduleId);
+        if (!module) {
+            return res.redirect('/admin-mace/modules?msg=not_found');
+        }
+        
+        if (!module.hasLevels) {
+            return res.redirect('/admin-mace/modules/' + req.params.moduleId + '/levels?msg=levels_not_enabled');
+        }
+        
+        let finalOrder = order;
+        if (!finalOrder) {
+            const lastLevel = await Level.findOne({ moduleId: req.params.moduleId }).sort({ order: -1 });
+            finalOrder = lastLevel ? lastLevel.order + 1 : 1;
+        }
+        
+        await Level.create({
+            moduleId: req.params.moduleId,
+            name,
+            description: description || '',
+            order: parseInt(finalOrder)
+        });
+        
+        res.redirect('/admin-mace/modules/' + req.params.moduleId + '/levels?msg=level_created');
+    } catch (err) {
+        console.error('Create Level Error:', err);
+        res.redirect('/admin-mace/modules?msg=create_error');
+    }
+});
+
+// POST: Delete Level
+router.post('/levels/delete/:id', async (req, res) => {
+    try {
+        const level = await Level.findById(req.params.id);
+        if (!level) {
+            return res.redirect('/admin-mace/modules?msg=not_found');
+        }
+        
+        const moduleId = level.moduleId;
+        
+        const lessonCount = await Lesson.countDocuments({ levelId: req.params.id });
+        if (lessonCount > 0) {
+            return res.redirect('/admin-mace/modules/' + moduleId + '/levels?msg=cannot_delete_has_lessons');
+        }
+        
+        await Level.findByIdAndDelete(req.params.id);
+        res.redirect('/admin-mace/modules/' + moduleId + '/levels?msg=level_deleted');
+    } catch (err) {
+        console.error('Delete Level Error:', err);
+        res.redirect('/admin-mace/modules?msg=delete_error');
+    }
+});
