@@ -1098,7 +1098,9 @@ router.get("/groups", async (req, res) => {
         res.render("admin", { 
             page: "groups", 
             groups, 
-            msg: req.query.msg || null 
+            msg: req.query.msg || null,
+            createdKey: req.query.key || null,
+            newKey: req.query.newKey || null
         });
     } catch (err) {
         console.error("Groups Error:", err);
@@ -1128,14 +1130,36 @@ router.post("/groups/new", async (req, res) => {
     try {
         const { name, description, teacherId, moduleIds, enrollmentKey, maxStudents } = req.body;
         
-        if (!name || !teacherId) {
+        if (!name) {
             return res.redirect("/admin-mace/groups?msg=missing_fields");
+        }
+
+        let targetTeacherId = teacherId;
+        if (!targetTeacherId) {
+            if (req.session && req.session.userId) {
+                targetTeacherId = req.session.userId;
+            } else {
+                const adminUser = await User.findOne({ role: "admin" });
+                if (adminUser) {
+                    targetTeacherId = adminUser._id;
+                } else {
+                    const anyUser = await User.findOne();
+                    if (anyUser) {
+                        targetTeacherId = anyUser._id;
+                    }
+                }
+            }
+        }
+
+        if (!targetTeacherId) {
+            return res.redirect("/admin-mace/groups?msg=no_teacher_available");
         }
 
         const groupData = {
             name,
             description: description || "",
-            teacherId,
+            teacherId: targetTeacherId,
+            createdBy: req.session && req.session.userId ? req.session.userId : targetTeacherId,
             modules: moduleIds ? (Array.isArray(moduleIds) ? moduleIds : [moduleIds]) : [],
             maxStudents: parseInt(maxStudents) || 0
         };
@@ -1145,8 +1169,8 @@ router.post("/groups/new", async (req, res) => {
             groupData.enrollmentKey = enrollmentKey.trim().toUpperCase();
         }
 
-        await Group.create(groupData);
-        res.redirect("/admin-mace/groups?msg=group_created");
+        const group = await Group.create(groupData);
+        res.redirect("/admin-mace/groups?msg=group_created&key=" + encodeURIComponent(group.enrollmentKey));
     } catch (err) {
         console.error("Create Group Error:", err);
         res.redirect("/admin-mace/groups?msg=create_error");

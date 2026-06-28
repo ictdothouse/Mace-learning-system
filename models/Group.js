@@ -67,13 +67,12 @@ const groupSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Generate enrollment key secara automatik sebelum simpan
-groupSchema.pre('save', async function(next) {
+// Generate enrollment key secara automatik sebelum validasi
+groupSchema.pre('validate', function() {
     if (!this.enrollmentKey) {
         const crypto = require('crypto');
         this.enrollmentKey = 'GRP-' + crypto.randomBytes(4).toString('hex').toUpperCase();
     }
-    next();
 });
 
 module.exports = mongoose.model('Group', groupSchema);
