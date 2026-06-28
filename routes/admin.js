@@ -739,8 +739,6 @@ router.get('/certificate/preview/:id', async (req, res) => {
     }
 });
 
-module.exports = router;
-
 // ==========================================
 // PENGURUSAN TEACHER (ADMIN SAHAJA)
 // ==========================================
