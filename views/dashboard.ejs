@@ -113,11 +113,11 @@
                 <div class="flex gap-1 bg-white/10 rounded-lg p-1">
                     <form method="POST" action="/set-language" class="inline">
                         <input type="hidden" name="lang" value="ms">
-                        <button type="submit" class="text-xs px-2.5 py-1 rounded font-semibold transition-all <%= lang === 'ms' ? 'bg-white text-indigo-900' : 'text-white/60 hover:text-white' %>">🇲🇾 BM</button>
+                        <button type="submit" class="text-xs px-2.5 py-1 rounded font-semibold transition-all <%= lang === 'ms' ? 'bg-white text-indigo-900' : 'text-white/60 hover:text-white' %>">BM</button>
                     </form>
                     <form method="POST" action="/set-language" class="inline">
                         <input type="hidden" name="lang" value="en">
-                        <button type="submit" class="text-xs px-2.5 py-1 rounded font-semibold transition-all <%= lang === 'en' ? 'bg-white text-indigo-900' : 'text-white/60 hover:text-white' %>">🇬🇧 EN</button>
+                        <button type="submit" class="text-xs px-2.5 py-1 rounded font-semibold transition-all <%= lang === 'en' ? 'bg-white text-indigo-900' : 'text-white/60 hover:text-white' %>">EN</button>
                     </form>
                 </div>
                 <a href="/logout" class="flex items-center gap-1.5 text-sm text-white/60 hover:text-red-400 transition-colors font-medium px-3 py-1.5 rounded-lg hover:bg-red-500/10">

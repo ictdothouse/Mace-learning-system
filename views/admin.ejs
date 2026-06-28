@@ -35,31 +35,31 @@
             <!-- 🆕 PENGURUSAN GURU / INSTRUKTOR -->
             <a href="/admin-mace/teachers" class="sidebar-link <%= page === 'teachers' ? 'active' : '' %> flex items-center px-6 py-3 hover:bg-blue-800 transition border-l-4 border-transparent">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                <%= __('nav_teachers') %> / Instruktor
+                <%= __('nav_teachers') %>
             </a>
 
             <!-- 🆕 PENGURUSAN PELAJAR (ATLET) -->
             <a href="/admin-mace/students" class="sidebar-link <%= page === 'students' ? 'active' : '' %> flex items-center px-6 py-3 hover:bg-blue-800 transition border-l-4 border-transparent">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                <%= __('nav_students') %> (Atlit)
+                <%= __('nav_students') %>
             </a>
 
             <!-- 🆕 PENGURUSAN KUMPULAN & ENROLLMENT -->
             <a href="/admin-mace/groups" class="sidebar-link <%= page === 'groups' ? 'active' : '' %> flex items-center px-6 py-3 hover:bg-blue-800 transition border-l-4 border-transparent">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                <%= __('nav_groups') %> & Enrollment
+                <%= __('nav_groups') %>
             </a>
 
             <!-- 🆕 EDIT MODUL & KUIZ (dengan Level) -->
             <a href="/admin-mace/modules" class="sidebar-link <%= page === 'modules' ? 'active' : '' %> flex items-center px-6 py-3 hover:bg-blue-800 transition border-l-4 border-transparent">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-                <%= __('nav_modules') %> & Lesson (Level)
+                <%= __('nav_modules') %>
             </a>
             
             <!-- 🎨 TEMPLATE SIJIL -->
             <a href="/admin-mace/templates" class="sidebar-link <%= page === 'templates' ? 'active' : '' %> flex items-center px-6 py-3 hover:bg-blue-800 transition border-l-4 border-transparent">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                Template <%= __('nav_templates') %>
+                <%= __('nav_templates') %>
             </a>
             
             <!-- Tetapan Sistem -->
@@ -71,15 +71,15 @@
 
         <!-- Toggle Bahasa -->
         <div class="px-6 py-3 border-t border-blue-800">
-            <p class="text-xs text-blue-400 mb-2">🌐 Bahasa / Language</p>
+            <p class="text-xs text-blue-400 mb-2">🌐 Bahasa</p>
             <div class="flex gap-2">
                 <form method="POST" action="/set-language">
                     <input type="hidden" name="lang" value="ms">
-                    <button type="submit" class="text-xs px-3 py-1.5 rounded-lg font-semibold transition <%= lang === 'ms' ? 'bg-yellow-400 text-blue-900' : 'bg-blue-800 text-blue-200 hover:bg-blue-700' %>">🇲🇾 BM</button>
+                    <button type="submit" class="text-xs px-3 py-1.5 rounded-lg font-semibold transition <%= lang === 'ms' ? 'bg-yellow-400 text-blue-900' : 'bg-blue-800 text-blue-200 hover:bg-blue-700' %>">BM</button>
                 </form>
                 <form method="POST" action="/set-language">
                     <input type="hidden" name="lang" value="en">
-                    <button type="submit" class="text-xs px-3 py-1.5 rounded-lg font-semibold transition <%= lang === 'en' ? 'bg-yellow-400 text-blue-900' : 'bg-blue-800 text-blue-200 hover:bg-blue-700' %>">🇬🇧 EN</button>
+                    <button type="submit" class="text-xs px-3 py-1.5 rounded-lg font-semibold transition <%= lang === 'en' ? 'bg-yellow-400 text-blue-900' : 'bg-blue-800 text-blue-200 hover:bg-blue-700' %>">EN</button>
                 </form>
             </div>
         </div>
@@ -87,7 +87,7 @@
         <div class="p-6 border-t border-blue-800">
             <a href="/" class="flex items-center text-sm text-blue-300 hover:text-white transition group">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                <%= __('nav_dashboard') === 'Dashboard' ? 'Kembali ke Laman Utama' : 'Back to Main Page' %>
+                <%= __('nav_back_main') %>
             </a>
         </div>
     </aside>
@@ -141,12 +141,12 @@
         <% if (page === 'dashboard' || !page) { %>
             <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-900">Dashboard Pemantauan</h2>
-                    <p class="text-gray-500 text-sm mt-1">Statistik terkini prestasi atlit SUKMA secara live.</p>
+                    <h2 class="text-2xl font-bold text-gray-900"><%= __('dashboard_title') %></h2>
+                    <p class="text-gray-500 text-sm mt-1"><%= __('dashboard_subtitle') %></p>
                 </div>
                 <a href="/admin-mace/download" class="shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                    Muat Turun CSV
+                    <%= __('dashboard_csv') %>
                 </a>
             </div>
 
@@ -154,7 +154,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
                     <div>
-                        <p class="text-sm text-gray-500 font-medium uppercase tracking-wider">Jumlah Keseluruhan</p>
+                        <p class="text-sm text-gray-500 font-medium uppercase tracking-wider"><%= __('dashboard_total') %></p>
                         <p class="text-3xl font-bold text-gray-900 mt-2"><%= total || 0 %></p>
                     </div>
                     <div class="bg-blue-50 p-3 rounded-full text-blue-600">
@@ -164,7 +164,7 @@
                 
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
                     <div>
-                        <p class="text-sm text-gray-500 font-medium uppercase tracking-wider">Atlit Lulus (Stage 4)</p>
+                        <p class="text-sm text-gray-500 font-medium uppercase tracking-wider"><%= __('dashboard_passed') %></p>
                         <p class="text-3xl font-bold text-green-600 mt-2"><%= passed || 0 %></p>
                     </div>
                     <div class="bg-green-50 p-3 rounded-full text-green-600">
@@ -174,7 +174,7 @@
 
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
                     <div>
-                        <p class="text-sm text-gray-500 font-medium uppercase tracking-wider">Masih Belajar</p>
+                        <p class="text-sm text-gray-500 font-medium uppercase tracking-wider"><%= __('dashboard_learning') %></p>
                         <p class="text-3xl font-bold text-orange-500 mt-2"><%= learning || 0 %></p>
                     </div>
                     <div class="bg-orange-50 p-3 rounded-full text-orange-500">
@@ -188,13 +188,13 @@
                 <div class="lg:col-span-1 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                     <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 font-bold text-gray-700 flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 7m0 13V7" /></svg>
-                        Pecahan Mengikut Negeri
+                        <%= __('dashboard_by_state_header') %>
                     </div>
                     <div class="p-4 max-h-[400px] overflow-y-auto">
                         <% if (byState && byState.length > 0) { %>
                             <table class="w-full text-sm">
                                 <thead class="text-xs text-gray-500 uppercase bg-gray-50 sticky top-0">
-                                    <tr><th class="py-2 text-left">Negeri</th><th class="py-2 text-right">Jml</th><th class="py-2 text-right">Lulus</th></tr>
+                                    <tr><th class="py-2 text-left"><%= __('table_state') %></th><th class="py-2 text-right"><%= __('dashboard_total') %></th><th class="py-2 text-right"><%= __('status_passed') %></th></tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100">
                                     <% byState.forEach(s => { %>
@@ -216,7 +216,7 @@
                     <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 font-bold text-gray-700 flex justify-between items-center">
                         <span class="flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                            Senarai Atlit Terkini (100 Terakhir)
+                            <%= __('dashboard_athlete_list') %>
                         </span>
                         <span class="text-xs bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full font-medium">Live Data</span>
                     </div>
@@ -224,12 +224,12 @@
                         <table class="w-full text-sm text-left">
                             <thead class="text-xs text-gray-500 uppercase bg-gray-50 sticky top-0 z-10 shadow-sm">
                                 <tr>
-                                    <th class="px-6 py-3">Nama</th>
-                                    <th class="px-6 py-3">IC</th>
-                                    <th class="px-6 py-3">Negeri</th>
-                                    <th class="px-6 py-3">Kemajuan Modul</th>
-                                    <th class="px-6 py-3 text-center">Status</th>
-                                    <th class="px-6 py-3 text-right">Tindakan</th>
+                                    <th class="px-6 py-3"><%= __('table_name') %></th>
+                                    <th class="px-6 py-3"><%= __('table_ic') %></th>
+                                    <th class="px-6 py-3"><%= __('table_state') %></th>
+                                    <th class="px-6 py-3"><%= __('table_progress') %></th>
+                                    <th class="px-6 py-3 text-center"><%= __('table_status') %></th>
+                                    <th class="px-6 py-3 text-right"><%= __('table_action') %></th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">

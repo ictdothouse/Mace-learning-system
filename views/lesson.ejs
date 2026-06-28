@@ -51,11 +51,11 @@
                 <div class="flex gap-1 bg-gray-100 rounded-lg p-1">
                     <form method="POST" action="/set-language" class="inline">
                         <input type="hidden" name="lang" value="ms">
-                        <button type="submit" class="text-xs px-2 py-0.5 rounded font-semibold transition <%= lang === 'ms' ? 'bg-white shadow text-blue-700' : 'text-gray-400 hover:text-gray-600' %>">🇲🇾 BM</button>
+                        <button type="submit" class="text-xs px-2 py-0.5 rounded font-semibold transition <%= lang === 'ms' ? 'bg-white shadow text-blue-700' : 'text-gray-400 hover:text-gray-600' %>">BM</button>
                     </form>
                     <form method="POST" action="/set-language" class="inline">
                         <input type="hidden" name="lang" value="en">
-                        <button type="submit" class="text-xs px-2 py-0.5 rounded font-semibold transition <%= lang === 'en' ? 'bg-white shadow text-blue-700' : 'text-gray-400 hover:text-gray-600' %>">🇬🇧 EN</button>
+                        <button type="submit" class="text-xs px-2 py-0.5 rounded font-semibold transition <%= lang === 'en' ? 'bg-white shadow text-blue-700' : 'text-gray-400 hover:text-gray-600' %>">EN</button>
                     </form>
                 </div>
                 <a href="/dashboard" class="text-sm text-blue-600 hover:text-blue-800 font-medium transition flex items-center gap-1"><%= __('lesson_nav_back') %></a>
