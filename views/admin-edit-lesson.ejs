@@ -111,15 +111,21 @@
 
             <!-- Pengurusan Kuiz Dinamik -->
             <div class="border-t border-gray-200 pt-6">
-                <div class="flex justify-between items-center mb-4">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-4">
                     <div>
                         <h3 class="text-lg font-bold text-gray-900">📝 Pengurusan Kuiz & Soalan</h3>
                         <p class="text-xs text-gray-500">Bina soalan kuiz secara dinamik mengikut pelbagai jenis format.</p>
                     </div>
-                    <button type="button" onclick="addQuestion()" 
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm flex items-center gap-1">
-                        + Tambah Soalan
-                    </button>
+                    <div class="flex items-center gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer bg-gray-100 px-3 py-2 rounded-lg border border-gray-200">
+                            <input type="checkbox" id="toggleMarkah" onchange="toggleCustomMarkah(this.checked)" class="accent-blue-600 h-4 w-4">
+                            <span class="text-xs font-semibold text-gray-700">Set Markah Khusus</span>
+                        </label>
+                        <button type="button" onclick="addQuestion()" 
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm flex items-center gap-1">
+                            + Tambah Soalan
+                        </button>
+                    </div>
                 </div>
                 
                 <div id="quiz-editor" class="space-y-6"></div>
@@ -157,6 +163,21 @@
     <!-- Dynamic Quiz Logic -->
     <script>
         let questions = <%- JSON.stringify((typeof lesson !== 'undefined' && lesson && lesson.quizQuestions) ? lesson.quizQuestions : []) %>;
+        let isCustomMarkah = questions.length > 0 ? questions.some(q => q.points !== 1) : false;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggle = document.getElementById('toggleMarkah');
+            if (toggle) toggle.checked = isCustomMarkah;
+        });
+
+        function toggleCustomMarkah(checked) {
+            isCustomMarkah = checked;
+            if (!checked) {
+                questions.forEach(q => q.points = 1);
+                saveJson();
+            }
+            renderQuizEditor();
+        }
 
         function renderQuizEditor() {
             const container = document.getElementById('quiz-editor');
@@ -236,12 +257,7 @@
 
                 container.innerHTML += `
                     <div class="border border-gray-200 p-5 rounded-xl bg-gray-50/50 relative group shadow-sm">
-                        <button type="button" onclick="removeQuestion(${idx})" 
-                            class="absolute top-4 right-4 bg-red-50 text-red-600 hover:bg-red-100 p-1.5 rounded-lg text-xs transition">
-                            ✕ Padam Soalan
-                        </button>
-                        
-                        <div class="flex flex-wrap items-center gap-3 mb-4">
+                        <div class="flex flex-wrap items-center gap-3 mb-4 pr-1">
                             <span class="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full uppercase tracking-wider">Soalan ${idx+1}</span>
                             
                             <!-- Jenis Soalan -->
@@ -253,11 +269,17 @@
                             </select>
 
                             <!-- Mata/Markah -->
-                            <div class="flex items-center gap-2 ml-auto">
+                            <div class="flex items-center gap-2 ${isCustomMarkah ? '' : 'hidden'}">
                                 <label class="text-xs text-gray-500 font-semibold">Markah/Mata:</label>
                                 <input type="number" min="0" class="w-14 border border-gray-300 p-1 rounded-lg text-center text-xs focus:ring-2 focus:ring-blue-500 outline-none bg-white font-semibold" 
                                     value="${q.points}" onchange="updateQ(${idx}, 'points', parseInt(this.value) || 0)">
                             </div>
+                            
+                            <!-- Padam Butang -->
+                            <button type="button" onclick="removeQuestion(${idx})" 
+                                class="ml-auto bg-red-50 text-red-600 hover:bg-red-100 p-1.5 rounded-lg text-xs transition whitespace-nowrap">
+                                ✕ Padam Soalan
+                            </button>
                         </div>
 
                         <!-- Teks Soalan -->
