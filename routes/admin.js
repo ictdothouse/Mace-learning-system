@@ -469,7 +469,10 @@ router.post('/upload-data', upload.single('dataFile'), async (req, res) => {
 // POST: Kemaskini Penjenamaan (Branding)
 router.post('/settings/branding', async (req, res) => {
     try {
-        const { siteName, tagline, primaryColor, dashboardTitle, dashboardSubtitle, logoUrl, faviconUrl } = req.body;
+        const { 
+            siteName, tagline, primaryColor, dashboardTitle, dashboardSubtitle, logoUrl, faviconUrl,
+            homeBannerTitle, homeBannerImage, homeBgImage, homeLeftColumnHtml, menuLinksJson 
+        } = req.body;
         const Branding = require('../models/Branding');
         
         let branding = await Branding.findOne();
@@ -484,6 +487,21 @@ router.post('/settings/branding', async (req, res) => {
         if (dashboardSubtitle !== undefined) branding.dashboardSubtitle = dashboardSubtitle;
         if (logoUrl !== undefined) branding.logoUrl = logoUrl;
         if (faviconUrl !== undefined) branding.faviconUrl = faviconUrl;
+        
+        if (homeBannerTitle !== undefined) branding.homeBannerTitle = homeBannerTitle;
+        if (homeBannerImage !== undefined) branding.homeBannerImage = homeBannerImage;
+        if (homeBgImage !== undefined) branding.homeBgImage = homeBgImage;
+        if (homeLeftColumnHtml !== undefined) branding.homeLeftColumnHtml = homeLeftColumnHtml;
+        branding.showMenu = req.body.showMenu === 'on';
+        
+        if (menuLinksJson) {
+            try {
+                branding.menuLinks = JSON.parse(menuLinksJson);
+            } catch (e) {
+                console.error("Failed to parse menu links:", e);
+            }
+        }
+
         branding.allowModuleSelectionInEnrollment = req.body.allowModuleSelectionInEnrollment === 'on';
         
         await branding.save();

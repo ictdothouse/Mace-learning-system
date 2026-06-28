@@ -582,7 +582,7 @@
                             Penjenamaan Sistem
                         </h3>
                         
-                        <form action="/admin-mace/settings/branding" method="POST" class="space-y-6">
+                        <form action="/admin-mace/settings/branding" method="POST" class="space-y-6" id="brandingForm">
                             <!-- Site Info -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
@@ -641,6 +641,103 @@
                             </div>
                         </form>
                     </div>
+
+                    <!-- Homepage Customization Section -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 mb-8">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                            Penyesuaian Halaman Utama (Homepage)
+                        </h3>
+                        
+                        <form action="/admin-mace/settings/branding" method="POST" class="space-y-6" id="homepageForm">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Tajuk Banner Utama (Merah)</label>
+                                    <input type="text" name="homeBannerTitle" value="<%= branding.homeBannerTitle || 'Modul' %>" class="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
+                                </div>
+                                <div class="flex items-center gap-3 mt-6">
+                                    <input type="checkbox" name="showMenu" id="showMenu" value="on" <%= branding.showMenu !== false ? 'checked' : '' %> class="h-5 w-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                                    <label for="showMenu" class="text-sm font-medium text-gray-700">Tunjuk Menu di Halaman Utama</label>
+                                </div>
+                            </div>
+                            
+                            <!-- Menu Links Manager -->
+                            <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                                <label class="block text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Pengurusan Pautan Menu</label>
+                                <div id="menu-links-container" class="space-y-3 mb-3"></div>
+                                <button type="button" onclick="addMenuLink()" class="text-xs bg-purple-100 text-purple-700 hover:bg-purple-200 px-3 py-2 rounded-lg font-medium transition">+ Tambah Pautan Menu</button>
+                                <input type="hidden" name="menuLinksJson" id="menuLinksJson">
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Imej Banner Utama (Ganti Merah Biasa)</label>
+                                    <input type="text" name="homeBannerImage" id="homeBannerImage" value="<%= branding.homeBannerImage || '' %>" class="w-full border border-gray-200 rounded-lg p-2 text-sm mb-2" placeholder="https://...">
+                                    <button type="button" onclick="document.getElementById('homeBannerUpload').click()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded transition">⬆️ Upload ke R2</button>
+                                    <input type="file" id="homeBannerUpload" accept="image/*" class="hidden" onchange="uploadBrandingImage(this, 'homeBannerImage', 'bannerProgress')">
+                                    <div id="bannerProgress" class="text-xs text-blue-600 mt-1 hidden">Memuat naik... <span class="pct">0%</span></div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Imej Latar Belakang (Main Background)</label>
+                                    <input type="text" name="homeBgImage" id="homeBgImage" value="<%= branding.homeBgImage || '' %>" class="w-full border border-gray-200 rounded-lg p-2 text-sm mb-2" placeholder="https://...">
+                                    <button type="button" onclick="document.getElementById('homeBgUpload').click()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded transition">⬆️ Upload ke R2</button>
+                                    <input type="file" id="homeBgUpload" accept="image/*" class="hidden" onchange="uploadBrandingImage(this, 'homeBgImage', 'bgProgress')">
+                                    <div id="bgProgress" class="text-xs text-blue-600 mt-1 hidden">Memuat naik... <span class="pct">0%</span></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Teks/HTML Ruangan Kiri</label>
+                                <textarea id="homeLeftColumnHtml" name="homeLeftColumnHtml" class="w-full border border-gray-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-purple-500 outline-none min-h-[150px]"><%= branding.homeLeftColumnHtml %></textarea>
+                            </div>
+                            
+                            <div class="pt-6 border-t border-gray-100 flex justify-end">
+                                <button type="submit" onclick="saveMenuLinks()" class="bg-purple-600 text-white px-8 py-2.5 rounded-lg font-medium hover:bg-purple-700 transition shadow-sm">
+                                    Simpan Halaman Utama
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
+                    <script>
+                        tinymce.init({
+                            selector: '#homeLeftColumnHtml',
+                            height: 250,
+                            plugins: 'link lists textcolor',
+                            toolbar: 'undo redo | bold italic | forecolor | alignleft aligncenter alignright | bullist numlist | link',
+                            menubar: false,
+                            branding: false
+                        });
+
+                        let menuLinks = <%- JSON.stringify(branding.menuLinks || [
+                            { label: 'Home', url: '/' },
+                            { label: 'Modul', url: '/#modul' },
+                            { label: 'Hubungi Kami', url: '/#kontak' },
+                            { label: 'Akaun', url: '/dashboard' }
+                        ]) %>;
+
+                        function renderMenuLinks() {
+                            const container = document.getElementById('menu-links-container');
+                            container.innerHTML = '';
+                            menuLinks.forEach((link, idx) => {
+                                container.innerHTML += `
+                                    <div class="flex items-center gap-3 bg-white p-2 rounded border border-gray-200">
+                                        <input type="text" value="${link.label}" onchange="updateMenu(${idx}, 'label', this.value)" class="flex-1 text-sm border-none bg-transparent outline-none p-1" placeholder="Label Menu">
+                                        <input type="text" value="${link.url}" onchange="updateMenu(${idx}, 'url', this.value)" class="flex-2 text-sm border-none bg-transparent outline-none p-1 text-blue-600" placeholder="URL Pautan (cth: https://...)">
+                                        <button type="button" onclick="removeMenu(${idx})" class="text-red-500 hover:text-red-700 p-1">✕</button>
+                                    </div>
+                                `;
+                            });
+                        }
+                        
+                        function updateMenu(idx, field, val) { menuLinks[idx][field] = val; }
+                        function addMenuLink() { menuLinks.push({ label: 'Menu Baru', url: '#' }); renderMenuLinks(); }
+                        function removeMenu(idx) { menuLinks.splice(idx, 1); renderMenuLinks(); }
+                        function saveMenuLinks() { document.getElementById('menuLinksJson').value = JSON.stringify(menuLinks); }
+                        
+                        document.addEventListener('DOMContentLoaded', renderMenuLinks);
+                    </script>
                     
                     <!-- Script for R2 direct upload -->
                     <script>
