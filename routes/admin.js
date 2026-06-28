@@ -980,20 +980,78 @@ router.get('/migrate-lessons', async (req, res) => {
 // DOWNLOAD CSV
 router.get('/download', async (req, res) => {
     try {
-        const athletes = await Athlete.find().lean();
+        const athletes = await Athlete.find().sort({ createdAt: -1 }).lean();
+        const users = await User.find({ athleteId: { $in: athletes.map(a => a._id) } }).lean();
+        const progresses = await LessonProgress.find().lean();
+        
+        const allModules = await Module.find({ isActive: true }).sort({ order: 1 }).lean();
+        const allLessons = await Lesson.find({ isActive: true }).lean();
+        
+        const moduleLessonCount = {};
+        allModules.forEach(m => {
+            moduleLessonCount[m._id.toString()] = allLessons.filter(l => l.moduleId && l.moduleId.toString() === m._id.toString()).length;
+        });
+
+        const athleteUserMap = {};
+        users.forEach(u => {
+            if (u.athleteId) athleteUserMap[u.athleteId.toString()] = u._id;
+        });
+
+        const userCompletedCount = {};
+        progresses.forEach(p => {
+            if (!p.isCompleted) return;
+            const uId = p.userId.toString();
+            const mId = p.moduleId.toString();
+            if (!userCompletedCount[uId]) userCompletedCount[uId] = {};
+            if (!userCompletedCount[uId][mId]) userCompletedCount[uId][mId] = 0;
+            userCompletedCount[uId][mId]++;
+        });
+
         const bom = '\uFEFF';
-        const headers = ['Nama', 'No. IC', 'Jantina', 'Umur', 'Negeri', 'K1', 'K2', 'K3', 'Status', 'Tarikh'];
+        const moduleHeaders = allModules.map(m => `"${(m.title || '').replace(/"/g, '""')} (%)"`);
+        const headers = ['Nama', 'No. IC', 'Jantina', 'Umur', 'Negeri', 'Sukan', ...moduleHeaders, 'Status', 'Tarikh'];
         let csv = bom + headers.join(',') + '\n';
+        
         athletes.forEach(a => {
-            const status = a.currentStage >= 4 ? 'Lulus' : `Stage ${a.currentStage}`;
+            const status = a.currentStage >= 4 ? 'Lulus' : `Sedang Belajar`;
             const date = a.completedAt ? new Date(a.completedAt).toLocaleDateString('ms-MY') : '-';
             const name = `"${(a.fullName || '').replace(/"/g, '""')}"`;
-            csv += [name, a.icNumber, a.jantina, a.umur, a.negeriWakil, a.quizScores?.quiz1||0, a.quizScores?.quiz2||0, a.quizScores?.quiz3||0, status, date].join(',') + '\n';
+            const sukan = `"${(a.sukan || '').replace(/"/g, '""')}"`;
+            
+            const userId = athleteUserMap[a._id.toString()];
+            const hasNewProgress = userId && userCompletedCount[userId.toString()];
+            
+            const rowData = [name, a.icNumber, a.jantina, a.umur, a.negeriWakil, sukan];
+            
+            allModules.forEach((m, i) => {
+                let percent = 0;
+                if (hasNewProgress) {
+                    const total = moduleLessonCount[m._id.toString()] || 0;
+                    if (total > 0) {
+                        const completed = userCompletedCount[userId.toString()][m._id.toString()] || 0;
+                        percent = Math.round((completed / total) * 100);
+                    }
+                } else {
+                    const legacyKeys = ['quiz1', 'quiz2', 'quiz3'];
+                    const qKey = legacyKeys[i];
+                    if (qKey) {
+                        percent = (a.quizScores && a.quizScores[qKey]) ? a.quizScores[qKey] : 0;
+                    }
+                }
+                rowData.push(percent);
+            });
+            
+            rowData.push(status, date);
+            csv += rowData.join(',') + '\n';
         });
+        
         res.header('Content-Type', 'text/csv; charset=utf-8');
         res.attachment(`Data-Atlit-${Date.now()}.csv`);
         res.send(csv);
-    } catch (err) { res.send('Error generating CSV'); }
+    } catch (err) { 
+        console.error('CSV Error:', err);
+        res.send('Error generating CSV'); 
+    }
 });
 
 // ==========================================
