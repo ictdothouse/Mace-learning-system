@@ -9,6 +9,7 @@ const Module = require('../models/Module');
 const Level = require('../models/Level');
 const QuestionBank = require('../models/QuestionBank');
 const CertificateTemplate = require('../models/CertificateTemplate');
+const LessonProgress = require('../models/LessonProgress');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
