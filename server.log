@@ -1,5 +1,5 @@
-◇ injected env (12) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
-(node:7858) Warning: NodeVersionSupportWarning: The AWS SDK for JavaScript (v3)
+◇ injected env (12) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+(node:3039) Warning: NodeVersionSupportWarning: The AWS SDK for JavaScript (v3)
 versions published after the first week of January 2027
 will require node >=22. You are running node v20.19.5.
 

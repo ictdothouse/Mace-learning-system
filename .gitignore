@@ -1,1 +1,10 @@
-(empty)
+```
+# Environment files
+.env
+.env.local
+*.env.*
+
+# Log files
+*.log
+server.log
+```
