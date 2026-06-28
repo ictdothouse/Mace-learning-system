@@ -156,7 +156,7 @@
 
     <!-- Dynamic Quiz Logic -->
     <script>
-        let questions = <%= JSON.stringify(lesson?.quizQuestions || []) %>;
+        let questions = <%- JSON.stringify((typeof lesson !== 'undefined' && lesson && lesson.quizQuestions) ? lesson.quizQuestions : []) %>;
 
         function renderQuizEditor() {
             const container = document.getElementById('quiz-editor');
