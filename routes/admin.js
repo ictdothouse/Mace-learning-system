@@ -1056,6 +1056,10 @@ router.get('/certificate/preview/:id', async (req, res) => {
             }
         }
         
+        if (!course) {
+            course = {};
+        }
+
         // Dapatkan template aktif
         let template = await CertificateTemplate.findOne({ isActive: true });
         
