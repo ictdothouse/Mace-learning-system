@@ -466,6 +466,40 @@ router.post('/upload-data', upload.single('dataFile'), async (req, res) => {
     } catch (err) { res.redirect('/admin-mace/settings?msg=error_upload'); }
 });
 
+router.get('/download-system-data', async (req, res) => {
+    try {
+        const Athlete = require('../models/Athlete');
+        const Module = require('../models/Module');
+        const Lesson = require('../models/Lesson');
+        const Branding = require('../models/Branding');
+        const Group = require('../models/Group');
+
+        const [athletes, modules, lessons, branding, groups] = await Promise.all([
+            Athlete.find().lean(),
+            Module.find().lean(),
+            Lesson.find().lean(),
+            Branding.findOne().lean(),
+            Group.find().lean()
+        ]);
+
+        const exportData = {
+            exportDate: new Date().toISOString(),
+            branding,
+            groups,
+            modules,
+            lessons,
+            athletes
+        };
+
+        res.setHeader('Content-disposition', 'attachment; filename=mace_system_data.json');
+        res.setHeader('Content-type', 'application/json');
+        res.send(JSON.stringify(exportData, null, 2));
+    } catch (err) {
+        console.error('Export Error:', err);
+        res.redirect('/admin-mace/settings?msg=error_export');
+    }
+});
+
 // POST: Kemaskini Penjenamaan (Branding)
 router.post('/settings/branding', async (req, res) => {
     try {
