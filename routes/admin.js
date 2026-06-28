@@ -851,84 +851,205 @@ router.get('/users', (req, res) => {
     res.redirect('/admin-mace/students');
 });
 
-// GET: Senarai Pelajar
+// GET: Senarai Pelajar (Student/Atlet)
 router.get('/students', async (req, res) => {
     try {
-        // Include both User model students AND Athlete model (for legacy data)
-        const students = await User.find({ role: 'student' })
+        // Get all users with student role
+        const studentUsers = await User.find({ role: 'student' })
             .populate('athleteId')
             .populate('enrolledGroups')
             .sort({ createdAt: -1 });
         
-        // Also get athletes from legacy Athlete collection
-        const athletes = await Athlete.find().sort({ fullName: 1 }).limit(50);
+        // Get all athletes from Athlete collection
+        const allAthletes = await Athlete.find()
+            .sort({ fullName: 1 });
+        
+        // Combine both lists: 
+        // - If athlete has a linked User account, show the User info
+        // - If athlete doesn't have User account, show athlete info directly
+        // - Also include standalone students (users without athleteId)
+        
+        const combinedStudents = [];
+        const processedAthleteIds = new Set();
+        
+        // First, add all student users
+        for (const user of studentUsers) {
+            if (user.athleteId) {
+                processedAthleteIds.add(user.athleteId.toString());
+            }
+            combinedStudents.push({
+                _id: user._id,
+                fullName: user.fullName,
+                email: user.email || '-',
+                isActive: user.isActive,
+                enrolledGroups: user.enrolledGroups || [],
+                createdAt: user.createdAt,
+                isUserAccount: true,
+                userType: 'student',
+                athleteData: user.athleteId ? {
+                    _id: user.athleteId._id,
+                    noKadPengenalan: user.athleteId.noKadPengenalan,
+                    negeriWakil: user.athleteId.negeriWakil,
+                    sukan: user.athleteId.sukan
+                } : null
+            });
+        }
+        
+        // Then, add athletes that don't have User accounts yet
+        for (const athlete of allAthletes) {
+            if (!processedAthleteIds.has(athlete._id.toString())) {
+                combinedStudents.push({
+                    _id: athlete._id,
+                    fullName: athlete.fullName,
+                    email: athlete.email || '-',
+                    isActive: athlete.isActive !== false,
+                    enrolledGroups: athlete.enrolledGroups || [],
+                    createdAt: athlete.createdAt || new Date(),
+                    isUserAccount: false,
+                    userType: 'athlete',
+                    athleteData: {
+                        _id: athlete._id,
+                        noKadPengenalan: athlete.noKadPengenalan,
+                        negeriWakil: athlete.negeriWakil,
+                        sukan: athlete.sukan
+                    }
+                });
+            }
+        }
         
         const groups = await Group.find().sort({ name: 1 });
-        res.render('admin', { page: 'students', students, athletes, groups, msg: req.query.msg || null });
+        res.render('admin', { page: 'students', students: combinedStudents, groups, msg: req.query.msg || null });
     } catch (err) {
         console.error('Students Error:', err);
         res.status(500).send('Ralat memuatkan senarai pelajar.');
     }
 });
 
-// GET: Form Edit Pelajar
+// GET: Form Edit Pelajar (supports both User accounts and Athlete records)
 router.get('/students/edit/:id', async (req, res) => {
     try {
-        const student = await User.findById(req.params.id)
+        // Try to find as User first
+        let student = await User.findById(req.params.id)
             .populate('athleteId')
             .populate('enrolledGroups');
+        
+        let isAthleteRecord = false;
+        
         if (!student || student.role !== 'student') {
+            // If not found as User, try to find as Athlete record
+            const mongoose = require('mongoose');
+            if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+                const athlete = await Athlete.findById(req.params.id);
+                if (athlete) {
+                    student = athlete;
+                    isAthleteRecord = true;
+                }
+            }
+        }
+        
+        if (!student) {
             return res.redirect('/admin-mace/students?msg=not_found');
         }
+        
         const groups = await Group.find().sort({ name: 1 });
-        res.render('admin-edit-student', { page: 'students', student, groups, editMode: 'edit' });
+        res.render('admin-edit-student', { 
+            page: 'students', 
+            student, 
+            groups, 
+            editMode: 'edit',
+            isAthleteRecord 
+        });
     } catch (err) {
         console.error('Edit Student Form Error:', err);
         res.redirect('/admin-mace/students?msg=error');
     }
 });
 
-// POST: Update Pelajar
+// POST: Update Pelajar (supports both User accounts and Athlete records)
 router.post('/students/edit/:id', async (req, res) => {
     try {
         const { fullName, email, password, isActive, groupIds } = req.body;
-        
-        const student = await User.findById(req.params.id);
+
+        // Try to find as User first
+        let student = await User.findById(req.params.id);
+        let isAthleteRecord = false;
+
         if (!student || student.role !== 'student') {
-            return res.redirect('/admin-mace/students?msg=not_found');
-        }
-        
-        if (email !== student.email) {
-            const existing = await User.findOne({ email, _id: { $ne: req.params.id } });
-            if (existing) {
-                return res.redirect('/admin-mace/students?msg=email_exists');
+            // If not found as User, try to find as Athlete record
+            const mongoose = require('mongoose');
+            if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+                const athlete = await Athlete.findById(req.params.id);
+                if (athlete) {
+                    student = athlete;
+                    isAthleteRecord = true;
+                }
             }
         }
-        
-        const updateData = { fullName, email, isActive: isActive === 'on' };
-        
-        if (password && password.trim() !== '') {
-            updateData.password = password;
+
+        if (!student) {
+            return res.redirect('/admin-mace/students?msg=not_found');
         }
-        
-        await User.findByIdAndUpdate(req.params.id, updateData);
-        
+
+        if (isAthleteRecord) {
+            // Update Athlete record
+            const updateData = { fullName, isActive: isActive === 'on' };
+            if (email && email.trim() !== '' && email !== '-') {
+                updateData.email = email;
+            }
+            await Athlete.findByIdAndUpdate(req.params.id, updateData);
+        } else {
+            // Update User account
+            if (email !== student.email) {
+                const existing = await User.findOne({ email, _id: { $ne: req.params.id } });
+                if (existing) {
+                    return res.redirect('/admin-mace/students?msg=email_exists');
+                }
+            }
+
+            const updateData = { fullName, email, isActive: isActive === 'on' };
+
+            if (password && password.trim() !== '') {
+                updateData.password = password;
+            }
+
+            await User.findByIdAndUpdate(req.params.id, updateData);
+        }
+
+        // Handle group enrollment for both types
         if (groupIds) {
             const groups = Array.isArray(groupIds) ? groupIds : (groupIds ? [groupIds] : []);
-            student.enrolledGroups = groups;
-            await student.save();
-            
-            await Group.updateMany(
-                { _id: { $in: groups } },
-                { $addToSet: { students: student._id } }
-            );
-            
-            await Group.updateMany(
-                { _id: { $nin: groups }, students: student._id },
-                { $pull: { students: student._id } }
-            );
+
+            if (isAthleteRecord) {
+                // Update enrolledGroups in Athlete model
+                await Athlete.findByIdAndUpdate(req.params.id, { enrolledGroups: groups });
+
+                // Update Group model to add/remove this athlete
+                await Group.updateMany(
+                    { _id: { $in: groups } },
+                    { $addToSet: { students: req.params.id } }
+                );
+
+                await Group.updateMany(
+                    { _id: { $nin: groups }, students: req.params.id },
+                    { $pull: { students: req.params.id } }
+                );
+            } else {
+                // Update enrolledGroups in User model
+                await User.findByIdAndUpdate(req.params.id, { enrolledGroups: groups });
+
+                // Update Group model to add/remove this student
+                await Group.updateMany(
+                    { _id: { $in: groups } },
+                    { $addToSet: { students: req.params.id } }
+                );
+
+                await Group.updateMany(
+                    { _id: { $nin: groups }, students: req.params.id },
+                    { $pull: { students: req.params.id } }
+                );
+            }
         }
-        
+
         res.redirect('/admin-mace/students?msg=student_updated');
     } catch (err) {
         console.error('Update Student Error:', err);
@@ -936,20 +1057,41 @@ router.post('/students/edit/:id', async (req, res) => {
     }
 });
 
-// POST: Delete Pelajar
+
+// POST: Delete Pelajar (supports both User accounts and Athlete records)
 router.post('/students/delete/:id', async (req, res) => {
     try {
-        const student = await User.findById(req.params.id);
+        // Try to find as User first
+        let student = await User.findById(req.params.id);
+        let isAthleteRecord = false;
+
         if (!student || student.role !== 'student') {
+            const mongoose = require('mongoose');
+            if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+                const athlete = await Athlete.findById(req.params.id);
+                if (athlete) {
+                    student = athlete;
+                    isAthleteRecord = true;
+                }
+            }
+        }
+
+        if (!student) {
             return res.redirect('/admin-mace/students?msg=not_found');
         }
-        
+
+        // Remove from groups
         await Group.updateMany(
-            { students: student._id },
-            { $pull: { students: student._id } }
+            { students: req.params.id },
+            { $pull: { students: req.params.id } }
         );
-        
-        await User.findByIdAndDelete(req.params.id);
+
+        if (isAthleteRecord) {
+            await Athlete.findByIdAndDelete(req.params.id);
+        } else {
+            await User.findByIdAndDelete(req.params.id);
+        }
+
         res.redirect('/admin-mace/students?msg=student_deleted');
     } catch (err) {
         console.error('Delete Student Error:', err);
@@ -957,27 +1099,25 @@ router.post('/students/delete/:id', async (req, res) => {
     }
 });
 
-// POST: Reset Password Pelajar
+// POST: Reset Password Pelajar (User accounts only)
 router.post('/students/reset-password/:id', async (req, res) => {
     try {
         const student = await User.findById(req.params.id);
         if (!student || student.role !== 'student') {
             return res.redirect('/admin-mace/students?msg=not_found');
         }
-        
+
         const newPassword = crypto.randomBytes(4).toString('hex').toUpperCase();
         student.password = newPassword;
         await student.save();
-        
+
         res.redirect('/admin-mace/students?msg=password_reset&newPassword=' + encodeURIComponent(newPassword));
     } catch (err) {
         console.error('Reset Password Error:', err);
         res.redirect('/admin-mace/students?msg=reset_error');
     }
-});
 
-// ==========================================
-// PENGURUSAN LEVEL DALAM MODUL (ADMIN)
+});
 // ==========================================
 
 // GET: Manage Levels untuk Modul tertentu
@@ -1245,6 +1385,76 @@ router.post("/groups/reset-key/:id", async (req, res) => {
     } catch (err) {
         console.error("Reset Key Error:", err);
         res.redirect("/admin-mace/groups?msg=reset_error");
+    }
+});
+
+// ==========================================
+// PENGURUSAN ATLET (LEGACY ATHLETE MODEL)
+// ==========================================
+// POST: Update Atlet (dari halaman students)
+router.post('/athletes/update/:id', async (req, res) => {
+    try {
+        const { fullName, icNumber, jantina, umur, negeriWakil, sukan } = req.body;
+        
+        const updateData = {
+            fullName,
+            icNumber,
+            jantina,
+            umur: parseInt(umur),
+            negeriWakil,
+            sukan
+        };
+        
+        await Athlete.findByIdAndUpdate(req.params.id, updateData);
+        res.redirect('/admin-mace/students?msg=athlete_updated');
+    } catch (err) {
+        console.error('Update Athlete Error:', err);
+        res.redirect('/admin-mace/students?msg=update_error');
+    }
+});
+
+// POST: Delete Atlet
+router.post('/athletes/delete/:id', async (req, res) => {
+    try {
+        await Athlete.findByIdAndDelete(req.params.id);
+        res.redirect('/admin-mace/students?msg=athlete_deleted');
+    } catch (err) {
+        console.error('Delete Athlete Error:', err);
+        res.redirect('/admin-mace/students?msg=delete_error');
+    }
+});
+
+// POST: Convert Atlet to Student (buat akaun user)
+router.post('/athletes/convert/:id', async (req, res) => {
+    try {
+        const athlete = await Athlete.findById(req.params.id);
+        if (!athlete) {
+            return res.redirect('/admin-mace/students?msg=not_found');
+        }
+        
+        // Check if user already exists with this athleteId
+        const existingUser = await User.findOne({ athleteId: athlete._id });
+        if (existingUser) {
+            return res.redirect('/admin-mace/students?msg=already_converted');
+        }
+        
+        // Generate random password
+        const randomPassword = Math.random().toString(36).slice(-8);
+        
+        // Create user account
+        const newUser = await User.create({
+            fullName: athlete.fullName,
+            email: `${athlete.icNumber}@athlete.local`, // Use IC as username
+            password: randomPassword,
+            role: 'student',
+            athleteId: athlete._id,
+            isActive: true
+        });
+        
+        res.redirect('/admin-mace/students?msg=athlete_converted&newPassword=' + encodeURIComponent(randomPassword));
+    } catch (err) {
+        console.error('Convert Athlete Error:', err);
+        res.redirect('/admin-mace/students?msg=convert_error');
     }
 });
 
