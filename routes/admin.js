@@ -256,6 +256,71 @@ const basicAuth = (req, res, next) => {
 };
 router.use(basicAuth);
 
+// GET: Generate Pre-signed URL for direct browser upload to R2
+router.get('/api/presigned-url', async (req, res) => {
+    try {
+        const { filename, contentType } = req.query;
+        if (!filename || !contentType) {
+            return res.status(400).json({ error: 'Missing parameters' });
+        }
+
+        const hasR2 = process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_ACCOUNT_ID;
+        const bucketName = process.env.R2_BUCKET_NAME || 'modulmace';
+        
+        const ext = path.extname(filename);
+        const uniqueFilename = `${Date.now()}-${Math.round(Math.random() * 1E9)}${ext}`;
+
+        if (hasR2) {
+            const command = new PutObjectCommand({
+                Bucket: bucketName,
+                Key: uniqueFilename,
+                ContentType: contentType
+            });
+
+            // Pre-signed URL valid for 15 minutes (900 seconds)
+            const uploadUrl = await getSignedUrl(r2Client, command, { expiresIn: 900 });
+            const publicUrl = `https://pub-${process.env.R2_ACCOUNT_ID}.r2.dev/${uniqueFilename}`;
+
+            res.json({
+                uploadUrl,
+                fileKey: uniqueFilename,
+                publicUrl,
+                isR2: true
+            });
+        } else {
+            // Local fallback upload url
+            res.json({
+                uploadUrl: '/admin-mace/api/local-upload',
+                fileKey: uniqueFilename,
+                publicUrl: `/uploads/${uniqueFilename}`,
+                isR2: false
+            });
+        }
+    } catch (err) {
+        console.error('Presigned URL error:', err);
+        res.status(500).json({ error: 'Failed to generate pre-signed URL' });
+    }
+});
+
+// POST: Local fallback file upload endpoint (when R2 is not configured)
+router.post('/api/local-upload', upload.single('file'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+        const fileKey = req.body.fileKey;
+        if (fileKey) {
+            const oldPath = req.file.path;
+            const newPath = path.join(__dirname, '../uploads', fileKey);
+            fs.renameSync(oldPath, newPath);
+        }
+        res.json({ success: true, url: `/uploads/${fileKey || req.file.filename}` });
+    } catch (err) {
+        console.error('Local upload error:', err);
+        res.status(500).json({ error: 'Local upload failed' });
+    }
+});
+
 // GET: Dashboard Utama
 router.get('/', async (req, res) => {
     try {
@@ -338,7 +403,8 @@ router.get('/modules/edit/:id', async (req, res) => {
 });
 
 // POST: Cipta Modul Baru
-router.post('/modules/new', upload.single('thumbnail'), async (req, res) => {
+// POST: Cipta Modul Baru (Kini menggunakan Pautan R2 terus dari Client)
+router.post('/modules/new', async (req, res) => {
     try {
         const { title, description, order, isActive, hasLevels, isSequential, minPassingScore, featuredImageUrl } = req.body;
         const moduleData = {
@@ -348,14 +414,9 @@ router.post('/modules/new', upload.single('thumbnail'), async (req, res) => {
             isActive: isActive === 'on',
             hasLevels: hasLevels === 'on',
             isSequential: isSequential === 'on',
-            minPassingScore: parseInt(minPassingScore) || 0
+            minPassingScore: parseInt(minPassingScore) || 0,
+            thumbnail: featuredImageUrl || ''
         };
-        
-        // Handle Featured Image upload (either file or URL input)
-        const imageUrl = await processAndUploadImage(req.file, featuredImageUrl);
-        if (imageUrl) {
-            moduleData.thumbnail = imageUrl;
-        }
         
         await Module.create(moduleData);
         res.redirect('/admin-mace/modules?msg=module_created');
@@ -365,8 +426,8 @@ router.post('/modules/new', upload.single('thumbnail'), async (req, res) => {
     }
 });
 
-// POST: Update Modul
-router.post('/modules/edit/:id', upload.single('thumbnail'), async (req, res) => {
+// POST: Update Modul (Kini menggunakan Pautan R2 terus dari Client)
+router.post('/modules/edit/:id', async (req, res) => {
     try {
         const { title, description, order, isActive, hasLevels, isSequential, minPassingScore, featuredImageUrl } = req.body;
         
@@ -380,20 +441,9 @@ router.post('/modules/edit/:id', upload.single('thumbnail'), async (req, res) =>
             isActive: isActive === 'on',
             hasLevels: hasLevels === 'on',
             isSequential: isSequential === 'on',
-            minPassingScore: parseInt(minPassingScore) || 0
+            minPassingScore: parseInt(minPassingScore) || 0,
+            thumbnail: featuredImageUrl !== undefined ? featuredImageUrl : module.thumbnail
         };
-        
-        // Handle Featured Image upload or URL updates
-        let imageUrl = module.thumbnail;
-        if (req.file || (featuredImageUrl && featuredImageUrl !== module.thumbnail)) {
-            imageUrl = await processAndUploadImage(req.file, featuredImageUrl);
-        } else if (!req.file && featuredImageUrl !== undefined && featuredImageUrl.trim() === '') {
-            imageUrl = ''; // cleared
-        }
-
-        if (imageUrl !== undefined) {
-            updateData.thumbnail = imageUrl;
-        }
         
         await Module.findByIdAndUpdate(req.params.id, updateData);
         res.redirect('/admin-mace/modules?msg=module_updated');
@@ -461,20 +511,17 @@ router.get('/lessons/edit/:id', async (req, res) => {
 });
 
 // POST: Cipta Lesson Baru
-router.post('/lessons/new', upload.single('videoFile'), async (req, res) => {
+router.post('/lessons/new', async (req, res) => {
     try {
         const { moduleId, title, contentHtml, videoUrl, passMark, order, isActive, questionsJson } = req.body;
         let quizQuestions = [];
         try { quizQuestions = JSON.parse(questionsJson || '[]'); } catch(e) {}
         
-        // Handle Video upload or compression
-        const finalVideoUrl = await processAndUploadVideo(req.file, videoUrl);
-        
         const lessonData = {
             moduleId,
             title,
             contentHtml, // TinyMCE content
-            videoUrl: finalVideoUrl || '',
+            videoUrl: videoUrl || '',
             passMark: parseInt(passMark) || 80,
             order: parseInt(order) || 0,
             isActive: isActive === 'on',
@@ -490,7 +537,7 @@ router.post('/lessons/new', upload.single('videoFile'), async (req, res) => {
 });
 
 // POST: Update Lesson
-router.post('/lessons/edit/:id', upload.single('videoFile'), async (req, res) => {
+router.post('/lessons/edit/:id', async (req, res) => {
     try {
         const { moduleId, title, contentHtml, videoUrl, passMark, order, isActive, questionsJson } = req.body;
         let quizQuestions = [];
@@ -499,17 +546,11 @@ router.post('/lessons/edit/:id', upload.single('videoFile'), async (req, res) =>
         const lesson = await Lesson.findById(req.params.id);
         if (!lesson) return res.redirect('/admin-mace/lessons?msg=not_found');
 
-        // Only upload/process if a new video file is uploaded or the text input has changed
-        let finalVideoUrl = lesson.videoUrl;
-        if (req.file || (videoUrl !== undefined && videoUrl !== lesson.videoUrl)) {
-            finalVideoUrl = await processAndUploadVideo(req.file, videoUrl);
-        }
-
         const updateData = {
             moduleId,
             title,
             contentHtml,
-            videoUrl: finalVideoUrl || '',
+            videoUrl: videoUrl !== undefined ? videoUrl : lesson.videoUrl,
             passMark: parseInt(passMark) || 80,
             order: parseInt(order) || 0,
             isActive: isActive === 'on',

@@ -20,7 +20,7 @@
         </div>
 
         <!-- Form -->
-        <form action="" method="POST" enctype="multipart/form-data" class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 space-y-6">
+        <form action="" method="POST" class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 space-y-6">
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Pilihan Silibus/Modul Induk -->
@@ -53,9 +53,12 @@
                     <!-- Muat Naik Fail Video -->
                     <div>
                         <label class="block text-xs font-semibold text-gray-500 mb-1">Pilihan A: Muat Naik Fail Video (.mp4, .webm, dll.)</label>
-                        <input type="file" name="videoFile" id="videoFile" accept="video/*" 
+                        <input type="file" id="videoFile" accept="video/*" 
                             class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition cursor-pointer border border-gray-300 rounded-lg p-1 bg-white">
-                        <p class="text-[10px] text-gray-400 mt-1">Video akan dimampatkan secara automatik sebelum disimpan di Cloud.</p>
+                        <div id="video-upload-status" class="text-xs mt-1 hidden font-semibold"></div>
+                        <div id="video-progress-container" class="w-full bg-gray-200 rounded-full h-2 mt-2 hidden">
+                            <div id="video-progress-bar" class="bg-blue-600 h-2 rounded-full transition-all" style="width: 0%"></div>
+                        </div>
                     </div>
 
                     <!-- Input Nama Fail atau URL manual -->
@@ -358,26 +361,121 @@
         const videoUrlInput = document.getElementById('videoUrl');
         const videoPreview = document.getElementById('video-preview');
         const videoPreviewContainer = document.getElementById('video-preview-container');
+        const uploadStatusDiv = document.getElementById('video-upload-status');
+        const progressContainer = document.getElementById('video-progress-container');
+        const progressBar = document.getElementById('video-progress-bar');
+        const submitBtn = document.querySelector('button[type="submit"]');
 
-        videoFileInput.addEventListener('change', function() {
+        videoFileInput.addEventListener('change', async function() {
             const file = this.files[0];
-            if (file) {
-                if (file.size > 50 * 1024 * 1024) {
-                    alert('Amaran: Saiz video melebihi had 50MB. Sila mampatkan video anda terlebih dahulu.');
-                    this.value = '';
-                    return;
+            if (!file) return;
+
+            if (file.size > 50 * 1024 * 1024) {
+                alert('Amaran: Saiz video melebihi had 50MB. Sila mampatkan video anda terlebih dahulu.');
+                this.value = '';
+                return;
+            }
+
+            // Set local preview instantly
+            const localUrl = URL.createObjectURL(file);
+            videoPreview.innerHTML = '';
+            const source = document.createElement('source');
+            source.src = localUrl;
+            source.type = file.type || 'video/mp4';
+            videoPreview.appendChild(source);
+            videoPreview.load();
+            videoPreviewContainer.classList.remove('hidden');
+
+            // Start uploading in background
+            uploadStatusDiv.classList.remove('hidden');
+            uploadStatusDiv.className = 'text-xs mt-1 font-semibold text-blue-600';
+            uploadStatusDiv.innerText = 'Menyediakan saluran muat naik video...';
+            
+            progressContainer.classList.remove('hidden');
+            progressBar.style.width = '0%';
+            submitBtn.disabled = true;
+
+            try {
+                // Request presigned URL from server
+                const res = await fetch(`/admin-mace/api/presigned-url?filename=${encodeURIComponent(file.name)}&contentType=${encodeURIComponent(file.type)}`);
+                const data = await res.json();
+
+                if (!res.ok || !data.uploadUrl) {
+                    throw new Error(data.error || 'Gagal menjana saluran muat naik');
                 }
+
+                uploadStatusDiv.innerText = 'Memuat naik video... 0%';
+
+                const xhr = new XMLHttpRequest();
                 
-                const localUrl = URL.createObjectURL(file);
-                videoPreview.innerHTML = '';
-                const source = document.createElement('source');
-                source.src = localUrl;
-                source.type = file.type || 'video/mp4';
-                videoPreview.appendChild(source);
-                
-                videoPreview.load();
-                videoPreviewContainer.classList.remove('hidden');
-                videoUrlInput.value = ''; // clear url input
+                if (data.isR2) {
+                    // PUT to Cloudflare R2 directly
+                    xhr.open('PUT', data.uploadUrl, true);
+                    xhr.setRequestHeader('Content-Type', file.type);
+                    
+                    xhr.upload.onprogress = (e) => {
+                        if (e.lengthComputable) {
+                            const percent = Math.round((e.loaded / e.total) * 100);
+                            progressBar.style.width = `${percent}%`;
+                            uploadStatusDiv.innerText = `Memuat naik video terus ke awan... ${percent}%`;
+                        }
+                    };
+
+                    xhr.onload = () => {
+                        if (xhr.status === 200) {
+                            // Save the key in the videoUrl text input
+                            videoUrlInput.value = data.fileKey;
+
+                            uploadStatusDiv.className = 'text-xs mt-1 font-semibold text-green-600';
+                            uploadStatusDiv.innerText = '✓ Video berjaya dimuat naik ke awan!';
+                            submitBtn.disabled = false;
+                        } else {
+                            uploadStatusDiv.className = 'text-xs mt-1 font-semibold text-red-600';
+                            uploadStatusDiv.innerText = '✗ Gagal memuat naik video ke awan.';
+                            submitBtn.disabled = false;
+                        }
+                    };
+                    
+                    xhr.send(file);
+                } else {
+                    // Local fallback POST
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('fileKey', data.fileKey);
+
+                    xhr.open('POST', data.uploadUrl, true);
+                    
+                    xhr.upload.onprogress = (e) => {
+                        if (e.lengthComputable) {
+                            const percent = Math.round((e.loaded / e.total) * 100);
+                            progressBar.style.width = `${percent}%`;
+                            uploadStatusDiv.innerText = `Memuat naik video... ${percent}%`;
+                        }
+                    };
+
+                    xhr.onload = () => {
+                        const response = JSON.parse(xhr.responseText || '{}');
+                        if (xhr.status === 200 && response.success) {
+                            videoUrlInput.value = response.url;
+
+                            uploadStatusDiv.className = 'text-xs mt-1 font-semibold text-green-600';
+                            uploadStatusDiv.innerText = '✓ Video disimpan secara lokal!';
+                            submitBtn.disabled = false;
+                        } else {
+                            uploadStatusDiv.className = 'text-xs mt-1 font-semibold text-red-600';
+                            uploadStatusDiv.innerText = '✗ Gagal menyimpan video lokal.';
+                            submitBtn.disabled = false;
+                        }
+                    };
+
+                    xhr.send(formData);
+                }
+
+            } catch (err) {
+                console.error(err);
+                uploadStatusDiv.className = 'text-xs mt-1 font-semibold text-red-600';
+                uploadStatusDiv.innerText = `✗ Ralat: ${err.message}`;
+                submitBtn.disabled = false;
             }
         });
 
@@ -403,32 +501,19 @@
             }
         });
 
-        // Form submit overlay for upload & compress progress
+        // Form submit overlay for saving status
         document.querySelector('form').addEventListener('submit', function(e) {
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const file = videoFileInput.files[0];
+            saveJson(); // Make sure quiz questions JSON is updated
             
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `
+            const btn = this.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.innerHTML = `
                 <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                \${file ? 'Sedang Memampat & Memuat Naik Video...' : 'Sedang Menyimpan...'}
+                Menyimpan Pelajaran...
             `;
-            
-            if (file) {
-                const overlay = document.createElement('div');
-                overlay.className = 'fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex flex-col items-center justify-center text-white z-[9999]';
-                overlay.innerHTML = `
-                    <div class="bg-white text-gray-800 p-8 rounded-xl shadow-xl max-w-sm w-full text-center space-y-4 mx-4">
-                        <div class="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-                        <h3 class="font-bold text-lg">Memproses Video Anda</h3>
-                        <p class="text-sm text-gray-500 font-medium">Video sedang dimampatkan ke saiz optimum (~30MB) dan dihantar ke Cloud. Sila tunggu sehingga selesai...</p>
-                    </div>
-                `;
-                document.body.appendChild(overlay);
-            }
         });
     </script>
 </body>
