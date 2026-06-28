@@ -38,7 +38,7 @@ const getSecureVideoUrl = async (filename) => {
 
 // ✅ FUNGSI ASYNC UNTUK AMBIL DATA DARI MONGODB
 const getLessonsWithQuiz = async () => {
-    return await Lesson.find().sort({ order: 1 }).lean();
+    return await Lesson.find().populate('moduleId').sort({ order: 1 }).lean();
 };
 
 const checkSession = (req, res, next) => req.session.athleteId ? next() : res.redirect('/');
@@ -103,6 +103,7 @@ router.get('/lesson/:id', checkSession, async (req, res) => {
 
         res.render('lesson', { 
             athlete, lesson, moduleId, secureVideoUrl, quizResult,
+            allLessons: lessons,
             error: req.session.error, success: req.session.success 
         });
         
