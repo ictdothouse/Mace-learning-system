@@ -122,10 +122,14 @@
             </div>
         </div>
 
-        <div class="p-6 border-t border-blue-800">
+        <div class="p-6 border-t border-blue-800 flex flex-col gap-3">
             <a href="/" class="flex items-center text-sm text-blue-300 hover:text-white transition group">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                 <%= __('nav_back_main') %>
+            </a>
+            <a href="/auth/logout" class="flex items-center text-sm text-red-300 hover:text-red-100 transition group">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                Log Keluar
             </a>
         </div>
     </aside>
