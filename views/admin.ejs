@@ -2140,7 +2140,7 @@
         <% } %>
         <!-- Footer -->
         <div class="text-center text-xs text-gray-400 py-8 mt-8 border-t border-gray-200">
-            &copy; 2026 Majlis Sukan Negara Malaysia. Sistem eLearning Atlit SUKMA v2.0
+            <%- (locals.branding && branding.footerText) ? branding.footerText : '&copy; 2026 Majlis Sukan Negara Malaysia. Sistem eLearning Atlit SUKMA v2.0' %>
         </div>
     </main>
 
