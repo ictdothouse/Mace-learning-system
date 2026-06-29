@@ -2,7 +2,7 @@
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <title>Sijil SUKMA - <%= athlete.fullName %></title>
+    <title>Sijil <%= (locals.branding && locals.branding.siteName) ? branding.siteName : 'MACE' %> - <%= athlete.fullName %></title>
     <style>
         @page { size: A4 landscape; margin: 0; }
         body { 

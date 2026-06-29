@@ -42,7 +42,7 @@ const certificateTemplateSchema = new mongoose.Schema({
     },
     subtitle: {
         type: String,
-        default: 'KURSUS eLEARNING ATLET SUKMA'
+        default: 'KURSUS eLEARNING ATLET MACE'
     },
     showSubtitle: {
         type: Boolean,
@@ -50,7 +50,7 @@ const certificateTemplateSchema = new mongoose.Schema({
     },
     courseName: {
         type: String,
-        default: 'KURSUS eLEARNING ATLET SUKMA'
+        default: 'KURSUS eLEARNING ATLET MACE'
     },
     showCourseName: {
         type: Boolean,

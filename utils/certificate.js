@@ -53,8 +53,8 @@ async function generateCertificate(athlete, res, templateId = null) {
     // Default template values
     const config = template || {
         title: 'SIJIL PENGHARGAAN',
-        subtitle: 'KURSUS eLEARNING ATLET SUKMA',
-        courseName: 'KURSUS eLEARNING ATLET SUKMA',
+        subtitle: 'KURSUS eLEARNING ATLET MACE',
+        courseName: 'KURSUS eLEARNING ATLET MACE',
         description: 'Adalah dengan ini diperakui bahawa',
         signatoryName: 'PENGARAH',
         signatoryTitle: 'Majlis Sukan Negara',
