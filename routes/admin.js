@@ -80,7 +80,11 @@ const processAndUploadImage = async (file, urlInput) => {
                 ContentType: 'image/webp'
             }));
             
-            return `https://pub-${process.env.R2_ACCOUNT_ID}.r2.dev/${filename}`;
+            let publicUrlBase = process.env.R2_PUBLIC_URL || `https://pub-${process.env.R2_ACCOUNT_ID}.r2.dev`;
+            if (publicUrlBase && !publicUrlBase.startsWith('http://') && !publicUrlBase.startsWith('https://')) {
+                publicUrlBase = 'https://' + publicUrlBase;
+            }
+            return `${publicUrlBase}/${filename}`;
         } else {
             // Local fallback
             const localPath = path.join(__dirname, '../uploads', filename);
