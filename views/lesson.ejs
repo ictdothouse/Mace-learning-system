@@ -296,11 +296,17 @@ const moduleTitle = lesson.moduleId ? lesson.moduleId.title : ('MODUL ' + module
                                     <% } else { %>
                                         <a href="/lesson/<%= moduleId + 1 %>" class="flex-1 bg-green-600 text-white px-6 py-3.5 rounded-lg font-bold hover:bg-green-700 transition shadow-md flex items-center justify-center gap-2 text-center">Pelajaran Seterusnya →</a>
                                     <% } %>
-                                    <button type="submit" class="sm:w-auto bg-gray-100 text-gray-700 px-6 py-3.5 rounded-lg font-medium hover:bg-gray-200 transition border border-gray-200">Jawab Semula</button>
+                                    <button type="button" onclick="window.location.href='/lesson/<%= moduleId %>';" class="sm:w-auto bg-gray-100 text-gray-700 px-6 py-3.5 rounded-lg font-medium hover:bg-gray-200 transition border border-gray-200">Jawab Semula</button>
                                 <% } else { %>
-                                    <button type="submit" class="flex-1 bg-blue-600 text-white px-6 py-3.5 rounded-lg font-bold hover:bg-blue-700 transition shadow-md flex items-center justify-center gap-2">
-                                        <%= quizResult ? 'Jawab Semula Kuiz ↺' : 'Hantar Jawapan & Semak Keputusan →' %>
-                                    </button>
+                                    <% if (quizResult) { %>
+                                        <button type="button" onclick="window.location.href='/lesson/<%= moduleId %>';" class="flex-1 bg-blue-600 text-white px-6 py-3.5 rounded-lg font-bold hover:bg-blue-700 transition shadow-md flex items-center justify-center gap-2">
+                                            Jawab Semula Kuiz ↺
+                                        </button>
+                                    <% } else { %>
+                                        <button type="submit" class="flex-1 bg-blue-600 text-white px-6 py-3.5 rounded-lg font-bold hover:bg-blue-700 transition shadow-md flex items-center justify-center gap-2">
+                                            Hantar Jawapan & Semak Keputusan →
+                                        </button>
+                                    <% } %>
                                 <% } %>
                             </div>
                         <% } else { %>
