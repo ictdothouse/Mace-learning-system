@@ -409,28 +409,32 @@
     <!-- First Time Welcome Modal -->
     <% if (athlete.currentStage === 1 && lessons && lessons.length > 0 && lessons[0].moduleId) { %>
         <div id="welcomeModal" class="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 transition-opacity duration-300 opacity-0 pointer-events-none" style="backdrop-filter: blur(5px);">
-            <div class="bg-white rounded-2xl max-w-4xl w-full overflow-hidden shadow-2xl relative transform transition-transform duration-300 scale-95 max-h-[90vh] flex flex-col" id="welcomeModalContent">
+            <div class="bg-white rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl relative transform transition-transform duration-300 scale-95 max-h-[85vh] md:max-h-[90vh] flex flex-col" id="welcomeModalContent">
                 
-                <div class="overflow-y-auto">
-                    <% if (lessons[0].moduleId.coverImage) { %>
-                        <img src="<%= lessons[0].moduleId.coverImage %>" alt="Cover" class="w-full h-64 sm:h-96 object-cover">
+                <!-- Scrollable Content Container -->
+                <div class="overflow-y-auto flex-1">
+                    <% if (lessons[0].moduleId.thumbnail) { %>
+                        <img src="<%= lessons[0].moduleId.thumbnail %>" alt="Cover" class="w-full h-48 sm:h-64 object-cover">
                     <% } else { %>
                         <div class="w-full h-48 bg-gradient-to-r from-blue-600 to-indigo-700"></div>
                     <% } %>
                     
-                    <div class="p-6 sm:p-10 text-gray-900">
-                        <h2 class="text-2xl sm:text-3xl font-black mb-6 uppercase text-gray-900 leading-tight">
+                    <div class="p-6 sm:p-8 text-gray-900">
+                        <h2 class="text-xl sm:text-2xl font-black mb-4 uppercase text-gray-900 leading-tight">
                             <%= lessons[0].moduleId.title || lessons[0].title || '' %>
                         </h2>
                         
-                        <div class="prose max-w-none text-gray-700 mb-8 leading-relaxed text-sm sm:text-base">
+                        <div class="prose max-w-none text-gray-700 leading-relaxed text-sm sm:text-base">
                             <%- lessons[0].moduleId.description || 'Sila mulakan pembelajaran anda...' %>
                         </div>
-                        
-                        <button onclick="closeWelcomeModal()" class="w-full sm:w-auto px-10 py-3.5 bg-[#e87a14] hover:bg-[#d66c11] text-white text-lg font-bold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5">
-                            Mulakan Modul
-                        </button>
                     </div>
+                </div>
+                
+                <!-- Fixed Footer at the bottom -->
+                <div class="p-4 sm:p-6 border-t border-gray-100 bg-gray-50 flex justify-end">
+                    <button onclick="closeWelcomeModal()" class="w-full sm:w-auto px-10 py-3 bg-[#e87a14] hover:bg-[#d66c11] text-white text-base sm:text-lg font-bold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg active:scale-95">
+                        Mulakan Modul
+                    </button>
                 </div>
             </div>
         </div>
