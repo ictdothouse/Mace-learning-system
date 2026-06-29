@@ -1696,6 +1696,12 @@
                 <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">Maklumat <%= getTerm('teacher').toLowerCase() %> dikemaskini!</div>
             <% } else if (msg === 'teacher_deleted') { %>
                 <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6"><%= getTerm('teacher') %> berjaya dipadam!</div>
+            <% } else if (msg === 'email_exists') { %>
+                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">❌ E-mel tersebut telah digunakan oleh pengguna lain.</div>
+            <% } else if (msg === 'username_exists') { %>
+                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">❌ Username tersebut telah digunakan oleh pengguna lain.</div>
+            <% } else if (msg === 'missing_fields') { %>
+                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">❌ Sila isi semua ruangan yang wajib.</div>
             <% } else if (msg === 'create_error') { %>
                 <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-r-lg mb-6 shadow-sm flex items-center gap-2 animate-fade-in">❌ Ralat: Gagal menambah guru baru. Sila cuba lagi.</div>
             <% } else if (msg === 'password_reset') { %>
@@ -1708,6 +1714,7 @@
                         <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-100">
                             <tr>
                                 <th class="px-6 py-4">Nama</th>
+                                <th class="px-6 py-4">Username</th>
                                 <th class="px-6 py-4">Email</th>
                                 <th class="px-6 py-4">Tarikh Daftar</th>
                                 <th class="px-6 py-4 text-right">Tindakan</th>
@@ -1718,6 +1725,7 @@
                                 <% teachers.forEach(t => { %>
                                     <tr class="hover:bg-blue-50/30 transition">
                                         <td class="px-6 py-4 font-medium text-gray-900"><%= t.fullName %></td>
+                                        <td class="px-6 py-4 text-gray-600 font-mono text-xs"><%= t.username || '-' %></td>
                                         <td class="px-6 py-4 text-gray-600"><%= t.email %></td>
                                         <td class="px-6 py-4 text-gray-500"><%= new Date(t.createdAt).toLocaleDateString('ms-MY') %></td>
                                         <td class="px-6 py-4 text-right">
@@ -1735,7 +1743,7 @@
                                 <% }) %>
                             <% } else { %>
                                 <tr>
-                                    <td colspan="4" class="px-6 py-12 text-center text-gray-400 italic">Tiada guru berdaftar lagi.</td>
+                                    <td colspan="5" class="px-6 py-12 text-center text-gray-400 italic">Tiada guru berdaftar lagi.</td>
                                 </tr>
                             <% } %>
                         </tbody>
@@ -1781,6 +1789,10 @@
                 <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">✗ Enrollment key tidak dijumpai. Sila semak semula.</div>
             <% } else if (msg === 'bulk_error') { %>
                 <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">✗ Ralat semasa menjalankan tindakan pukal.</div>
+            <% } else if (msg === 'email_exists') { %>
+                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">❌ E-mel tersebut telah digunakan oleh pengguna lain.</div>
+            <% } else if (msg === 'username_exists') { %>
+                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">❌ Username tersebut telah digunakan oleh pengguna lain.</div>
             <% } %>
 
             <!-- Bulk Actions Toolbar -->
@@ -2037,7 +2049,7 @@
                     <h2 class="text-2xl font-bold text-gray-900">Pengurusan Admin / Urusetia</h2>
                     <p class="text-gray-500 text-sm mt-1">Urus senarai pentadbir sistem yang boleh log masuk dan menguruskan platform ini.</p>
                 </div>
-                <button onclick="document.getElementById('createAdminModal').classList.remove('hidden')" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition shadow-sm">
+                <button onclick="openCreateAdminModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition shadow-sm">
                     + Tambah Admin
                 </button>
             </div>
@@ -2050,6 +2062,8 @@
                 <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-r-lg mb-6 shadow-sm">🗑️ Akaun admin berjaya dipadam.</div>
             <% } else if (locals.msg === 'email_exists') { %>
                 <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-r-lg mb-6 shadow-sm">❌ Email tersebut telah digunakan oleh pengguna lain.</div>
+            <% } else if (locals.msg === 'username_exists') { %>
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-r-lg mb-6 shadow-sm">❌ Username tersebut telah digunakan oleh pengguna lain.</div>
             <% } else if (locals.msg === 'error_empty') { %>
                 <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-r-lg mb-6 shadow-sm">❌ Sila isi semua ruangan yang wajib.</div>
             <% } else if (locals.msg === 'error_self_delete') { %>
@@ -2064,6 +2078,7 @@
                         <thead class="text-xs text-gray-500 uppercase bg-gray-50">
                             <tr>
                                 <th class="px-6 py-3">Nama Penuh</th>
+                                <th class="px-6 py-3">Username</th>
                                 <th class="px-6 py-3">E-mel (Log Masuk)</th>
                                 <th class="px-6 py-3">Status</th>
                                 <th class="px-6 py-3 text-right">Tindakan</th>
@@ -2076,6 +2091,7 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd" /></svg>
                                     Master Admin
                                 </td>
+                                <td class="px-6 py-4 text-gray-500 italic">system</td>
                                 <td class="px-6 py-4 text-gray-500 italic">Akaun Sistem Utama</td>
                                 <td class="px-6 py-4"><span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">AKTIF</span></td>
                                 <td class="px-6 py-4 text-right text-xs text-gray-400">-</td>
@@ -2085,6 +2101,7 @@
                                 <% admins.forEach(a => { %>
                                     <tr class="hover:bg-gray-50 transition">
                                         <td class="px-6 py-4 font-medium text-gray-900"><%= a.fullName %></td>
+                                        <td class="px-6 py-4 text-gray-600 font-mono text-xs"><%= a.username || '-' %></td>
                                         <td class="px-6 py-4 text-gray-600"><%= a.email %></td>
                                         <td class="px-6 py-4">
                                             <% if (a.isActive) { %>
@@ -2094,7 +2111,7 @@
                                             <% } %>
                                         </td>
                                         <td class="px-6 py-4 text-right">
-                                            <button onclick="editAdmin('<%= a._id %>', '<%= a.fullName.replace(/'/g, "\\'") %>', '<%= a.email %>', <%= a.isActive %>)" class="text-blue-600 hover:text-blue-800 text-xs font-medium px-3 py-1.5 rounded hover:bg-blue-50 transition">Edit</button>
+                                            <button onclick="editAdmin('<%= a._id %>', '<%= a.fullName.replace(/'/g, "\\'") %>', '<%= a.username || '' %>', '<%= a.email %>', <%= a.isActive %>)" class="text-blue-600 hover:text-blue-800 text-xs font-medium px-3 py-1.5 rounded hover:bg-blue-50 transition">Edit</button>
                                             <form action="/admin-mace/admins/delete/<%= a._id %>" method="POST" class="inline" onsubmit="return confirm('PADAM akaun admin ini? Tindakan tidak boleh diundur.')">
                                                 <button type="submit" class="text-red-600 hover:text-red-800 text-xs font-medium px-3 py-1.5 rounded hover:bg-red-50 transition">Padam</button>
                                             </form>
@@ -2123,6 +2140,10 @@
                                 <input type="text" name="fullName" id="adminFullName" required class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none transition">
                             </div>
                             <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                                <input type="text" name="username" id="adminUsername" required placeholder="Cth: adminmace" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none transition font-mono lowercase">
+                            </div>
+                            <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">E-mel Log Masuk</label>
                                 <input type="email" name="email" id="adminEmail" required class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none transition">
                             </div>
@@ -2145,11 +2166,12 @@
             </div>
 
             <script>
-                function editAdmin(id, name, email, isActive) {
+                function editAdmin(id, name, username, email, isActive) {
                     const form = document.getElementById('adminForm');
                     form.action = '/admin-mace/admins/edit/' + id;
                     document.getElementById('adminModalTitle').innerText = 'Kemaskini Admin';
                     document.getElementById('adminFullName').value = name;
+                    document.getElementById('adminUsername').value = username;
                     document.getElementById('adminEmail').value = email;
                     document.getElementById('adminPassword').required = false;
                     document.getElementById('adminPasswordHint').innerText = 'Biarkan kosong jika tidak mahu menukar kata laluan.';
@@ -2157,6 +2179,23 @@
                     const activeContainer = document.getElementById('adminActiveContainer');
                     activeContainer.style.display = 'flex';
                     document.getElementById('adminIsActive').checked = isActive;
+                    
+                    document.getElementById('createAdminModal').classList.remove('hidden');
+                }
+
+                function openCreateAdminModal() {
+                    const form = document.getElementById('adminForm');
+                    form.action = '/admin-mace/admins/add';
+                    document.getElementById('adminModalTitle').innerText = 'Tambah Admin Baru';
+                    document.getElementById('adminFullName').value = '';
+                    document.getElementById('adminUsername').value = '';
+                    document.getElementById('adminEmail').value = '';
+                    document.getElementById('adminPassword').value = '';
+                    document.getElementById('adminPassword').required = true;
+                    document.getElementById('adminPasswordHint').innerText = 'Wajib diisi untuk admin baru.';
+                    
+                    const activeContainer = document.getElementById('adminActiveContainer');
+                    activeContainer.style.display = 'none';
                     
                     document.getElementById('createAdminModal').classList.remove('hidden');
                 }
@@ -2177,6 +2216,8 @@
                 <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-r-lg mb-6 shadow-sm">✅ Profil anda berjaya dikemaskini.</div>
             <% } else if (locals.msg === 'email_exists') { %>
                 <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-r-lg mb-6 shadow-sm">❌ Email tersebut telah digunakan.</div>
+            <% } else if (locals.msg === 'username_exists') { %>
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-r-lg mb-6 shadow-sm">❌ Username tersebut telah digunakan.</div>
             <% } else if (locals.msg === 'not_db_admin') { %>
                 <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-r-lg mb-6 shadow-sm flex gap-3 items-start">
                     <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -2199,6 +2240,11 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Nama Penuh</label>
                                 <input type="text" name="fullName" value="<%= adminUser.fullName %>" required class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                                <input type="text" name="username" value="<%= adminUser.username || '' %>" required placeholder="Cth: adminmace" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none transition font-mono lowercase">
                             </div>
                             
                             <div>

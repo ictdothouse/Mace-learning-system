@@ -42,14 +42,20 @@ router.post('/login', async (req, res) => {
             return res.render('auth-login', { error: 'Sila masukkan email/username dan password', success: null });
         }
         
-        // Cuba cari user melalui email dahulu, kemudian melalui fullName (username)
-        const loginInput = email.trim();
-        let user = await User.findOne({ email: loginInput.toLowerCase(), isActive: true });
+        // Cuba cari user melalui email atau username
+        const loginInput = email.trim().toLowerCase();
+        let user = await User.findOne({ 
+            $or: [
+                { email: loginInput },
+                { username: loginInput }
+            ], 
+            isActive: true 
+        });
         
-        // Jika tidak dijumpai melalui email, cuba cari melalui fullName (untuk admin/teacher)
+        // Jika tidak dijumpai, cuba cari melalui fullName (untuk admin/teacher)
         if (!user) {
             user = await User.findOne({ 
-                fullName: { $regex: new RegExp('^' + loginInput.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') },
+                fullName: { $regex: new RegExp('^' + email.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') },
                 role: { $in: ['admin', 'teacher'] },
                 isActive: true 
             });

@@ -1343,21 +1343,28 @@ router.get('/teachers/new', async (req, res) => {
 // POST: Cipta Teacher Baru
 router.post('/teachers/new', async (req, res) => {
     try {
-        const { fullName, email, password } = req.body;
+        const { fullName, username, email, password } = req.body;
         
-        if (!fullName || !email || !password) {
+        if (!fullName || !username || !email || !password) {
             return res.redirect('/admin-mace/teachers?msg=missing_fields');
         }
         
         // Check if email already exists
-        const existing = await User.findOne({ email });
-        if (existing) {
+        const existingEmail = await User.findOne({ email: email.toLowerCase() });
+        if (existingEmail) {
             return res.redirect('/admin-mace/teachers?msg=email_exists');
+        }
+
+        // Check if username already exists
+        const existingUsername = await User.findOne({ username: username.toLowerCase() });
+        if (existingUsername) {
+            return res.redirect('/admin-mace/teachers?msg=username_exists');
         }
         
         await User.create({
             fullName,
-            email,
+            username: username.toLowerCase(),
+            email: email.toLowerCase(),
             password,
             role: 'teacher',
             isActive: true
@@ -1387,7 +1394,7 @@ router.get('/teachers/edit/:id', async (req, res) => {
 // POST: Update Teacher
 router.post('/teachers/edit/:id', async (req, res) => {
     try {
-        const { fullName, email, password, isActive } = req.body;
+        const { fullName, username, email, password, isActive } = req.body;
         
         const teacher = await User.findById(req.params.id);
         if (!teacher || teacher.role !== 'teacher') {
@@ -1395,13 +1402,21 @@ router.post('/teachers/edit/:id', async (req, res) => {
         }
         
         if (email !== teacher.email) {
-            const existing = await User.findOne({ email, _id: { $ne: req.params.id } });
-            if (existing) {
+            const existingEmail = await User.findOne({ email: email.toLowerCase(), _id: { $ne: req.params.id } });
+            if (existingEmail) {
                 return res.redirect('/admin-mace/teachers?msg=email_exists');
             }
         }
+
+        if (username && username.toLowerCase() !== teacher.username) {
+            const existingUsername = await User.findOne({ username: username.toLowerCase(), _id: { $ne: req.params.id } });
+            if (existingUsername) {
+                return res.redirect('/admin-mace/teachers?msg=username_exists');
+            }
+        }
         
-        const updateData = { fullName, email, isActive: isActive === 'on' };
+        const updateData = { fullName, email: email.toLowerCase(), isActive: isActive === 'on' };
+        if (username) updateData.username = username.toLowerCase();
         
         if (password && password.trim() !== '') {
             updateData.password = password;
@@ -1577,7 +1592,7 @@ router.get('/students/edit/:id', async (req, res) => {
 // POST: Update Pelajar (supports both User accounts and Athlete records)
 router.post('/students/edit/:id', async (req, res) => {
     try {
-        const { fullName, email, password, isActive, groupIds } = req.body;
+        const { fullName, username, email, password, isActive, groupIds } = req.body;
 
         // Try to find as User first
         let student = await User.findById(req.params.id);
@@ -1619,13 +1634,21 @@ router.post('/students/edit/:id', async (req, res) => {
         } else {
             // Update User account
             if (email !== student.email) {
-                const existing = await User.findOne({ email, _id: { $ne: req.params.id } });
-                if (existing) {
+                const existingEmail = await User.findOne({ email: email.toLowerCase(), _id: { $ne: req.params.id } });
+                if (existingEmail) {
                     return res.redirect('/admin-mace/students?msg=email_exists');
                 }
             }
 
-            const updateData = { fullName, email, isActive: isActive === 'on' };
+            if (username && username.toLowerCase() !== student.username) {
+                const existingUsername = await User.findOne({ username: username.toLowerCase(), _id: { $ne: req.params.id } });
+                if (existingUsername) {
+                    return res.redirect('/admin-mace/students?msg=username_exists');
+                }
+            }
+
+            const updateData = { fullName, email: email.toLowerCase(), isActive: isActive === 'on' };
+            if (username) updateData.username = username.toLowerCase();
 
             if (password && password.trim() !== '') {
                 updateData.password = password;
@@ -2236,6 +2259,7 @@ router.post('/athletes/convert/:id', async (req, res) => {
         // Create user account
         const newUser = await User.create({
             fullName: athlete.fullName,
+            username: athlete.icNumber.trim().toLowerCase(),
             email: `${athlete.icNumber}@athlete.local`, // Use IC as username
             password: randomPassword,
             role: 'student',
@@ -2274,15 +2298,21 @@ router.post('/profile', async (req, res) => {
         if (!req.session || !req.session.userId) {
             return res.redirect('/admin-mace/profile?msg=not_db_admin');
         }
-        const { fullName, email, password } = req.body;
-        const updateData = { fullName, email };
+        const { fullName, username, email, password } = req.body;
+        const updateData = { fullName, email: email.toLowerCase() };
+        if (username) updateData.username = username.trim().toLowerCase();
         if (password && password.trim() !== '') {
             updateData.password = password;
         }
         
         if (email) {
-            const existing = await User.findOne({ email, _id: { $ne: req.session.userId } });
-            if (existing) return res.redirect('/admin-mace/profile?msg=email_exists');
+            const existingEmail = await User.findOne({ email: email.toLowerCase(), _id: { $ne: req.session.userId } });
+            if (existingEmail) return res.redirect('/admin-mace/profile?msg=email_exists');
+        }
+
+        if (username) {
+            const existingUsername = await User.findOne({ username: username.trim().toLowerCase(), _id: { $ne: req.session.userId } });
+            if (existingUsername) return res.redirect('/admin-mace/profile?msg=username_exists');
         }
         
         await User.findByIdAndUpdate(req.session.userId, updateData);
@@ -2308,14 +2338,18 @@ router.get('/admins', async (req, res) => {
 // POST: Tambah Admin
 router.post('/admins/add', async (req, res) => {
     try {
-        const { fullName, email, password } = req.body;
-        if (!fullName || !email || !password) return res.redirect('/admin-mace/admins?msg=error_empty');
+        const { fullName, username, email, password } = req.body;
+        if (!fullName || !username || !email || !password) return res.redirect('/admin-mace/admins?msg=error_empty');
         
-        const existing = await User.findOne({ email: email.toLowerCase() });
-        if (existing) return res.redirect('/admin-mace/admins?msg=email_exists');
+        const existingEmail = await User.findOne({ email: email.toLowerCase() });
+        if (existingEmail) return res.redirect('/admin-mace/admins?msg=email_exists');
+
+        const existingUsername = await User.findOne({ username: username.trim().toLowerCase() });
+        if (existingUsername) return res.redirect('/admin-mace/admins?msg=username_exists');
         
         await User.create({
             fullName,
+            username: username.trim().toLowerCase(),
             email: email.toLowerCase(),
             password,
             role: 'admin',
@@ -2331,12 +2365,18 @@ router.post('/admins/add', async (req, res) => {
 // POST: Update Admin
 router.post('/admins/edit/:id', async (req, res) => {
     try {
-        const { fullName, email, password, isActive } = req.body;
-        const updateData = { fullName, email, isActive: isActive === 'on' };
+        const { fullName, username, email, password, isActive } = req.body;
+        const updateData = { fullName, email: email.toLowerCase(), isActive: isActive === 'on' };
+        if (username) updateData.username = username.trim().toLowerCase();
         if (password && password.trim() !== '') updateData.password = password;
         
-        const existing = await User.findOne({ email, _id: { $ne: req.params.id } });
-        if (existing) return res.redirect('/admin-mace/admins?msg=email_exists');
+        const existingEmail = await User.findOne({ email: email.toLowerCase(), _id: { $ne: req.params.id } });
+        if (existingEmail) return res.redirect('/admin-mace/admins?msg=email_exists');
+
+        if (username) {
+            const existingUsername = await User.findOne({ username: username.trim().toLowerCase(), _id: { $ne: req.params.id } });
+            if (existingUsername) return res.redirect('/admin-mace/admins?msg=username_exists');
+        }
         
         await User.findByIdAndUpdate(req.params.id, updateData);
         res.redirect('/admin-mace/admins?msg=admin_updated');
