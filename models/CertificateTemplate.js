@@ -267,6 +267,11 @@ const certificateTemplateSchema = new mongoose.Schema({
     borderWidth: {
         type: Number,
         default: 3
+    },
+    orientation: {
+        type: String,
+        enum: ['landscape', 'portrait'],
+        default: 'landscape'
     }
 }, {
     timestamps: true

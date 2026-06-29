@@ -1,6 +1,7 @@
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
+const axios = require('axios');
 const CertificateTemplate = require('../models/CertificateTemplate');
 const { S3Client } = require('@aws-sdk/client-s3');
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
@@ -29,18 +30,38 @@ const getSecureImageUrl = async (key) => {
     }
 };
 
-async function generateCertificate(athlete, res, templateId = null) {
-    const doc = new PDFDocument({ 
-        size: 'A4', 
-        layout: 'landscape',
-        margins: { top: 0, bottom: 0, left: 0, right: 0 }
-    });
+// Helper function to fetch image buffers (supports local paths and remote URLs)
+async function getImageBuffer(imgUrl) {
+    if (!imgUrl) return null;
     
-    res.header('Content-Type', 'application/pdf');
-    res.header('Content-Disposition', `inline; filename=Sijil_${athlete.fullName.replace(/\s+/g, '_')}.pdf`);
+    // Local path starts with /uploads
+    if (imgUrl.startsWith('/uploads/')) {
+        const localPath = path.join(__dirname, '..', imgUrl);
+        if (fs.existsSync(localPath)) {
+            return fs.readFileSync(localPath);
+        }
+    }
     
-    doc.pipe(res);
+    // Relative file path on disk
+    if (fs.existsSync(imgUrl)) {
+        return fs.readFileSync(imgUrl);
+    }
+    
+    // Remote URL
+    if (imgUrl.startsWith('http://') || imgUrl.startsWith('https://')) {
+        try {
+            const response = await axios.get(imgUrl, { responseType: 'arraybuffer' });
+            return Buffer.from(response.data);
+        } catch (err) {
+            console.error(`❌ Gagal mendownload imej dari URL (${imgUrl}):`, err.message);
+            return null;
+        }
+    }
+    
+    return null;
+}
 
+async function generateCertificate(athlete, res, templateId = null) {
     // Get template or use default
     let template = null;
     if (templateId) {
@@ -74,11 +95,25 @@ async function generateCertificate(athlete, res, templateId = null) {
         showDate: true,
         showSignatory: true,
         backgroundImageType: 'none',
+        orientation: 'landscape',
         elements: {
             title: { fontSize: 36, color: '#004aad', align: 'center', positionX: 50, positionY: 10 },
             athleteName: { fontSize: 42, color: '#004aad', align: 'center', positionX: 50, positionY: 38 }
         }
     };
+
+    // Force A4 dimensions and disable autoPageBreak
+    const doc = new PDFDocument({ 
+        size: 'A4', 
+        layout: config.orientation || 'landscape',
+        margins: { top: 0, bottom: 0, left: 0, right: 0 },
+        autoPageBreak: false // Force exactly 1 page
+    });
+    
+    res.header('Content-Type', 'application/pdf');
+    res.header('Content-Disposition', `inline; filename=Sijil_${athlete.fullName.replace(/\s+/g, '_')}.pdf`);
+    
+    doc.pipe(res);
 
     const pageWidth = doc.page.width;
     const pageHeight = doc.page.height;
@@ -87,29 +122,27 @@ async function generateCertificate(athlete, res, templateId = null) {
     if (config.backgroundImageType === 'none' || !config.backgroundImageType) {
         // Solid color background
         doc.rect(0, 0, pageWidth, pageHeight).fill(config.backgroundColor || '#ffffff');
-    } else if (config.backgroundImageType === 'url' && config.backgroundImageUrl) {
-        // Background from URL
-        try {
-            doc.opacity(config.backgroundOpacity || 1);
-            doc.image(config.backgroundImageUrl, 0, 0, { width: pageWidth, height: pageHeight });
-            doc.opacity(1);
-        } catch (err) {
-            console.error('Error loading background image from URL:', err.message);
-            doc.rect(0, 0, pageWidth, pageHeight).fill(config.backgroundColor || '#ffffff');
-        }
-    } else if (config.backgroundImageType === 'r2' && config.backgroundR2Key) {
-        // Background from Cloudflare R2
-        try {
+    } else {
+        let bgBuffer = null;
+        if (config.backgroundImageType === 'url' && config.backgroundImageUrl) {
+            bgBuffer = await getImageBuffer(config.backgroundImageUrl);
+        } else if (config.backgroundImageType === 'r2' && config.backgroundR2Key) {
             const imageUrl = await getSecureImageUrl(config.backgroundR2Key);
             if (imageUrl) {
+                bgBuffer = await getImageBuffer(imageUrl);
+            }
+        }
+        
+        if (bgBuffer) {
+            try {
                 doc.opacity(config.backgroundOpacity || 1);
-                doc.image(imageUrl, 0, 0, { width: pageWidth, height: pageHeight });
+                doc.image(bgBuffer, 0, 0, { width: pageWidth, height: pageHeight });
                 doc.opacity(1);
-            } else {
+            } catch (err) {
+                console.error('Error drawing background image:', err.message);
                 doc.rect(0, 0, pageWidth, pageHeight).fill(config.backgroundColor || '#ffffff');
             }
-        } catch (err) {
-            console.error('Error loading background image from R2:', err.message);
+        } else {
             doc.rect(0, 0, pageWidth, pageHeight).fill(config.backgroundColor || '#ffffff');
         }
     }
@@ -173,14 +206,12 @@ async function generateCertificate(athlete, res, templateId = null) {
             doc.rect(25, 25, pageWidth - 50, pageHeight - 50).stroke(borderColor);
             
             // Ornamental corners
-            const cornerSize = 30;
             doc.lineCap('square');
             doc.moveTo(35, 55).lineTo(35, 35).lineTo(55, 35).stroke(borderColor);
             doc.moveTo(pageWidth - 55, 35).lineTo(pageWidth - 35, 35).lineTo(pageWidth - 35, 55).stroke(borderColor);
             doc.moveTo(35, pageHeight - 55).lineTo(35, pageHeight - 35).lineTo(55, pageHeight - 35).stroke(borderColor);
             doc.moveTo(pageWidth - 55, pageHeight - 35).lineTo(pageWidth - 35, pageHeight - 35).lineTo(pageWidth - 35, pageHeight - 55).stroke(borderColor);
         } else if (borderStyle === 'ornate') {
-            // More elaborate border
             doc.lineWidth(5);
             doc.rect(10, 10, pageWidth - 20, pageHeight - 20).stroke(borderColor);
             doc.lineWidth(2);
@@ -193,38 +224,41 @@ async function generateCertificate(athlete, res, templateId = null) {
     // Draw logo
     if (config.showLogo && config.logoUrl) {
         try {
-            const logoPosition = config.logoPosition || 'top-center';
-            const logoSize = config.logoSize || { width: 80, height: 80 };
-            let logoX, logoY;
-            
-            switch (logoPosition) {
-                case 'top-left':
-                    logoX = 40;
-                    logoY = 30;
-                    break;
-                case 'top-right':
-                    logoX = pageWidth - logoSize.width - 40;
-                    logoY = 30;
-                    break;
-                case 'bottom-left':
-                    logoX = 40;
-                    logoY = pageHeight - logoSize.height - 40;
-                    break;
-                case 'bottom-center':
-                    logoX = (pageWidth - logoSize.width) / 2;
-                    logoY = pageHeight - logoSize.height - 40;
-                    break;
-                case 'bottom-right':
-                    logoX = pageWidth - logoSize.width - 40;
-                    logoY = pageHeight - logoSize.height - 40;
-                    break;
-                case 'top-center':
-                default:
-                    logoX = (pageWidth - logoSize.width) / 2;
-                    logoY = 30;
+            const logoBuffer = await getImageBuffer(config.logoUrl);
+            if (logoBuffer) {
+                const logoPosition = config.logoPosition || 'top-center';
+                const logoSize = config.logoSize || { width: 80, height: 80 };
+                let logoX, logoY;
+                
+                switch (logoPosition) {
+                    case 'top-left':
+                        logoX = 40;
+                        logoY = 30;
+                        break;
+                    case 'top-right':
+                        logoX = pageWidth - logoSize.width - 40;
+                        logoY = 30;
+                        break;
+                    case 'bottom-left':
+                        logoX = 40;
+                        logoY = pageHeight - logoSize.height - 40;
+                        break;
+                    case 'bottom-center':
+                        logoX = (pageWidth - logoSize.width) / 2;
+                        logoY = pageHeight - logoSize.height - 40;
+                        break;
+                    case 'bottom-right':
+                        logoX = pageWidth - logoSize.width - 40;
+                        logoY = pageHeight - logoSize.height - 40;
+                        break;
+                    case 'top-center':
+                    default:
+                        logoX = (pageWidth - logoSize.width) / 2;
+                        logoY = 30;
+                }
+                
+                doc.image(logoBuffer, logoX, logoY, { width: logoSize.width, height: logoSize.height });
             }
-            
-            doc.image(config.logoUrl, logoX, logoY, { width: logoSize.width, height: logoSize.height });
         } catch (err) {
             console.error('Error drawing logo:', err.message);
         }

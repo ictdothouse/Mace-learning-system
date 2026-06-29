@@ -1177,7 +1177,8 @@ router.post('/templates/create', upload.single('backgroundImage'), async (req, r
             showDate, signatoryName, showSignatory, signatoryTitle,
             primaryColor, secondaryColor, accentColor, backgroundColor, fontFamily,
             showBorder, showLogo, logoUrl, logoPosition, borderStyle, borderColor, borderWidth,
-            backgroundImageType, backgroundImageUrl, backgroundR2Key, backgroundOpacity
+            backgroundImageType, backgroundImageUrl, backgroundR2Key, backgroundOpacity,
+            orientation
         } = req.body;
         
         // Parse elements JSON or use defaults
@@ -1219,14 +1220,18 @@ router.post('/templates/create', upload.single('backgroundImage'), async (req, r
             backgroundImageUrl,
             backgroundR2Key,
             backgroundOpacity: parseFloat(backgroundOpacity) || 1,
+            orientation: orientation || 'landscape',
             elements,
             isActive: false
         };
         
-        // Handle file upload to R2
-        if (req.file && backgroundImageType === 'r2') {
-            // Upload to R2 would go here
-            templateData.backgroundR2Key = `cert-bg-${Date.now()}-${req.file.originalname}`;
+        // Handle background image file upload
+        if (req.file) {
+            const uploadedUrl = await processAndUploadImage(req.file, null);
+            if (uploadedUrl) {
+                templateData.backgroundImageUrl = uploadedUrl;
+                templateData.backgroundImageType = 'url';
+            }
         }
         
         await CertificateTemplate.create(templateData);
@@ -1247,7 +1252,7 @@ router.post('/templates/update/:id', upload.single('backgroundImage'), async (re
             primaryColor, secondaryColor, accentColor, backgroundColor, fontFamily,
             showBorder, showLogo, logoUrl, logoPosition, borderStyle, borderColor, borderWidth,
             backgroundImageType, backgroundImageUrl, backgroundR2Key, backgroundOpacity,
-            setAsActive
+            orientation, setAsActive
         } = req.body;
         
         // Parse elements JSON or use defaults
@@ -1289,12 +1294,17 @@ router.post('/templates/update/:id', upload.single('backgroundImage'), async (re
             backgroundImageUrl,
             backgroundR2Key,
             backgroundOpacity: parseFloat(backgroundOpacity) || 1,
+            orientation: orientation || 'landscape',
             elements
         };
         
-        // Handle file upload to R2
-        if (req.file && backgroundImageType === 'r2') {
-            templateData.backgroundR2Key = `cert-bg-${Date.now()}-${req.file.originalname}`;
+        // Handle background image file upload
+        if (req.file) {
+            const uploadedUrl = await processAndUploadImage(req.file, null);
+            if (uploadedUrl) {
+                updateData.backgroundImageUrl = uploadedUrl;
+                updateData.backgroundImageType = 'url';
+            }
         }
         
         if (setAsActive === 'on') {
