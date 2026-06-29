@@ -248,8 +248,8 @@
 </head>
 <body>
     <div class="no-print">
-        <button onclick="window.print()" class="btn-print">🖨️ Cetak / Simpan PDF</button>
-        <a href="/admin-mace" class="btn-back">← Kembali ke Admin</a>
+        <button onclick="window.print()" class="btn-print"><%= lang === 'en' ? '🖨️ Print / Save PDF' : '🖨️ Cetak / Simpan PDF' %></button>
+        <a href="<%= locals.backUrl || '/admin-mace' %>" class="btn-back">← <%= lang === 'en' ? 'Back' : 'Kembali' %></a>
     </div>
 
     <div class="cert-scroll-wrapper" style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; display: flex; justify-content: center; padding: 10px 0;">

@@ -1542,7 +1542,8 @@ router.get('/certificate/preview/:id', async (req, res) => {
             athlete,
             course,
             template,
-            courseDate
+            courseDate,
+            backUrl: '/admin-mace/templates'
         });
 
     } catch (err) {

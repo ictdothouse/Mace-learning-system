@@ -250,8 +250,8 @@
                     <% if (moduleObj && moduleObj.hasCertificate) { %>
                         <% const isModuleCompleted = modulesMap[moduleName].every(item => athlete.currentStage > (item.order || (item.idx + 1))); %>
                         <% if (isModuleCompleted) { %>
-                            <a href="/certificate/module/<%= moduleObj._id %>?print=1" target="_blank" class="text-xs bg-yellow-500 hover:bg-yellow-400 text-blue-900 font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors shadow-sm no-print">
-                                🎓 <%= lang === 'en' ? 'Download Certificate' : 'Muat Turun Sijil' %>
+                            <a href="/certificate/module/<%= moduleObj._id %>" target="_blank" class="text-xs bg-yellow-500 hover:bg-yellow-400 text-blue-900 font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors shadow-sm no-print">
+                                🎓 <%= lang === 'en' ? 'Print Certificate' : 'Cetak Sijil' %>
                             </a>
                         <% } else { %>
                             <span class="text-xs text-white/40 border border-white/10 px-3 py-1.5 rounded-lg flex items-center gap-1.5 no-print">
@@ -365,10 +365,10 @@
                         : 'Anda telah berjaya menyelesaikan semua pembelajaran ' + ((locals.branding && locals.branding.siteName) ? locals.branding.siteName : 'sistem') + '. Muat turun sijil anda sekarang!' %>
                 </p>
                 <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                    <a href="/certificate/<%= athlete._id %>?print=1" target="_blank"
+                    <a href="/certificate/<%= athlete._id %>" target="_blank"
                        class="inline-flex items-center justify-center gap-2 bg-white text-amber-600 px-6 py-3.5 rounded-xl font-bold hover:bg-amber-50 transition-all shadow-xl hover:shadow-2xl transform hover:scale-105">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                        <%= lang === 'en' ? '📜 Download Certificate' : '📜 Muat Turun Sijil' %>
+                        <%= lang === 'en' ? '📜 Print Certificate' : '📜 Cetak Sijil' %>
                     </a>
                 </div>
             </div>

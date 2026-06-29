@@ -8,6 +8,7 @@ const User = require('../models/User');
 const Module = require('../models/Module');
 const { generateCertificate } = require('../utils/certificate');
 const Page = require('../models/Page');
+const CertificateTemplate = require('../models/CertificateTemplate');
 
 // ==========================================
 // KONFIGURASI CLOUDFLARE R2 (VIDEO SULIT)
@@ -273,8 +274,23 @@ router.get('/certificate/:id', checkSession, async (req, res) => {
         if (req.query.print === '1') {
             generateCertificate(athlete, res);
         } else {
-            // Preview halaman HTML
-            res.render('certificate-preview', { athlete });
+            // Preview halaman HTML menggunakan template aktif
+            let template = await CertificateTemplate.findOne({ isActive: true });
+            if (!template) {
+                template = new CertificateTemplate();
+            }
+
+            const course = {};
+            const courseDate = new Date().toLocaleDateString('ms-MY', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            res.render('certificate-print', {
+                layout: false,
+                athlete,
+                template,
+                course,
+                courseDate,
+                backUrl: '/dashboard'
+            });
         }
     } catch (err) { 
         console.error('Certificate Error:', err);
@@ -282,7 +298,7 @@ router.get('/certificate/:id', checkSession, async (req, res) => {
     }
 });
 
-// Route untuk download sijil modul spesifik
+// Route untuk download/preview sijil modul spesifik
 router.get('/certificate/module/:moduleId', checkSession, async (req, res) => {
     try {
         const athlete = await Athlete.findById(req.session.athleteId);
@@ -302,7 +318,33 @@ router.get('/certificate/module/:moduleId', checkSession, async (req, res) => {
             }
         }
         
-        generateCertificate(athlete, res, module.certificateTemplate);
+        // JIKA ADA print=1, download PDF. JIKA TIDAK, render HTML print preview!
+        if (req.query.print === '1') {
+            generateCertificate(athlete, res, module.certificateTemplate);
+        } else {
+            let template = null;
+            if (module.certificateTemplate) {
+                template = await CertificateTemplate.findById(module.certificateTemplate);
+            }
+            if (!template) {
+                template = await CertificateTemplate.findOne({ isActive: true });
+            }
+            if (!template) {
+                template = new CertificateTemplate();
+            }
+
+            const course = { name: module.title };
+            const courseDate = new Date().toLocaleDateString('ms-MY', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            res.render('certificate-print', {
+                layout: false,
+                athlete,
+                template,
+                course,
+                courseDate,
+                backUrl: '/dashboard'
+            });
+        }
     } catch (err) {
         console.error('Module Certificate Error:', err);
         res.redirect('/dashboard');
