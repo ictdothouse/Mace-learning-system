@@ -320,10 +320,44 @@
             }
         }
 
-        // Auto-format IC
+        // Auto-format IC & Calculate Age/Gender
         document.querySelectorAll('input[name="icNumber"]').forEach(input => {
             input.addEventListener('input', function() {
                 this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12);
+                
+                const val = this.value;
+                const form = this.closest('form');
+                if (!form) return;
+                
+                const ageInput = form.querySelector('input[name="umur"]');
+                const genderSelect = form.querySelector('select[name="jantina"]');
+                
+                // Auto calculate age if at least 2 digits
+                if (val.length >= 2 && ageInput) {
+                    let yy = parseInt(val.substring(0, 2), 10);
+                    let currentYear = new Date().getFullYear();
+                    // Assuming cutoff year is 30 (e.g. 35 -> 1935, 05 -> 2005)
+                    let birthYear = yy > 30 ? 1900 + yy : 2000 + yy;
+                    ageInput.value = currentYear - birthYear;
+                    ageInput.setAttribute('readonly', 'true');
+                    ageInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+                } else if (ageInput) {
+                    ageInput.value = '';
+                    ageInput.removeAttribute('readonly');
+                    ageInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                }
+                
+                // Auto select gender if 12 digits
+                if (val.length === 12 && genderSelect) {
+                    let lastDigit = parseInt(val.substring(11, 12), 10);
+                    genderSelect.value = (lastDigit % 2 === 0) ? 'Perempuan' : 'Lelaki';
+                    genderSelect.style.pointerEvents = 'none';
+                    genderSelect.classList.add('bg-gray-100');
+                } else if (genderSelect) {
+                    genderSelect.value = '';
+                    genderSelect.style.pointerEvents = 'auto';
+                    genderSelect.classList.remove('bg-gray-100');
+                }
             });
         });
 
