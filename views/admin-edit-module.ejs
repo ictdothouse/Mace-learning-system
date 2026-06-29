@@ -152,6 +152,20 @@
 
         const compressImageClient = (file) => {
             return new Promise((resolve) => {
+                let fileType = file.type ? file.type.toLowerCase() : '';
+                const extMatch = file.name.match(/\.(webp|gif|svg)$/i);
+                if (extMatch && !fileType) {
+                    const ext = extMatch[1].toLowerCase();
+                    if (ext === 'webp') fileType = 'image/webp';
+                    else if (ext === 'gif') fileType = 'image/gif';
+                    else if (ext === 'svg') fileType = 'image/svg+xml';
+                }
+                
+                // Jika fail adalah format yang tak patut dimampatkan (cth: webp/gif), terus guna fail asal
+                if (['image/webp', 'image/gif', 'image/svg+xml'].includes(fileType)) {
+                    return resolve(file);
+                }
+
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
                 reader.onload = (event) => {
