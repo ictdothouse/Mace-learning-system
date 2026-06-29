@@ -402,7 +402,7 @@
                     
                     <div class="p-6 sm:p-10 text-gray-900">
                         <h2 class="text-2xl sm:text-3xl font-black mb-6 uppercase text-gray-900 leading-tight">
-                            <%= lang === 'en' ? 'MODULE 1 : ' : 'MODUL 1 : ' %><%= lessons[0].title || '' %>
+                            <%= lessons[0].moduleId.title || lessons[0].title || '' %>
                         </h2>
                         
                         <div class="prose max-w-none text-gray-700 mb-8 leading-relaxed text-sm sm:text-base">
