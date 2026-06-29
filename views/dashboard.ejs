@@ -162,8 +162,9 @@
                         </span>
                         <% } %>
                         <% 
+                        const lastCompleted = (athlete.currentStage || 1) - 1;
                         const stageLabel = athlete.currentStage >= 4 
-                            ? (lang === 'en' ? '🏆 Completed!' : '🏆 Tamat!')
+                            ? (lang === 'en' ? `🏆 Completed: Module ${lastCompleted}` : `🏆 Tamat: Modul ${lastCompleted}`)
                             : (lang === 'en' ? `Stage ${athlete.currentStage}` : `Peringkat ${athlete.currentStage}`);
                         const stageBg = athlete.currentStage >= 4 ? 'bg-emerald-500/20 border-emerald-400/30 text-emerald-300' : 'bg-indigo-500/20 border-indigo-400/30 text-indigo-300';
                         %>
