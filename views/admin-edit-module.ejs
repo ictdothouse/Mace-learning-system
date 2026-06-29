@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
@@ -179,12 +179,16 @@
                         canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
+                        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+                        const outputType = allowedTypes.includes(file.type) ? file.type : 'image/jpeg';
+                        const extension = outputType === 'image/jpeg' ? '.jpg' : outputType === 'image/png' ? '.png' : '.webp';
+                        
                         canvas.toBlob((blob) => {
-                            resolve(new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
-                                type: 'image/jpeg',
+                            resolve(new File([blob], file.name.replace(/\.[^/.]+$/, "") + extension, {
+                                type: outputType,
                                 lastModified: Date.now()
                             }));
-                        }, 'image/jpeg', 0.85);
+                        }, outputType, 0.85);
                     };
                 };
             });
