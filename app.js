@@ -56,6 +56,7 @@ app.post('/set-language', (req, res) => {
 
 // 5. Static Files
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // 6. Rate Limiting
 const limiter = rateLimit({

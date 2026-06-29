@@ -1946,7 +1946,7 @@
                     const prefix = type === 'banner' ? 'contact_banner' : 'contact_image';
                     const fileInput = document.getElementById(`${prefix}File`);
                     const previewImg = document.getElementById(`${prefix}Preview`);
-                    const hiddenUrlInput = document.getElementById(`${prefix}Image` === `${prefix}Image` ? (type === 'banner' ? 'contact_bannerImage' : 'contact_imageUrl') : '');
+                    const hiddenUrlInput = document.getElementById(type === 'banner' ? 'contact_bannerImage' : 'contact_imageUrl');
                     const uploadingMsg = document.getElementById(`${prefix}Uploading`);
                     
                     if (!fileInput.files || fileInput.files.length === 0) return;
