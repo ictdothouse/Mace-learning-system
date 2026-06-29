@@ -1462,6 +1462,7 @@ router.get('/students', async (req, res) => {
         
         // Get all athletes from Athlete collection
         const allAthletes = await Athlete.find()
+            .populate('enrolledGroups')
             .sort({ fullName: 1 });
         
         // Combine both lists: 
