@@ -29,7 +29,7 @@
     <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-30 hidden transition-opacity duration-300 opacity-0" onclick="toggleSidebar()"></div>
 
     <!-- SIDEBAR MENU -->
-    <aside id="adminSidebar" class="w-64 bg-blue-900 text-white flex flex-col h-screen fixed md:sticky top-0 left-0 shadow-xl z-40 transition-transform duration-300 -translate-x-full md:translate-x-0">
+    <aside id="adminSidebar" class="w-64 bg-blue-900 text-white flex flex-col fixed inset-y-0 left-0 md:sticky md:h-screen md:top-0 shadow-xl z-40 transition-transform duration-300 -translate-x-full md:translate-x-0">
         <div class="p-6 border-b border-blue-800 flex justify-between items-center">
             <div>
                 <h1 class="text-xl font-bold tracking-wider flex items-center gap-2">
@@ -49,7 +49,7 @@
             </button>
         </div>
         
-        <nav class="flex-1 py-6 space-y-1">
+        <nav class="flex-1 py-6 space-y-1 overflow-y-auto">
             <!-- Dashboard -->
             <a href="/admin-mace" class="sidebar-link <%= page === 'dashboard' ? 'active' : '' %> flex items-center px-6 py-3 hover:bg-blue-800 transition border-l-4 border-transparent">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
