@@ -14,6 +14,8 @@
     <% if (athleteFont && !['Helvetica', 'Times-Roman', 'Courier', 'Arial', 'Georgia'].includes(athleteFont)) { %>
         <link href="https://fonts.googleapis.com/css2?family=<%= formattedAthleteFont %>&display=swap" rel="stylesheet">
     <% } %>
+    <!-- html2pdf.js CDN library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -102,6 +104,11 @@
             .certificate-container {
                 zoom: 0.32;
             }
+        }
+
+        .certificate-container.html2pdf-printing {
+            zoom: 1 !important;
+            transform: none !important;
         }
 
         /* Print styles */
@@ -316,7 +323,7 @@
 </head>
 <body>
     <div class="no-print">
-        <button onclick="window.print()" class="btn-print"><%= lang === 'en' ? '🖨️ Print / Save PDF' : '🖨️ Cetak / Simpan PDF' %></button>
+        <button id="btnPrintPDF" onclick="downloadPDF()" class="btn-print"><%= lang === 'en' ? '🖨️ Print / Save PDF' : '🖨️ Cetak / Simpan PDF' %></button>
         <a href="<%= locals.backUrl || '/admin-mace' %>" class="btn-back">← <%= lang === 'en' ? 'Back' : 'Kembali' %></a>
     </div>
 
@@ -325,7 +332,12 @@
         <!-- Background Layers -->
         <div class="bg-layer bg-color"></div>
         <% if (template.backgroundImageType !== 'none' && (template.backgroundImageUrl || template.backgroundR2Key)) { %>
-            <div class="bg-layer bg-image"></div>
+            <div class="bg-layer">
+                <% 
+                    const bgUrl = template.backgroundImageType === "r2" ? "https://imghub-cdn.cloudflare.com/" + template.backgroundR2Key : (template.backgroundImageUrl || "");
+                %>
+                <img src="<%= bgUrl %>" crossorigin="anonymous" style="width: 100%; height: 100%; object-fit: cover; opacity: <%= template.backgroundOpacity || 1 %>; display: block; z-index: 0;">
+            </div>
         <% } %>
         
         <!-- Border Frames -->
@@ -336,7 +348,7 @@
         
         <!-- Logo -->
         <% if (template.showLogo && template.logoUrl) { %>
-            <img src="<%= template.logoUrl %>" alt="Logo" class="logo" style="width: <%= template.logoSize?.width || 80 %>px; height: <%= template.logoSize?.height || 80 %>px;">
+            <img src="<%= template.logoUrl %>" crossorigin="anonymous" alt="Logo" class="logo" style="width: <%= template.logoSize?.width || 80 %>px; height: <%= template.logoSize?.height || 80 %>px;">
         <% } %>
         
         <!-- Content Area -->
@@ -502,8 +514,49 @@
     </div>
     
     <script>
-        // Auto-focus print dialog on load (optional)
-        // window.onload = () => window.print();
+        function downloadPDF() {
+            const button = document.getElementById('btnPrintPDF');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<%= lang === "en" ? "⏳ Generating PDF..." : "⏳ Menjana PDF..." %>';
+            button.disabled = true;
+
+            const element = document.querySelector('.certificate-container');
+            
+            // Add printing class to override responsive zooms during capture
+            element.classList.add('html2pdf-printing');
+            
+            const opt = {
+                margin:       0,
+                filename:     'Sijil_<%= athlete.fullName.trim().replace(/[^a-zA-Z0-9]/g, "_") %>.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { 
+                    scale: 2, 
+                    useCORS: true, 
+                    allowTaint: false,
+                    logging: false,
+                    scrollX: 0,
+                    scrollY: 0
+                },
+                jsPDF:        { 
+                    unit: 'mm', 
+                    format: 'a4', 
+                    orientation: '<%= isPortrait ? "portrait" : "landscape" %>' 
+                }
+            };
+
+            // Generate PDF on client-side
+            html2pdf().set(opt).from(element).save().then(() => {
+                element.classList.remove('html2pdf-printing');
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }).catch(err => {
+                element.classList.remove('html2pdf-printing');
+                console.error('PDF Generation Error:', err);
+                alert('<%= lang === "en" ? "Failed to generate PDF. Please try again." : "Gagal menjana PDF. Sila cuba lagi." %>');
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
     </script>
 </body>
 </html>
