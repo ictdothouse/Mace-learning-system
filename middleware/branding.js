@@ -1,4 +1,5 @@
 const Branding = require('../models/Branding');
+const Page = require('../models/Page');
 
 // Cache to avoid querying the DB on every request
 let brandingCache = null;
@@ -44,6 +45,13 @@ module.exports = async function brandingMiddleware(req, res, next) {
     };
 
     res.locals.branding = brandingCache;
+    
+    // Fetch CMS pages for navigation menu dynamically
+    try {
+        res.locals.navPages = await Page.find({ isPublished: true, showInNavigation: true }).sort({ navigationOrder: 1 }).lean();
+    } catch (e) {
+        res.locals.navPages = [];
+    }
     
     // Terminology translator helper with plural support for English
     res.locals.getTerm = (key, isPlural = false) => {

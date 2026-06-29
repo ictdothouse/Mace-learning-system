@@ -10,6 +10,7 @@ const Level = require('../models/Level');
 const QuestionBank = require('../models/QuestionBank');
 const CertificateTemplate = require('../models/CertificateTemplate');
 const LessonProgress = require('../models/LessonProgress');
+const Page = require('../models/Page');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
@@ -1338,6 +1339,95 @@ router.post('/templates/delete/:id', async (req, res) => {
     } catch (err) {
         console.error('Delete Template Error:', err);
         res.redirect('/admin-mace/templates?msg=delete_error');
+    }
+});
+
+// ==========================================
+// CMS PAGES MANAGEMENT ROUTES
+// ==========================================
+
+// GET: Urus CMS Pages
+router.get('/pages', async (req, res) => {
+    try {
+        const pages = await Page.find().sort({ navigationOrder: 1 });
+        res.render('admin', { 
+            page: 'pages', 
+            pages, 
+            msg: req.query.msg || null 
+        });
+    } catch (err) {
+        console.error('Fetch Pages Error:', err);
+        res.redirect('/admin-mace?msg=error');
+    }
+});
+
+// POST: Cipta Page Baru
+router.post('/pages/create', async (req, res) => {
+    try {
+        const { title, slug, content, content_en, customTemplate, navigationOrder, showInNavigation, isPublished } = req.body;
+        
+        // Ensure unique slug
+        const existing = await Page.findOne({ slug: slug.toLowerCase().trim() });
+        if (existing) {
+            return res.redirect('/admin-mace/pages?msg=slug_exists');
+        }
+        
+        await Page.create({
+            title,
+            slug: slug.toLowerCase().trim().replace(/\s+/g, '-'),
+            content,
+            content_en,
+            customTemplate: customTemplate || 'default',
+            navigationOrder: parseInt(navigationOrder) || 0,
+            showInNavigation: showInNavigation === 'on',
+            isPublished: isPublished === 'on'
+        });
+        
+        res.redirect('/admin-mace/pages?msg=page_created');
+    } catch (err) {
+        console.error('Create Page Error:', err);
+        res.redirect('/admin-mace/pages?msg=create_error');
+    }
+});
+
+// POST: Kemaskini Page
+router.post('/pages/update/:id', async (req, res) => {
+    try {
+        const { title, slug, content, content_en, customTemplate, navigationOrder, showInNavigation, isPublished } = req.body;
+        const normalizedSlug = slug.toLowerCase().trim().replace(/\s+/g, '-');
+        
+        // Check uniqueness of slug (excluding current page)
+        const existing = await Page.findOne({ slug: normalizedSlug, _id: { $ne: req.params.id } });
+        if (existing) {
+            return res.redirect('/admin-mace/pages?msg=slug_exists');
+        }
+        
+        await Page.findByIdAndUpdate(req.params.id, {
+            title,
+            slug: normalizedSlug,
+            content,
+            content_en,
+            customTemplate: customTemplate || 'default',
+            navigationOrder: parseInt(navigationOrder) || 0,
+            showInNavigation: showInNavigation === 'on',
+            isPublished: isPublished === 'on'
+        });
+        
+        res.redirect('/admin-mace/pages?msg=page_updated');
+    } catch (err) {
+        console.error('Update Page Error:', err);
+        res.redirect('/admin-mace/pages?msg=update_error');
+    }
+});
+
+// POST: Padam Page
+router.post('/pages/delete/:id', async (req, res) => {
+    try {
+        await Page.findByIdAndDelete(req.params.id);
+        res.redirect('/admin-mace/pages?msg=page_deleted');
+    } catch (err) {
+        console.error('Delete Page Error:', err);
+        res.redirect('/admin-mace/pages?msg=delete_error');
     }
 });
 

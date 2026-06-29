@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="<%= lang || 'ms' %>">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= page.title %> - <%= (locals.branding && locals.branding.siteName) ? locals.branding.siteName : 'MACE eLearning' %></title>
+    <% if (locals.branding && locals.branding.faviconUrl) { %>
+    <link rel="icon" href="<%= branding.faviconUrl %>">
+    <% } %>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: <%= locals.branding?.primaryColor || '#4f46e5' %>;
+        }
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .bg-primary { background-color: var(--primary-color); }
+        .text-primary { color: var(--primary-color); }
+        
+        /* Prose styling for HTML content */
+        .prose p { margin-bottom: 1em; line-height: 1.7; color: #374151; }
+        .prose h1 { font-size: 2.25rem; font-weight: 800; margin-bottom: 1rem; color: #111827; }
+        .prose h2 { font-size: 1.5rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 1rem; color: #1f2937; }
+        .prose h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.25rem; margin-bottom: 0.75rem; color: #374151; }
+        .prose ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; }
+        .prose ol { list-style-type: decimal; padding-left: 1.5em; margin-bottom: 1em; }
+        .prose strong { font-weight: 700; color: #111827; }
+        .prose a { color: var(--primary-color); text-decoration: underline; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-gray-50">
+
+    <!-- Top Header -->
+    <nav class="bg-[#0f172a] text-white py-4 px-6 md:px-12 flex justify-between items-center z-20 relative shadow-md">
+        <div class="flex items-center gap-4">
+            <a href="/" class="flex items-center gap-3">
+                <% if (locals.branding && locals.branding.logoUrl) { %>
+                    <img src="<%= branding.logoUrl %>" alt="Logo" class="h-10 w-auto object-contain">
+                <% } else { %>
+                    <h1 class="text-xl font-extrabold uppercase tracking-wider"><%= (locals.branding && locals.branding.siteName) ? locals.branding.siteName : 'MACE' %></h1>
+                <% } %>
+            </a>
+        </div>
+        
+        <div class="flex items-center gap-6">
+            <!-- Dynamic Menu -->
+            <div class="hidden md:flex items-center gap-6">
+                <!-- Pautan Laman Utama -->
+                <a href="/" class="text-sm font-medium hover:text-gray-300 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5 inline -mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                </a>
+                
+                <% if (locals.branding && branding.showMenu && branding.menuLinks && branding.menuLinks.length > 0) { %>
+                    <% branding.menuLinks.forEach(link => { %>
+                        <a href="<%= link.url %>" class="text-sm font-medium hover:text-gray-300 transition-colors"><%= link.label %></a>
+                    <% }) %>
+                <% } %>
+
+                <% if (locals.navPages && navPages.length > 0) { %>
+                    <% navPages.forEach(p => { %>
+                        <a href="/page/<%= p.slug %>" class="text-sm font-medium <%= page.slug === p.slug ? 'text-blue-400 font-semibold border-b-2 border-blue-400' : 'hover:text-gray-300' %> transition-colors pb-1"><%= p.title %></a>
+                    <% }) %>
+                <% } %>
+            </div>
+
+            <!-- Language Switcher -->
+            <div class="flex items-center gap-2 bg-white/10 rounded-lg p-1 border border-white/20">
+                <form method="POST" action="/set-language" class="inline m-0">
+                    <input type="hidden" name="lang" value="ms">
+                    <button type="submit" class="text-xs px-2 py-1 rounded font-semibold transition-all <%= lang === 'ms' ? 'bg-white text-gray-900' : 'text-white/70 hover:text-white' %>">BM</button>
+                </form>
+                <form method="POST" action="/set-language" class="inline m-0">
+                    <input type="hidden" name="lang" value="en">
+                    <button type="submit" class="text-xs px-2 py-1 rounded font-semibold transition-all <%= lang === 'en' ? 'bg-white text-gray-900' : 'text-white/70 hover:text-white' %>">EN</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <% if (page.customTemplate === 'modules') { %>
+        <!-- BANNER SECTION FOR MODULES -->
+        <div class="relative bg-gradient-to-r from-blue-900 to-indigo-950 text-white py-16 px-6 md:px-12 text-center shadow-lg overflow-hidden">
+            <!-- Background Decorative Image Overlay -->
+            <div class="absolute inset-0 opacity-15 mix-blend-overlay bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=1200&auto=format&fit=crop');"></div>
+            <div class="relative z-10 max-w-4xl mx-auto">
+                <h1 class="text-3xl md:text-5xl font-extrabold tracking-wider uppercase drop-shadow-md">
+                    <%= lang === 'en' ? 'MY ATHLETE MODULE' : 'MODUL MY ATHLETE' %>
+                </h1>
+            </div>
+        </div>
+
+        <!-- MAIN MODULES GRID SECTION -->
+        <div class="flex-grow py-16 px-6 md:px-12 bg-white">
+            <div class="max-w-6xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center">
+                    
+                    <!-- MODUL 1 (DARI DATABASE) -->
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:-translate-y-1 flex flex-col h-full text-center p-6">
+                        <div class="rounded-xl overflow-hidden aspect-[1.6] mb-6 bg-gray-100 relative">
+                            <% if (module1 && module1.thumbnail) { %>
+                                <img src="<%= module1.thumbnail %>" alt="Modul 1" class="w-full h-full object-cover">
+                            <% } else { %>
+                                <img src="https://images.unsplash.com/photo-1519766304817-4f37bda74a27?q=80&w=600&auto=format&fit=crop" alt="Modul 1" class="w-full h-full object-cover">
+                            <% } %>
+                        </div>
+                        <h3 class="text-sm font-extrabold text-gray-500 uppercase tracking-widest mb-2"><%= lang === 'en' ? 'MODULE 1' : 'MODUL 1' %></h3>
+                        <h4 class="text-xl font-bold text-red-600 uppercase tracking-tight leading-snug mb-6 flex-grow">
+                            <%= module1 ? module1.title : 'PLAY SAFE, WIN STRONG' %>
+                        </h4>
+                        <div>
+                            <% if (module1 && module1.firstLessonId) { %>
+                                <a href="/lesson/<%= module1.firstLessonId %>" class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-2.5 rounded-lg transition shadow-md hover:shadow-lg">
+                                    <%= lang === 'en' ? 'Start' : 'Mula' %>
+                                </a>
+                            <% } else { %>
+                                <a href="/" class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-2.5 rounded-lg transition shadow-md hover:shadow-lg">
+                                    <%= lang === 'en' ? 'Start' : 'Mula' %>
+                                </a>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <!-- MODUL 2 (COMING SOON) -->
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] hover:-translate-y-1 flex flex-col h-full text-center p-6 opacity-75 hover:opacity-100">
+                        <div class="rounded-xl overflow-hidden aspect-[1.6] mb-6 bg-gray-100 grayscale">
+                            <img src="https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=600&auto=format&fit=crop" alt="Modul 2" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="text-sm font-extrabold text-gray-400 uppercase tracking-widest mb-2"><%= lang === 'en' ? 'MODULE 2' : 'MODUL 2' %></h3>
+                        <h4 class="text-xl font-bold text-gray-400 uppercase tracking-tight leading-snug mb-4">CAREER BOOST</h4>
+                        <p class="text-sm italic text-gray-400 font-medium mt-auto"><%= lang === 'en' ? 'Coming Soon' : 'Akan Datang' %></p>
+                    </div>
+
+                    <!-- MODUL 3 (COMING SOON) -->
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] hover:-translate-y-1 flex flex-col h-full text-center p-6 opacity-75 hover:opacity-100">
+                        <div class="rounded-xl overflow-hidden aspect-[1.6] mb-6 bg-gray-100 grayscale">
+                            <img src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=600&auto=format&fit=crop" alt="Modul 3" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="text-sm font-extrabold text-gray-400 uppercase tracking-widest mb-2"><%= lang === 'en' ? 'MODULE 3' : 'MODUL 3' %></h3>
+                        <h4 class="text-xl font-bold text-gray-400 uppercase tracking-tight leading-snug mb-4">POCKET POWER</h4>
+                        <p class="text-sm italic text-gray-400 font-medium mt-auto"><%= lang === 'en' ? 'Coming Soon' : 'Akan Datang' %></p>
+                    </div>
+
+                    <!-- MODUL 4 (COMING SOON) -->
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] hover:-translate-y-1 flex flex-col h-full text-center p-6 opacity-75 hover:opacity-100">
+                        <div class="rounded-xl overflow-hidden aspect-[1.6] mb-6 bg-gray-100 grayscale">
+                            <img src="https://images.unsplash.com/photo-1530541930197-ff16ac917b0e?q=80&w=600&auto=format&fit=crop" alt="Modul 4" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="text-sm font-extrabold text-gray-400 uppercase tracking-widest mb-2"><%= lang === 'en' ? 'MODULE 4' : 'MODUL 4' %></h3>
+                        <h4 class="text-xl font-bold text-gray-400 uppercase tracking-tight leading-snug mb-4">MODE ON!</h4>
+                        <p class="text-sm italic text-gray-400 font-medium mt-auto"><%= lang === 'en' ? 'Coming Soon' : 'Akan Datang' %></p>
+                    </div>
+
+                    <!-- MODUL 5 (COMING SOON) -->
+                    <div class="bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] hover:-translate-y-1 flex flex-col h-full text-center p-6 opacity-75 hover:opacity-100">
+                        <div class="rounded-xl overflow-hidden aspect-[1.6] mb-6 bg-gray-100 grayscale">
+                            <img src="https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?q=80&w=600&auto=format&fit=crop" alt="Modul 5" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="text-sm font-extrabold text-gray-400 uppercase tracking-widest mb-2"><%= lang === 'en' ? 'MODULE 5' : 'MODUL 5' %></h3>
+                        <h4 class="text-xl font-bold text-gray-400 uppercase tracking-tight leading-snug mb-4">SMART ATHLETE</h4>
+                        <p class="text-sm italic text-gray-400 font-medium mt-auto"><%= lang === 'en' ? 'Coming Soon' : 'Akan Datang' %></p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    <% } else { %>
+        <!-- STANDARD PAGE RENDERING -->
+        <div class="flex-grow py-12 px-6 md:px-12">
+            <div class="max-w-4xl mx-auto bg-white p-8 md:p-12 rounded-2xl shadow-sm border border-gray-100">
+                <h1 class="text-3xl font-extrabold text-gray-900 border-b pb-4 mb-6"><%= page.title %></h1>
+                <div class="prose max-w-none">
+                    <%- lang === 'en' ? (page.content_en || page.content) : page.content %>
+                </div>
+            </div>
+        </div>
+    <% } %>
+
+    <!-- Footer -->
+    <div class="text-center text-xs text-gray-400 py-8 border-t border-gray-200 bg-[#0f172a]">
+        <%- (locals.branding && branding.footerText) ? branding.footerText : '&copy; 2026 Majlis Sukan Negara Malaysia. Sistem eLearning Atlit MACE v2.0' %>
+    </div>
+
+</body>
+</html>

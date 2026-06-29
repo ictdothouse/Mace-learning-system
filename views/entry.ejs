@@ -47,13 +47,18 @@
         
         <div class="flex items-center gap-6">
             <!-- Dynamic Menu -->
-            <% if (locals.branding && branding.showMenu && branding.menuLinks && branding.menuLinks.length > 0) { %>
-                <div class="hidden md:flex items-center gap-6">
+            <div class="hidden md:flex items-center gap-6">
+                <% if (locals.branding && branding.showMenu && branding.menuLinks && branding.menuLinks.length > 0) { %>
                     <% branding.menuLinks.forEach(link => { %>
                         <a href="<%= link.url %>" class="text-sm font-medium hover:text-gray-300 transition-colors"><%= link.label %></a>
                     <% }) %>
-                </div>
-            <% } %>
+                <% } %>
+                <% if (locals.navPages && navPages.length > 0) { %>
+                    <% navPages.forEach(p => { %>
+                        <a href="/page/<%= p.slug %>" class="text-sm font-medium hover:text-gray-300 transition-colors"><%= p.title %></a>
+                    <% }) %>
+                <% } %>
+            </div>
 
             <!-- Language Switcher -->
             <div class="flex items-center gap-2 bg-white/10 rounded-lg p-1 border border-white/20">

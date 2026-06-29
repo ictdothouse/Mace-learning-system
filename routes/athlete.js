@@ -7,6 +7,7 @@ const Group = require('../models/Group');
 const User = require('../models/User');
 const Module = require('../models/Module');
 const { generateCertificate } = require('../utils/certificate');
+const Page = require('../models/Page');
 
 // ==========================================
 // KONFIGURASI CLOUDFLARE R2 (VIDEO SULIT)
@@ -309,6 +310,36 @@ router.get('/certificate/module/:moduleId', checkSession, async (req, res) => {
 });
 
 router.get('/logout', (req, res) => { req.session.destroy(); res.redirect('/'); });
+
+// Route untuk dynamic CMS pages
+router.get('/page/:slug', checkSports, async (req, res) => {
+    try {
+        const page = await Page.findOne({ slug: req.params.slug.toLowerCase(), isPublished: true });
+        if (!page) {
+            return res.status(404).send('Page not found');
+        }
+        
+        let module1 = null;
+        if (page.customTemplate === 'modules') {
+            // Tarik modul pertama (Modul 1)
+            module1 = await Module.findOne({ isActive: true }).sort({ order: 1 });
+            if (module1) {
+                const firstLesson = await Lesson.findOne({ moduleId: module1._id, isActive: true }).sort({ order: 1 });
+                module1.firstLessonId = firstLesson ? firstLesson._id : null;
+            }
+        }
+        
+        res.render('custom-page', { 
+            page, 
+            module1, 
+            sports: req.sports || [],
+            lang: res.locals.lang || 'ms'
+        });
+    } catch (err) {
+        console.error('Error loading custom page:', err);
+        res.redirect('/');
+    }
+});
 
 // ✅ EXPORT OBJEK YANG BETUL
 module.exports = { 

@@ -132,6 +132,27 @@ mongoose.connect(process.env.MONGO_URI)
             console.error('❌ Error seeding sports:', err.message);
         }
 
+        // Seed default CMS Page for 'modul' if it doesn't exist
+        try {
+            const Page = require('./models/Page');
+            const modulPage = await Page.findOne({ slug: 'modul' });
+            if (!modulPage) {
+                await Page.create({
+                    title: 'Modul',
+                    slug: 'modul',
+                    content: '<p>Halaman Modul e-Learning MACE.</p>',
+                    content_en: '<p>MACE e-Learning Modules Page.</p>',
+                    isPublished: true,
+                    showInNavigation: true,
+                    navigationOrder: 1,
+                    customTemplate: 'modules'
+                });
+                console.log('🌱 Seeded default CMS page: Modul');
+            }
+        } catch (err) {
+            console.error('❌ Error seeding Modul page:', err.message);
+        }
+
         startServer(); 
     })
     .catch(err => {
