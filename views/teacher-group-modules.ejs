@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="<%= lang || 'ms' %>">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urus Akses Modul - MACE eLearning</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <% if (locals.branding && locals.branding.faviconUrl) { %>
+    <link rel="icon" href="<%= branding.faviconUrl %>">
+    <% } %>
+    <style>
+        :root {
+            --primary-color: <%= locals.branding?.primaryColor || '#1e3a8a' %>;
+        }
+        .bg-blue-900 { background-color: var(--primary-color) !important; }
+        .text-blue-900 { color: var(--primary-color) !important; }
+        .sidebar-link.active { background-color: rgba(255,255,255,0.1); border-left: 4px solid #fbbf24; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex text-gray-800 font-sans">
+    
+    <!-- MOBILE OVERLAY BACKDROP -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-30 hidden transition-opacity duration-300 opacity-0" onclick="toggleSidebar()"></div>
+
+    <!-- SIDEBAR MENU -->
+    <aside id="adminSidebar" class="w-64 bg-blue-900 text-white flex flex-col h-screen fixed md:sticky top-0 left-0 shadow-xl z-40 transition-transform duration-300 -translate-x-full md:translate-x-0">
+        <div class="p-6 border-b border-blue-800 flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-bold tracking-wider flex items-center gap-2">
+                    <% if (locals.branding && locals.branding.logoUrl) { %>
+                        <img src="<%= branding.logoUrl %>" alt="Logo" class="h-8 w-auto object-contain">
+                    <% } else { %>
+                        <span class="text-yellow-400 text-2xl">🏅</span>
+                        <%= (locals.branding && locals.branding.siteName) ? locals.branding.siteName : 'MACE GURU' %>
+                    <% } %>
+                </h1>
+                <p class="text-xs text-blue-300 mt-1">Panel Instruktor</p>
+            </div>
+            <button onclick="toggleSidebar()" class="md:hidden text-blue-300 hover:text-white focus:outline-none p-1 rounded-lg hover:bg-blue-800/50 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        
+        <nav class="flex-1 py-6 space-y-1">
+            <a href="/teacher/dashboard" class="sidebar-link flex items-center px-6 py-3 hover:bg-blue-800 transition border-l-4 border-transparent">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                Dashboard
+            </a>
+            <a href="/teacher/groups" class="sidebar-link active flex items-center px-6 py-3 hover:bg-blue-800 transition border-l-4 border-transparent">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0" /></svg>
+                Kumpulan Saya
+            </a>
+        </nav>
+
+        <div class="p-6 border-t border-blue-800">
+            <a href="/auth/logout" class="flex items-center text-sm text-blue-300 hover:text-white transition group">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                Keluar
+            </a>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 p-6 md:p-10 overflow-y-auto h-screen relative">
+        <div class="mb-6">
+            <a href="/teacher/groups" class="text-blue-600 hover:text-blue-800 text-sm font-semibold mb-2 inline-block">← Kembali ke Senarai</a>
+            <h2 class="text-2xl font-bold text-gray-900">Urus Akses Modul</h2>
+            <p class="text-gray-500 text-sm mt-1">Tentukan modul mana yang boleh diakses oleh ahli kumpulan <strong><%= group.name %></strong>.</p>
+        </div>
+
+        <% if (locals.msg === 'modules_assigned') { %>
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-r-lg mb-6 shadow-sm">✓ Tetapan akses modul berjaya disimpan!</div>
+        <% } %>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 max-w-2xl">
+            <form action="/teacher/groups/<%= group._id %>/modules" method="POST" class="space-y-4">
+                <p class="text-xs text-gray-500 mb-4 bg-blue-50 text-blue-700 p-3 rounded-lg border border-blue-100">
+                    ℹ️ Pelajar dalam kumpulan ini hanya boleh mengakses modul yang ditandakan di bawah sahaja.
+                </p>
+
+                <div class="space-y-3">
+                    <% allModules.forEach(m => { %>
+                        <div class="flex items-start gap-3 p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition cursor-pointer" onclick="document.getElementById('m-<%= m._id %>').click()">
+                            <input type="checkbox" id="m-<%= m._id %>" name="moduleIds" value="<%= m._id %>" 
+                                   <%= assignedModuleIds.includes(m._id.toString()) ? 'checked' : '' %>
+                                   class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-1"
+                                   onclick="event.stopPropagation()">
+                            <div>
+                                <label for="m-<%= m._id %>" class="font-bold text-gray-900 block pointer-events-none"><%= m.title %></label>
+                                <span class="text-xs text-gray-500 pointer-events-none"><%- m.description.replace(/<[^>]*>/g, '').substring(0, 100) %>...</span>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+
+                <div class="pt-4 border-t border-gray-100 flex gap-2">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-semibold transition">Simpan Akses</button>
+                    <a href="/teacher/groups" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2.5 rounded-lg font-semibold transition text-center">Batal</a>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('adminSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                setTimeout(() => {
+                    overlay.classList.remove('opacity-0');
+                }, 50);
+                document.body.style.overflow = 'hidden';
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                }, 300);
+                document.body.style.overflow = '';
+            }
+        }
+    </script>
+</body>
+</html>

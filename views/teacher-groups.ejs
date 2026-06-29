@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="<%= lang || 'ms' %>">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kumpulan Saya - MACE eLearning</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <% if (locals.branding && locals.branding.faviconUrl) { %>
+    <link rel="icon" href="<%= branding.faviconUrl %>">
+    <% } %>
+    <style>
+        :root {
+            --primary-color: <%= locals.branding?.primaryColor || '#1e3a8a' %>;
+        }
+        .bg-blue-900 { background-color: var(--primary-color) !important; }
+        .text-blue-900 { color: var(--primary-color) !important; }
+        .sidebar-link.active { background-color: rgba(255,255,255,0.1); border-left: 4px solid #fbbf24; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex text-gray-800 font-sans">
+    
+    <!-- MOBILE OVERLAY BACKDROP -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-30 hidden transition-opacity duration-300 opacity-0" onclick="toggleSidebar()"></div>
+
+    <!-- SIDEBAR MENU -->
+    <aside id="adminSidebar" class="w-64 bg-blue-900 text-white flex flex-col h-screen fixed md:sticky top-0 left-0 shadow-xl z-40 transition-transform duration-300 -translate-x-full md:translate-x-0">
+        <div class="p-6 border-b border-blue-800 flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-bold tracking-wider flex items-center gap-2">
+                    <% if (locals.branding && locals.branding.logoUrl) { %>
+                        <img src="<%= branding.logoUrl %>" alt="Logo" class="h-8 w-auto object-contain">
+                    <% } else { %>
+                        <span class="text-yellow-400 text-2xl">🏅</span>
+                        <%= (locals.branding && locals.branding.siteName) ? locals.branding.siteName : 'MACE GURU' %>
+                    <% } %>
+                </h1>
+                <p class="text-xs text-blue-300 mt-1">Panel Instruktor</p>
+            </div>
+            <button onclick="toggleSidebar()" class="md:hidden text-blue-300 hover:text-white focus:outline-none p-1 rounded-lg hover:bg-blue-800/50 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        
+        <nav class="flex-1 py-6 space-y-1">
+            <a href="/teacher/dashboard" class="sidebar-link flex items-center px-6 py-3 hover:bg-blue-800 transition border-l-4 border-transparent">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                Dashboard
+            </a>
+            <a href="/teacher/groups" class="sidebar-link active flex items-center px-6 py-3 hover:bg-blue-800 transition border-l-4 border-transparent">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0" /></svg>
+                Kumpulan Saya
+            </a>
+        </nav>
+
+        <div class="p-6 border-t border-blue-800">
+            <a href="/auth/logout" class="flex items-center text-sm text-blue-300 hover:text-white transition group">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                Keluar
+            </a>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 p-6 md:p-10 overflow-y-auto h-screen relative">
+        
+        <!-- Mobile Header -->
+        <div class="md:hidden mb-6 flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+            <div class="flex items-center gap-3">
+                <button onclick="toggleSidebar()" class="text-gray-600 hover:text-gray-900 focus:outline-none p-1.5 rounded-lg hover:bg-gray-100 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+                <h1 class="font-bold text-blue-900 text-base sm:text-lg flex items-center gap-1.5">
+                    Kumpulan Saya
+                </h1>
+            </div>
+        </div>
+
+        <div class="mb-8 flex justify-between items-center">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Urus Kumpulan</h2>
+                <p class="text-gray-500 text-sm mt-1">Cipta, kemas kini, atau padam kumpulan pelajar.</p>
+            </div>
+            <a href="/teacher/groups/new" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow-sm">+ Cipta Kumpulan</a>
+        </div>
+
+        <% if (locals.msg === 'group_created') { %>
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-r-lg mb-6 shadow-sm">✓ Kumpulan berjaya dicipta!</div>
+        <% } else if (locals.msg === 'group_updated') { %>
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-r-lg mb-6 shadow-sm">✓ Kumpulan berjaya dikemaskini!</div>
+        <% } else if (locals.msg === 'group_deleted') { %>
+            <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-r-lg mb-6 shadow-sm">🗑️ Kumpulan berjaya dipadam.</div>
+        <% } %>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                    <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-100">
+                        <tr>
+                            <th class="px-6 py-4">Nama Kumpulan</th>
+                            <th class="px-6 py-4">Enrollment Key</th>
+                            <th class="px-6 py-4">Modul Diakses</th>
+                            <th class="px-6 py-4 text-center">Had Pelajar</th>
+                            <th class="px-6 py-4 text-right">Tindakan</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <% if (groups && groups.length > 0) { %>
+                            <% groups.forEach(g => { %>
+                                <tr class="hover:bg-gray-50/50 transition">
+                                    <td class="px-6 py-4">
+                                        <div class="font-bold text-gray-900"><%= g.name %></div>
+                                        <div class="text-xs text-gray-500"><%= g.description || 'Tiada deskripsi.' %></div>
+                                    </td>
+                                    <td class="px-6 py-4 font-mono text-sm text-blue-600 font-bold"><%= g.enrollmentKey %></td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex flex-wrap gap-1 max-w-xs">
+                                            <% if (g.modules && g.modules.length > 0) { %>
+                                                <% g.modules.forEach(m => { %>
+                                                    <span class="bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 rounded text-[10px] font-bold"><%= m.title %></span>
+                                                <% }) %>
+                                            <% } else { %>
+                                                <span class="text-gray-400 text-xs italic">Semua Modul Terbuka</span>
+                                            <% } %>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-center font-semibold text-gray-700"><%= g.students ? g.students.length : 0 %> / <%= g.maxStudents || '∞' %></td>
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex justify-end gap-1">
+                                            <a href="/teacher/groups/<%= g._id %>/students" class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-2.5 py-1.5 rounded transition">👥 Pelajar</a>
+                                            <a href="/teacher/groups/<%= g._id %>/modules" class="text-xs bg-green-50 hover:bg-green-100 text-green-700 px-2.5 py-1.5 rounded transition">📚 Modul</a>
+                                            <a href="/teacher/groups/edit/<%= g._id %>" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2.5 py-1.5 rounded transition">⚙️ Edit</a>
+                                            <form action="/teacher/groups/delete/<%= g._id %>" method="POST" class="inline" onsubmit="return confirm('PADAM kumpulan ini?')">
+                                                <button type="submit" class="text-xs bg-red-50 hover:bg-red-100 text-red-600 px-2.5 py-1.5 rounded transition">🗑️ Padam</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="5" class="px-6 py-12 text-center text-gray-400 italic">Tiada kumpulan dijumpai.</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('adminSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                setTimeout(() => {
+                    overlay.classList.remove('opacity-0');
+                }, 50);
+                document.body.style.overflow = 'hidden';
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                }, 300);
+                document.body.style.overflow = '';
+            }
+        }
+    </script>
+</body>
+</html>
