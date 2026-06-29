@@ -504,8 +504,57 @@ router.get('/settings', async (req, res) => {
         const uploadsDir = path.join(__dirname, '../uploads');
         let uploadedFiles = [];
         if (fs.existsSync(uploadsDir)) uploadedFiles = fs.readdirSync(uploadsDir).map(f => ({ name: f, size: (fs.statSync(path.join(uploadsDir, f)).size / 1024).toFixed(1) + ' KB' }));
-        res.render('admin', { page: 'settings', uploadedFiles, msg: req.query.msg || null, file: req.query.file || null, tab: req.query.tab || 'general' });
-    } catch (err) { res.send('Error loading settings'); }
+        
+        const Sport = require('../models/Sport');
+        const sportsList = await Sport.find().sort({ name: 1 });
+        
+        res.render('admin', { 
+            page: 'settings', 
+            uploadedFiles, 
+            sportsList,
+            msg: req.query.msg || null, 
+            file: req.query.file || null, 
+            tab: req.query.tab || 'general' 
+        });
+    } catch (err) { 
+        console.error('Settings error:', err);
+        res.send('Error loading settings'); 
+    }
+});
+
+// POST: Tambah Sukan Baru
+router.post('/settings/sports/add', async (req, res) => {
+    try {
+        const { sportName } = req.body;
+        if (!sportName || !sportName.trim()) {
+            return res.redirect('/admin-mace/settings?tab=sports&msg=sport_required');
+        }
+        const Sport = require('../models/Sport');
+        
+        // Cek duplicate
+        const exists = await Sport.findOne({ name: sportName.trim() });
+        if (exists) {
+            return res.redirect('/admin-mace/settings?tab=sports&msg=sport_exists');
+        }
+        
+        await Sport.create({ name: sportName.trim() });
+        res.redirect('/admin-mace/settings?tab=sports&msg=sport_added');
+    } catch (err) {
+        console.error('Add sport error:', err);
+        res.redirect('/admin-mace/settings?tab=sports&msg=error');
+    }
+});
+
+// POST: Padam Sukan
+router.post('/settings/sports/delete/:id', async (req, res) => {
+    try {
+        const Sport = require('../models/Sport');
+        await Sport.findByIdAndDelete(req.params.id);
+        res.redirect('/admin-mace/settings?tab=sports&msg=sport_deleted');
+    } catch (err) {
+        console.error('Delete sport error:', err);
+        res.redirect('/admin-mace/settings?tab=sports&msg=error');
+    }
 });
 router.post('/upload-data', upload.single('dataFile'), async (req, res) => {
     try {

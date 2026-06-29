@@ -613,6 +613,9 @@
                     <a href="?tab=terms" class="px-4 py-2 border-b-2 font-medium text-sm transition-colors <%= tab === 'terms' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' %>">
                         Daftar Istilah
                     </a>
+                    <a href="?tab=sports" class="px-4 py-2 border-b-2 font-medium text-sm transition-colors <%= tab === 'sports' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' %>">
+                        Daftar Bidang Sukan
+                    </a>
                 </div>
 
                 <% if (!locals.tab || tab === 'general') { %>
@@ -991,6 +994,65 @@
                                 </button>
                             </div>
                         </form>
+                    </div>
+                <% } %>
+
+                <% if (tab === 'sports') { %>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 mb-8 animate-fade-in">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                            Daftar Bidang Sukan (Sports Fields)
+                        </h3>
+                        <p class="text-sm text-gray-500 mb-6">Urus dan daftarkan bidang sukan yang diiktiraf di SUKMA dan disertai Malaysia. Sukan-sukan ini akan dipaparkan secara auto-complete semasa pendaftaran atlit.</p>
+
+                        <!-- Form tambah sukan baru -->
+                        <form action="/admin-mace/settings/sports/add" method="POST" class="flex flex-col sm:flex-row gap-4 items-end mb-8 p-4 bg-gray-55 rounded-lg border border-gray-100">
+                            <div class="flex-1 w-full">
+                                <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Nama Bidang Sukan Baru</label>
+                                <input type="text" name="sportName" required placeholder="Contoh: Ragbi Sentuh" class="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none bg-white">
+                            </div>
+                            <button type="submit" class="w-full sm:w-auto bg-purple-600 text-white px-8 py-2.5 rounded-lg font-medium hover:bg-purple-700 transition shadow-sm shrink-0">
+                                Tambah Sukan
+                            </button>
+                        </form>
+
+                        <!-- Senarai Sukan -->
+                        <div class="border border-gray-200 rounded-xl overflow-hidden">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Bil.</th>
+                                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Nama Bidang Sukan</th>
+                                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Tindakan</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200 text-sm text-gray-700">
+                                    <% if (locals.sportsList && sportsList.length > 0) { %>
+                                        <% sportsList.forEach((sport, index) => { %>
+                                            <tr class="hover:bg-gray-50 transition">
+                                                <td class="px-6 py-4 whitespace-nowrap text-gray-400 font-mono"><%= index + 1 %></td>
+                                                <td class="px-6 py-4 font-semibold text-gray-900"><%= sport.name %></td>
+                                                <td class="px-6 py-4 text-right whitespace-nowrap">
+                                                    <form action="/admin-mace/settings/sports/delete/<%= sport._id %>" method="POST" class="inline" onsubmit="return confirm('Adakah anda pasti mahu memadam sukan ini?')">
+                                                        <button type="submit" class="text-red-600 hover:text-red-900 font-semibold text-xs">
+                                                            Padam
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        <% }) %>
+                                    <% } else { %>
+                                        <tr>
+                                            <td colspan="3" class="px-6 py-10 text-center text-gray-400">
+                                                Tiada rekod bidang sukan ditemui.
+                                            </td>
+                                        </tr>
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 <% } %>
             </div>

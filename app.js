@@ -74,9 +74,64 @@ app.use(limiter);
 let isDbConnected = false;
 
 mongoose.connect(process.env.MONGO_URI)
-    .then(() => {
+    .then(async () => {
         console.log('✅ DB Connected successfully to MongoDB Atlas');
         isDbConnected = true;
+        
+        // Seed sports database if empty
+        try {
+            const Sport = require('./models/Sport');
+            const count = await Sport.countDocuments();
+            if (count === 0) {
+                const initialSports = [
+                    'Akuatik (Renang)',
+                    'Akuatik (Terjun)',
+                    'Memanah (Archery)',
+                    'Olahraga (Athletics)',
+                    'Badminton',
+                    'Bola Keranjang (Basketball)',
+                    'Tinju (Boxing)',
+                    'Kanu (Canoeing)',
+                    'Berbasikal (Cycling)',
+                    'Bola Sepak (Football)',
+                    'Golf',
+                    'Gimnastik (Gymnastics)',
+                    'Gimrama (Rhythmic Gymnastics)',
+                    'Bola Baling (Handball)',
+                    'Hoki (Hockey)',
+                    'Judo',
+                    'Karate',
+                    'Lawn Bowls',
+                    'Skuash (Squash)',
+                    'Ping Pong (Table Tennis)',
+                    'Taekwondo',
+                    'Tenis (Tennis)',
+                    'Tenpin Boling (Bowling)',
+                    'Layar (Sailing)',
+                    'Menembak (Shooting)',
+                    'Silat (Pencak Silat)',
+                    'Angkat Berat (Weightlifting)',
+                    'Wushu',
+                    'Bola Jaring (Netball)',
+                    'Ragbi (Rugby)',
+                    'Bola Tampar (Volleyball)',
+                    'Sepak Takraw',
+                    'E-Sukan (Esports)',
+                    'Catur (Chess)',
+                    'Petanque',
+                    'Kabaddi',
+                    'Silambam',
+                    'Muay Thai',
+                    'Kriket (Cricket)',
+                    'Memanah Tradisional'
+                ].map(name => ({ name }));
+                await Sport.insertMany(initialSports);
+                console.log('🌱 Successfully seeded initial sports fields.');
+            }
+        } catch (err) {
+            console.error('❌ Error seeding sports:', err.message);
+        }
+
         startServer(); 
     })
     .catch(err => {

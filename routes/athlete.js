@@ -44,31 +44,41 @@ const getLessonsWithQuiz = async () => {
     return await Lesson.find().populate('moduleId').sort({ order: 1 }).lean();
 };
 
+const checkSports = async (req, res, next) => {
+    try {
+        const Sport = require('../models/Sport');
+        req.sports = await Sport.find().sort({ name: 1 }).lean();
+    } catch (err) {
+        req.sports = [];
+    }
+    next();
+};
+
 const checkSession = (req, res, next) => req.session.athleteId ? next() : res.redirect('/');
 
 // ==========================================
 // ROUTES UTAMA
 // ==========================================
-router.get('/', (req, res) => res.render('entry', { error: null }));
+router.get('/', checkSports, (req, res) => res.render('entry', { error: null, sports: req.sports }));
 
-router.post('/access', async (req, res) => {
+router.post('/access', checkSports, async (req, res) => {
     const { action, fullName, icNumber, jantina, umur, negeri, sukan } = req.body;
     try {
         if (action === 'new') {
             const existing = await Athlete.findOne({ icNumber });
-            if (existing) return res.render('entry', { error: 'No. IC sudah berdaftar. Sila guna "Semak Akaun".' });
+            if (existing) return res.render('entry', { error: 'No. IC sudah berdaftar. Sila guna "Semak Akaun".', sports: req.sports });
             const newAthlete = await Athlete.create({ fullName, icNumber, jantina, umur, negeriWakil: negeri, sukan });
             req.session.athleteId = newAthlete._id;
             res.redirect('/dashboard');
         } else if (action === 'resume') {
             const athlete = await Athlete.findOne({ icNumber, fullName: { $regex: new RegExp('^' + fullName + '$', 'i') } });
-            if (!athlete) return res.render('entry', { error: 'Rekod tidak dijumpai. Semak Nama & No. IC.' });
+            if (!athlete) return res.render('entry', { error: 'Rekod tidak dijumpai. Semak Nama & No. IC.', sports: req.sports });
             req.session.athleteId = athlete._id;
             res.redirect('/dashboard');
         }
     } catch (err) {
         console.error('Access Error:', err);
-        res.render('entry', { error: 'Ralat sistem. Sila cuba lagi.' });
+        res.render('entry', { error: 'Ralat sistem. Sila cuba lagi.', sports: req.sports });
     }
 });
 
