@@ -220,30 +220,91 @@
                 background: white !important;
                 padding: 0 !important;
                 margin: 0 !important;
-                width: 100% !important;
-                height: 100% !important;
                 overflow: hidden !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
 
-            .cert-scroll-wrapper {
-                padding: 0 !important;
-                margin: 0 !important;
-                display: block !important;
-                width: 100% !important;
-                height: 100% !important;
-                overflow: hidden !important;
+            /* --- VIEWPORT IS LANDSCAPE --- */
+            @media (orientation: landscape) {
+                html, body {
+                    width: 297mm !important;
+                    height: 210mm !important;
+                }
+                .cert-scroll-wrapper {
+                    padding: 0 !important;
+                    margin: 0 !important;
+                    width: 297mm !important;
+                    height: 210mm !important;
+                    position: relative !important;
+                    display: block !important;
+                    overflow: hidden !important;
+                }
+                .certificate-container {
+                    box-shadow: none !important;
+                    margin: 0 !important;
+                    page-break-inside: avoid !important;
+                    page-break-after: avoid !important;
+                    flex-shrink: 0 !important;
+                    
+                    <% if (!isPortrait) { %>
+                        /* Landscape template on Landscape page: fits perfectly, no rotation */
+                        width: 297mm !important;
+                        height: 210mm !important;
+                        position: static !important;
+                        transform: none !important;
+                    <% } else { %>
+                        /* Portrait template on Landscape page: needs -90deg rotation to fit */
+                        width: 210mm !important;
+                        height: 297mm !important;
+                        position: absolute !important;
+                        left: 50% !important;
+                        top: 50% !important;
+                        transform: translate(-50%, -50%) rotate(-90deg) !important;
+                        transform-origin: center center !important;
+                    <% } %>
+                }
             }
 
-            .certificate-container {
-                width: <%= isPortrait ? '210mm' : '297mm' %> !important;
-                height: <%= isPortrait ? '297mm' : '210mm' %> !important;
-                box-shadow: none !important;
-                margin: 0 !important;
-                page-break-inside: avoid !important;
-                page-break-after: avoid !important;
-                transform: none !important; /* Reset any editor preview scales */
+            /* --- VIEWPORT IS PORTRAIT --- */
+            @media (orientation: portrait) {
+                html, body {
+                    width: 210mm !important;
+                    height: 297mm !important;
+                }
+                .cert-scroll-wrapper {
+                    padding: 0 !important;
+                    margin: 0 !important;
+                    width: 210mm !important;
+                    height: 297mm !important;
+                    position: relative !important;
+                    display: block !important;
+                    overflow: hidden !important;
+                }
+                .certificate-container {
+                    box-shadow: none !important;
+                    margin: 0 !important;
+                    page-break-inside: avoid !important;
+                    page-break-after: avoid !important;
+                    flex-shrink: 0 !important;
+                    
+                    <% if (isPortrait) { %>
+                        /* Portrait template on Portrait page: fits perfectly, no rotation */
+                        width: 210mm !important;
+                        height: 297mm !important;
+                        position: static !important;
+                        transform: none !important;
+                    <% } else { %>
+                        /* Landscape template on Portrait page: needs 90deg rotation to fit */
+                        width: 297mm !important;
+                        height: 210mm !important;
+                        position: absolute !important;
+                        left: 50% !important;
+                        top: 50% !important;
+                        transform: translate(-50%, -50%) rotate(90deg) !important;
+                        transform-origin: center center !important;
+                    <% } %>
+                }
             }
 
             @page {
