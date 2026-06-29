@@ -7,6 +7,11 @@ const pageSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  title_en: {
+    type: String,
+    trim: true,
+    default: ''
+  },
   slug: {
     type: String,
     required: true,

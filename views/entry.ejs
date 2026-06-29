@@ -55,7 +55,7 @@
                 <% } %>
                 <% if (locals.navPages && navPages.length > 0) { %>
                     <% navPages.forEach(p => { %>
-                        <a href="/page/<%= p.slug %>" class="text-sm font-medium hover:text-gray-300 transition-colors"><%= p.title %></a>
+                        <a href="/page/<%= p.slug %>" class="text-sm font-medium hover:text-gray-300 transition-colors"><%= lang === 'en' ? (p.title_en || p.title) : p.title %></a>
                     <% }) %>
                 <% } %>
             </div>
@@ -90,7 +90,7 @@
         <% } %>
         <% if (locals.navPages && navPages.length > 0) { %>
             <% navPages.forEach(p => { %>
-                <a href="/page/<%= p.slug %>" class="block text-sm font-medium py-2 border-b border-white/5 hover:text-gray-300 transition-colors"><%= p.title %></a>
+                <a href="/page/<%= p.slug %>" class="block text-sm font-medium py-2 border-b border-white/5 hover:text-gray-300 transition-colors"><%= lang === 'en' ? (p.title_en || p.title) : p.title %></a>
             <% }) %>
         <% } %>
     </div>

@@ -140,6 +140,7 @@ mongoose.connect(process.env.MONGO_URI)
             if (!modulPage) {
                 await Page.create({
                     title: 'Modul',
+                    title_en: 'Modules',
                     slug: 'modul',
                     content: '<p>Halaman Modul e-Learning MACE.</p>',
                     content_en: '<p>MACE e-Learning Modules Page.</p>',
@@ -178,6 +179,7 @@ mongoose.connect(process.env.MONGO_URI)
             if (!hubungiPage) {
                 await Page.create({
                     title: 'Hubungi Kami',
+                    title_en: 'Contact Us',
                     slug: 'hubungi-kami',
                     content: '<p>Hubungi kami untuk sebarang pertanyaan.</p>',
                     content_en: '<p>Contact us for any inquiries.</p>',

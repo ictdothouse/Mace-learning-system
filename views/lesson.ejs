@@ -189,8 +189,18 @@ const moduleTitle = lesson.moduleId ? lesson.moduleId.title : ('MODUL ' + module
                                 <% } %>
                             </div>
                             <% if (lesson.showPoints !== false && quizResult.earnedPoints !== undefined && quizResult.totalPoints !== undefined) { %>
-                                <div class="text-xs font-mono border-t border-current/10 pt-2 opacity-80">
-                                    <%= __('lesson_calculation') || 'Kira-kira' %>: <%= quizResult.earnedPoints %> / <%= quizResult.totalPoints %> &times; 100 = <%= quizResult.score %>%
+                                <div class="text-xs font-semibold border-t border-current/10 pt-2 opacity-90">
+                                    <% 
+                                        const correct = quizResult.earnedPoints;
+                                        const total = quizResult.totalPoints;
+                                        const wrong = total - correct;
+                                        const pct = quizResult.score;
+                                    %>
+                                    <% if (lang === 'en') { %>
+                                        Correct <%= correct %>, Wrong <%= wrong %>, <%= correct %>/<%= total %> = <%= pct %>%
+                                    <% } else { %>
+                                        Betul <%= correct %>, Salah <%= wrong %>, <%= correct %>/<%= total %> = <%= pct %>%
+                                    <% } %>
                                 </div>
                             <% } %>
                         </div>

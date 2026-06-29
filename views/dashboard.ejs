@@ -425,7 +425,7 @@
                         </h2>
                         
                         <div class="prose max-w-none text-gray-700 leading-relaxed text-sm sm:text-base">
-                            <%- lessons[0].moduleId.description || 'Sila mulakan pembelajaran anda...' %>
+                            <%- lessons[0].moduleId.description || (lang === 'en' ? 'Please start your learning...' : 'Sila mulakan pembelajaran anda...') %>
                         </div>
                     </div>
                 </div>
@@ -433,7 +433,7 @@
                 <!-- Fixed Footer at the bottom -->
                 <div class="p-4 sm:p-6 border-t border-gray-100 bg-gray-50 flex justify-end">
                     <button onclick="closeWelcomeModal()" class="w-full sm:w-auto px-10 py-3 bg-[#e87a14] hover:bg-[#d66c11] text-white text-base sm:text-lg font-bold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg active:scale-95">
-                        Mulakan Modul
+                        <%= lang === 'en' ? 'Start Module' : 'Mulakan Modul' %>
                     </button>
                 </div>
             </div>

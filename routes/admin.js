@@ -1379,7 +1379,7 @@ router.get('/pages', async (req, res) => {
 router.post('/pages/create', async (req, res) => {
     try {
         const { 
-            title, slug, content, content_en, customTemplate, navigationOrder, showInNavigation, isPublished, 
+            title, title_en, slug, content, content_en, customTemplate, navigationOrder, showInNavigation, isPublished, 
             modulesConfigJson,
             contact_bannerTitle, contact_bannerImage, contact_description, contact_email, contact_imageUrl
         } = req.body;
@@ -1409,6 +1409,7 @@ router.post('/pages/create', async (req, res) => {
         
         await Page.create({
             title,
+            title_en: title_en || '',
             slug: slug.toLowerCase().trim().replace(/\s+/g, '-'),
             content,
             content_en,
@@ -1431,7 +1432,7 @@ router.post('/pages/create', async (req, res) => {
 router.post('/pages/update/:id', async (req, res) => {
     try {
         const { 
-            title, slug, content, content_en, customTemplate, navigationOrder, showInNavigation, isPublished, 
+            title, title_en, slug, content, content_en, customTemplate, navigationOrder, showInNavigation, isPublished, 
             modulesConfigJson,
             contact_bannerTitle, contact_bannerImage, contact_description, contact_email, contact_imageUrl
         } = req.body;
@@ -1462,6 +1463,7 @@ router.post('/pages/update/:id', async (req, res) => {
         
         await Page.findByIdAndUpdate(req.params.id, {
             title,
+            title_en: title_en || '',
             slug: normalizedSlug,
             content,
             content_en,
