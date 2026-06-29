@@ -54,13 +54,57 @@
         }
         
         .certificate-container {
-            max-width: 1123px; /* A4 width at 96 DPI */
-            min-height: 794px; /* A4 height at 96 DPI */
+            width: 1123px !important;
+            height: 794px !important;
             margin: 0 auto;
             position: relative;
             background: white;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        /* Responsive zoom scaling for mobile screen preview */
+        @media (max-width: 1200px) {
+            .certificate-container {
+                zoom: 0.85;
+            }
+        }
+        @media (max-width: 992px) {
+            .certificate-container {
+                zoom: 0.68;
+            }
+        }
+        @media (max-width: 768px) {
+            .certificate-container {
+                zoom: 0.55;
+            }
+        }
+        @media (max-width: 600px) {
+            .certificate-container {
+                zoom: 0.42;
+            }
+        }
+        @media (max-width: 480px) {
+            .certificate-container {
+                zoom: 0.32;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                padding: 0 !important;
+                background: white !important;
+            }
+            .certificate-container {
+                box-shadow: none !important;
+                margin: 0 !important;
+                zoom: 1 !important; /* Ensure printed size is exactly 100% */
+            }
         }
         
         .certificate-content {
@@ -183,7 +227,8 @@
         <a href="/admin-mace" class="btn-back">← Kembali ke Admin</a>
     </div>
 
-    <div class="certificate-container">
+    <div class="cert-scroll-wrapper" style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; display: flex; justify-content: center; padding: 10px 0;">
+        <div class="certificate-container">
         <!-- Background Layers -->
         <div class="bg-layer bg-color"></div>
         <% if (template.backgroundImageType !== 'none' && (template.backgroundImageUrl || template.backgroundR2Key)) { %>
@@ -360,6 +405,7 @@
                 </div>
             <% } %>
         </div>
+    </div>
     </div>
     
     <script>
