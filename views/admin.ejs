@@ -347,10 +347,16 @@
                                             </td>
                                             <td class="px-6 py-3.5 text-center"><span class="<%= statusColor %> px-2.5 py-1 rounded-full text-xs font-bold"><%= statusText %></span></td>
                                             <td class="px-6 py-3.5 text-right">
-                                                <a href="/admin-mace/certificate/preview/<%= a._id %>" target="_blank" 
-                                                   class="text-blue-600 hover:text-blue-800 text-sm font-semibold bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition">
-                                                    📄 Sijil
-                                                </a>
+                                                <% if (finishedCount > 0 && finishedCount === totalCount) { %>
+                                                    <a href="/admin-mace/certificate/preview/<%= a._id %>" target="_blank" 
+                                                       class="text-blue-600 hover:text-blue-800 text-sm font-semibold bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition">
+                                                        📄 Sijil
+                                                    </a>
+                                                <% } else { %>
+                                                    <span class="text-gray-400 text-sm font-semibold bg-gray-50 px-3 py-1.5 rounded-lg cursor-not-allowed border border-gray-100 opacity-60">
+                                                        📄 Sijil
+                                                    </span>
+                                                <% } %>
                                             </td>
                                         </tr>
                                     <% }) %>
