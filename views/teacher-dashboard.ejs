@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Guru - MACE eLearning</title>
+    <title>Dashboard <%= getTerm('teacher') %> - MACE eLearning</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <% if (locals.branding && locals.branding.faviconUrl) { %>
     <link rel="icon" href="<%= branding.faviconUrl %>">
@@ -35,10 +35,10 @@
                         <img src="<%= branding.logoUrl %>" alt="Logo" class="h-8 w-auto object-contain">
                     <% } else { %>
                         <span class="text-yellow-400 text-2xl">🏅</span>
-                        <%= (locals.branding && locals.branding.siteName) ? locals.branding.siteName : 'MACE GURU' %>
+                        <%= (locals.branding && locals.branding.siteName) ? locals.branding.siteName : ('MACE ' + getTerm('teacher').toUpperCase()) %>
                     <% } %>
                 </h1>
-                <p class="text-xs text-blue-300 mt-1">Panel Instruktor</p>
+                <p class="text-xs text-blue-300 mt-1">Panel <%= getTerm('teacher') %></p>
             </div>
             <button onclick="toggleSidebar()" class="md:hidden text-blue-300 hover:text-white focus:outline-none p-1 rounded-lg hover:bg-blue-800/50 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -78,14 +78,14 @@
                     </svg>
                 </button>
                 <h1 class="font-bold text-blue-900 text-base sm:text-lg flex items-center gap-1.5">
-                    Dashboard Guru
+                    Dashboard <%= getTerm('teacher') %>
                 </h1>
             </div>
         </div>
 
         <div class="mb-8">
-            <h2 class="text-2xl font-bold text-gray-900">Selamat Datang, <%= locals.session?.userName || 'Instruktor' %></h2>
-            <p class="text-gray-500 text-sm mt-1">Urus kumpulan pelajar dan pantau perkembangan pembelajaran mereka.</p>
+            <h2 class="text-2xl font-bold text-gray-900">Selamat Datang, <%= locals.session?.userName || getTerm('teacher') %></h2>
+            <p class="text-gray-500 text-sm mt-1">Urus kumpulan <%= getTerm('student').toLowerCase() %> dan pantau perkembangan pembelajaran mereka.</p>
         </div>
 
         <!-- Stats Cards -->
@@ -102,7 +102,7 @@
             
             <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
                 <div>
-                    <p class="text-xs text-gray-400 font-medium uppercase">Jumlah Pelajar</p>
+                    <p class="text-xs text-gray-400 font-medium uppercase">Jumlah <%= getTerm('student') %></p>
                     <p class="text-2xl font-bold text-gray-900 mt-1"><%= stats.totalStudents || 0 %></p>
                 </div>
                 <div class="bg-green-50 p-2.5 rounded-full text-green-600">
@@ -143,7 +143,7 @@
                         <tr>
                             <th class="px-6 py-3">Nama Kumpulan</th>
                             <th class="px-6 py-3">Enrollment Key</th>
-                            <th class="px-6 py-3 text-center">Jumlah Pelajar</th>
+                            <th class="px-6 py-3 text-center">Jumlah <%= getTerm('student') %></th>
                             <th class="px-6 py-3 text-right">Tindakan</th>
                         </tr>
                     </thead>
@@ -159,7 +159,7 @@
                                     <td class="px-6 py-4 text-center font-semibold text-gray-700"><%= g.students ? g.students.length : 0 %> / <%= g.maxStudents || '∞' %></td>
                                     <td class="px-6 py-4 text-right">
                                         <div class="flex justify-end gap-2">
-                                            <a href="/teacher/groups/<%= g._id %>/students" class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-2.5 py-1.5 rounded transition">👥 Urus Pelajar</a>
+                                            <a href="/teacher/groups/<%= g._id %>/students" class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-2.5 py-1.5 rounded transition">👥 Urus <%= getTerm('student') %></a>
                                             <a href="/teacher/groups/<%= g._id %>/modules" class="text-xs bg-green-50 hover:bg-green-100 text-green-700 px-2.5 py-1.5 rounded transition">📚 Modul Akses</a>
                                             <a href="/teacher/groups/edit/<%= g._id %>" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2.5 py-1.5 rounded transition">⚙️ Edit</a>
                                         </div>

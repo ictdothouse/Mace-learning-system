@@ -31,10 +31,10 @@
                         <img src="<%= branding.logoUrl %>" alt="Logo" class="h-8 w-auto object-contain">
                     <% } else { %>
                         <span class="text-yellow-400 text-2xl">🏅</span>
-                        <%= (locals.branding && locals.branding.siteName) ? locals.branding.siteName : 'MACE GURU' %>
+                        <%= (locals.branding && locals.branding.siteName) ? locals.branding.siteName : ('MACE ' + getTerm('teacher').toUpperCase()) %>
                     <% } %>
                 </h1>
-                <p class="text-xs text-blue-300 mt-1">Panel Instruktor</p>
+                <p class="text-xs text-blue-300 mt-1">Panel <%= getTerm('teacher') %></p>
             </div>
             <button onclick="toggleSidebar()" class="md:hidden text-blue-300 hover:text-white focus:outline-none p-1 rounded-lg hover:bg-blue-800/50 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -82,7 +82,7 @@
         <div class="mb-8 flex justify-between items-center">
             <div>
                 <h2 class="text-2xl font-bold text-gray-900">Urus Kumpulan</h2>
-                <p class="text-gray-500 text-sm mt-1">Cipta, kemas kini, atau padam kumpulan pelajar.</p>
+                <p class="text-gray-500 text-sm mt-1">Cipta, kemas kini, atau padam kumpulan <%= getTerm('student').toLowerCase() %>.</p>
             </div>
             <a href="/teacher/groups/new" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow-sm">+ Cipta Kumpulan</a>
         </div>
@@ -103,7 +103,7 @@
                             <th class="px-6 py-4">Nama Kumpulan</th>
                             <th class="px-6 py-4">Enrollment Key</th>
                             <th class="px-6 py-4">Modul Diakses</th>
-                            <th class="px-6 py-4 text-center">Had Pelajar</th>
+                            <th class="px-6 py-4 text-center">Had <%= getTerm('student') %></th>
                             <th class="px-6 py-4 text-right">Tindakan</th>
                         </tr>
                     </thead>
@@ -130,7 +130,7 @@
                                     <td class="px-6 py-4 text-center font-semibold text-gray-700"><%= g.students ? g.students.length : 0 %> / <%= g.maxStudents || '∞' %></td>
                                     <td class="px-6 py-4 text-right">
                                         <div class="flex justify-end gap-1">
-                                            <a href="/teacher/groups/<%= g._id %>/students" class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-2.5 py-1.5 rounded transition">👥 Pelajar</a>
+                                            <a href="/teacher/groups/<%= g._id %>/students" class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-2.5 py-1.5 rounded transition">👥 <%= getTerm('student') %></a>
                                             <a href="/teacher/groups/<%= g._id %>/modules" class="text-xs bg-green-50 hover:bg-green-100 text-green-700 px-2.5 py-1.5 rounded transition">📚 Modul</a>
                                             <a href="/teacher/groups/edit/<%= g._id %>" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2.5 py-1.5 rounded transition">⚙️ Edit</a>
                                             <form action="/teacher/groups/delete/<%= g._id %>" method="POST" class="inline" onsubmit="return confirm('PADAM kumpulan ini?')">

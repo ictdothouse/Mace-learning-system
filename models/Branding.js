@@ -25,8 +25,12 @@ const brandingSchema = new mongoose.Schema({
     footerText: { type: String, default: '© 2026 Majlis Sukan Negara Malaysia. Hak Cipta Terpelihara.' },
     footerLinks: [{
         label: { type: String, required: true },
-        url: { type: String, required: true }
-    }]
+    }],
+    // Terminology Customization (Daftar Istilah)
+    termTeacher_ms: { type: String, default: 'Instruktor' },
+    termTeacher_en: { type: String, default: 'Instructor' },
+    termStudent_ms: { type: String, default: 'Atlit' },
+    termStudent_en: { type: String, default: 'Athlete' }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Branding', brandingSchema);

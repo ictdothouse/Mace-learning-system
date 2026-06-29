@@ -31,10 +31,10 @@
                         <img src="<%= branding.logoUrl %>" alt="Logo" class="h-8 w-auto object-contain">
                     <% } else { %>
                         <span class="text-yellow-400 text-2xl">🏅</span>
-                        <%= (locals.branding && locals.branding.siteName) ? locals.branding.siteName : 'MACE GURU' %>
+                        <%= (locals.branding && locals.branding.siteName) ? locals.branding.siteName : ('MACE ' + getTerm('teacher').toUpperCase()) %>
                     <% } %>
                 </h1>
-                <p class="text-xs text-blue-300 mt-1">Panel Instruktor</p>
+                <p class="text-xs text-blue-300 mt-1">Panel <%= getTerm('teacher') %></p>
             </div>
             <button onclick="toggleSidebar()" class="md:hidden text-blue-300 hover:text-white focus:outline-none p-1 rounded-lg hover:bg-blue-800/50 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -68,13 +68,13 @@
             <div>
                 <a href="/teacher/groups" class="text-blue-600 hover:text-blue-800 text-sm font-semibold mb-2 inline-block">← Kembali ke Senarai</a>
                 <h2 class="text-2xl font-bold text-gray-900">Urus Ahli Kumpulan</h2>
-                <p class="text-gray-500 text-sm mt-1">Urus senarai pelajar untuk kumpulan <strong><%= group.name %></strong>.</p>
+                <p class="text-gray-500 text-sm mt-1">Urus senarai <%= getTerm('student').toLowerCase() %> untuk kumpulan <strong><%= group.name %></strong>.</p>
             </div>
             
             <!-- Form Tambah Pelajar -->
             <form action="/teacher/groups/<%= group._id %>/students/add" method="POST" class="w-full md:w-auto flex gap-2">
                 <select name="studentId" required class="flex-1 md:w-64 border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
-                    <option value="">Pilih Pelajar Untuk Ditambah...</option>
+                    <option value="">Pilih <%= getTerm('student') %> Untuk Ditambah...</option>
                     <% allStudents.forEach(s => { %>
                         <option value="<%= s._id %>"><%= s.fullName %> (<%= s.email %>)</option>
                     <% }) %>
@@ -84,14 +84,14 @@
         </div>
 
         <% if (locals.msg === 'student_added') { %>
-            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-r-lg mb-6 shadow-sm">✓ Pelajar berjaya ditambahkan ke dalam kumpulan!</div>
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-r-lg mb-6 shadow-sm">✓ <%= getTerm('student') %> berjaya ditambahkan ke dalam kumpulan!</div>
         <% } else if (locals.msg === 'student_removed') { %>
-            <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-r-lg mb-6 shadow-sm">🗑️ Pelajar dikeluarkan dari kumpulan.</div>
+            <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-r-lg mb-6 shadow-sm">🗑️ <%= getTerm('student') %> dikeluarkan dari kumpulan.</div>
         <% } %>
 
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-8">
             <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                <span class="font-bold text-gray-700">Senarai Ahli Kumpulan (<%= group.students ? group.students.length : 0 %> Pelajar)</span>
+                <span class="font-bold text-gray-700">Senarai Ahli Kumpulan (<%= group.students ? group.students.length : 0 %> <%= getTerm('student') %>)</span>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm text-left">
@@ -111,7 +111,7 @@
                                     <td class="px-6 py-4 text-gray-600"><%= s.email %></td>
                                     <td class="px-6 py-4 text-gray-500"><%= s.lastLogin ? new Date(s.lastLogin).toLocaleString('ms-MY') : 'Belum Pernah' %></td>
                                     <td class="px-6 py-4 text-right">
-                                        <form action="/teacher/groups/<%= group._id %>/students/remove/<%= s._id %>" method="POST" class="inline" onsubmit="return confirm('Keluarkan pelajar ini dari kumpulan?')">
+                                        <form action="/teacher/groups/<%= group._id %>/students/remove/<%= s._id %>" method="POST" class="inline" onsubmit="return confirm('Keluarkan <%= getTerm('student').toLowerCase() %> ini dari kumpulan?')">
                                             <button type="submit" class="text-xs bg-red-50 hover:bg-red-100 text-red-600 px-2.5 py-1.5 rounded transition">🗑️ Keluarkan</button>
                                         </form>
                                     </td>
@@ -119,7 +119,7 @@
                             <% }) %>
                         <% } else { %>
                             <tr>
-                                <td colspan="4" class="px-6 py-12 text-center text-gray-400 italic">Tiada pelajar di dalam kumpulan ini lagi.</td>
+                                <td colspan="4" class="px-6 py-12 text-center text-gray-400 italic">Tiada <%= getTerm('student').toLowerCase() %> di dalam kumpulan ini lagi.</td>
                             </tr>
                         <% } %>
                     </tbody>

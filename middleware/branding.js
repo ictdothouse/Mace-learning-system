@@ -44,5 +44,58 @@ module.exports = async function brandingMiddleware(req, res, next) {
     };
 
     res.locals.branding = brandingCache;
+    
+    // Terminology translator helper with plural support for English
+    res.locals.getTerm = (key, isPlural = false) => {
+        const lang = res.locals.lang || 'ms';
+        if (key === 'teacher') {
+            const base = lang === 'en' 
+                ? (brandingCache.termTeacher_en || 'Instructor') 
+                : (brandingCache.termTeacher_ms || 'Instruktor');
+            return isPlural && lang === 'en' ? base + 's' : base;
+        }
+        if (key === 'student') {
+            const base = lang === 'en' 
+                ? (brandingCache.termStudent_en || 'Athlete') 
+                : (brandingCache.termStudent_ms || 'Atlit');
+            return isPlural && lang === 'en' ? base + 's' : base;
+        }
+        return '';
+    };
+
+    // Override localization function to dynamically replace terms from DB
+    const originalTranslate = res.locals.__;
+    res.locals.__ = (key, fallback) => {
+        let text = originalTranslate(key, fallback);
+        const lang = res.locals.lang || 'ms';
+        
+        const teacherTerm = lang === 'en' 
+            ? (brandingCache.termTeacher_en || 'Instructor') 
+            : (brandingCache.termTeacher_ms || 'Instruktor');
+            
+        const studentTerm = lang === 'en' 
+            ? (brandingCache.termStudent_en || 'Athlete') 
+            : (brandingCache.termStudent_ms || 'Atlit');
+
+        if (lang === 'ms') {
+            // Match exactly or context-based replacement
+            text = text.replace(/pelajar/g, studentTerm.toLowerCase())
+                       .replace(/Pelajar/g, studentTerm)
+                       .replace(/guru/g, teacherTerm.toLowerCase())
+                       .replace(/Guru/g, teacherTerm);
+        } else {
+            // Match plurals first in English
+            text = text.replace(/students/g, studentTerm.toLowerCase() + 's')
+                       .replace(/Students/g, studentTerm + 's')
+                       .replace(/teachers/g, teacherTerm.toLowerCase() + 's')
+                       .replace(/Teachers/g, teacherTerm + 's')
+                       .replace(/student/g, studentTerm.toLowerCase())
+                       .replace(/Student/g, studentTerm)
+                       .replace(/teacher/g, teacherTerm.toLowerCase())
+                       .replace(/Teacher/g, teacherTerm);
+        }
+        return text;
+    };
+
     next();
 };

@@ -31,10 +31,10 @@
                         <img src="<%= branding.logoUrl %>" alt="Logo" class="h-8 w-auto object-contain">
                     <% } else { %>
                         <span class="text-yellow-400 text-2xl">🏅</span>
-                        <%= (locals.branding && locals.branding.siteName) ? locals.branding.siteName : 'MACE GURU' %>
+                        <%= (locals.branding && locals.branding.siteName) ? locals.branding.siteName : ('MACE ' + getTerm('teacher').toUpperCase()) %>
                     <% } %>
                 </h1>
-                <p class="text-xs text-blue-300 mt-1">Panel Instruktor</p>
+                <p class="text-xs text-blue-300 mt-1">Panel <%= getTerm('teacher') %></p>
             </div>
             <button onclick="toggleSidebar()" class="md:hidden text-blue-300 hover:text-white focus:outline-none p-1 rounded-lg hover:bg-blue-800/50 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -67,7 +67,7 @@
         <div class="mb-6">
             <a href="/teacher/groups" class="text-blue-600 hover:text-blue-800 text-sm font-semibold mb-2 inline-block">← Kembali ke Senarai</a>
             <h2 class="text-2xl font-bold text-gray-900"><%= editMode ? 'Edit Kumpulan' : 'Cipta Kumpulan Baru' %></h2>
-            <p class="text-gray-500 text-sm mt-1">Isi borang di bawah untuk <%= editMode ? 'mengemaskini' : 'mencipta' %> kumpulan pelajar.</p>
+            <p class="text-gray-500 text-sm mt-1">Isi borang di bawah untuk <%= editMode ? 'mengemaskini' : 'mencipta' %> kumpulan <%= getTerm('student').toLowerCase() %>.</p>
         </div>
 
         <% if (locals.msg) { %>
@@ -90,11 +90,11 @@
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Kod Enrollment (Enrollment Key)</label>
                         <input type="text" name="enrollmentKey" value="<%= group ? group.enrollmentKey : '' %>" placeholder="Tinggalkan kosong untuk auto-jana" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none transition font-mono uppercase">
-                        <p class="text-xs text-gray-400 mt-1">Digunakan oleh pelajar untuk menyertai kumpulan.</p>
+                        <p class="text-xs text-gray-400 mt-1">Digunakan oleh <%= getTerm('student').toLowerCase() %> untuk menyertai kumpulan.</p>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Had Pelajar (Kosongkan jika tiada had)</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Had <%= getTerm('student') %> (Kosongkan jika tiada had)</label>
                         <input type="number" name="maxStudents" value="<%= group ? group.maxStudents : '' %>" placeholder="Contoh: 50" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none transition">
                     </div>
                 </div>

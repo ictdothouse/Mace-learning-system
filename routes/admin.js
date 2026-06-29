@@ -554,7 +554,8 @@ router.post('/settings/branding', async (req, res) => {
         const { 
             siteName, tagline, primaryColor, dashboardTitle, dashboardSubtitle, logoUrl, faviconUrl,
             homeBannerTitle, homeBannerImage, homeBgImage, homeLeftColumnHtml, homeLeftColumnHtml_en, menuLinksJson,
-            footerText, footerLinksJson
+            footerText, footerLinksJson,
+            termTeacher_ms, termTeacher_en, termStudent_ms, termStudent_en
         } = req.body;
         const Branding = require('../models/Branding');
         
@@ -597,16 +598,23 @@ router.post('/settings/branding', async (req, res) => {
 
         branding.allowModuleSelectionInEnrollment = req.body.allowModuleSelectionInEnrollment === 'on';
         
+        if (termTeacher_ms !== undefined) branding.termTeacher_ms = termTeacher_ms;
+        if (termTeacher_en !== undefined) branding.termTeacher_en = termTeacher_en;
+        if (termStudent_ms !== undefined) branding.termStudent_ms = termStudent_ms;
+        if (termStudent_en !== undefined) branding.termStudent_en = termStudent_en;
+        
         await branding.save();
         
         if (req.refreshBrandingCache) {
             await req.refreshBrandingCache();
         }
         
-        res.redirect('/admin-mace/settings?msg=branding_updated&tab=branding');
+        const targetTab = termTeacher_ms !== undefined ? 'terms' : 'branding';
+        res.redirect('/admin-mace/settings?msg=branding_updated&tab=' + targetTab);
     } catch (err) {
         console.error('Branding update error:', err);
-        res.redirect('/admin-mace/settings?msg=update_error&tab=branding');
+        const targetTab = req.body.termTeacher_ms !== undefined ? 'terms' : 'branding';
+        res.redirect('/admin-mace/settings?msg=update_error&tab=' + targetTab);
     }
 });
 

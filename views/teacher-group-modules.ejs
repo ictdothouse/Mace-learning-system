@@ -31,10 +31,10 @@
                         <img src="<%= branding.logoUrl %>" alt="Logo" class="h-8 w-auto object-contain">
                     <% } else { %>
                         <span class="text-yellow-400 text-2xl">🏅</span>
-                        <%= (locals.branding && locals.branding.siteName) ? locals.branding.siteName : 'MACE GURU' %>
+                        <%= (locals.branding && locals.branding.siteName) ? locals.branding.siteName : ('MACE ' + getTerm('teacher').toUpperCase()) %>
                     <% } %>
                 </h1>
-                <p class="text-xs text-blue-300 mt-1">Panel Instruktor</p>
+                <p class="text-xs text-blue-300 mt-1">Panel <%= getTerm('teacher') %></p>
             </div>
             <button onclick="toggleSidebar()" class="md:hidden text-blue-300 hover:text-white focus:outline-none p-1 rounded-lg hover:bg-blue-800/50 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -77,7 +77,7 @@
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 max-w-2xl">
             <form action="/teacher/groups/<%= group._id %>/modules" method="POST" class="space-y-4">
                 <p class="text-xs text-gray-500 mb-4 bg-blue-50 text-blue-700 p-3 rounded-lg border border-blue-100">
-                    ℹ️ Pelajar dalam kumpulan ini hanya boleh mengakses modul yang ditandakan di bawah sahaja.
+                    ℹ️ <%= getTerm('student') %> dalam kumpulan ini hanya boleh mengakses modul yang ditandakan di bawah sahaja.
                 </p>
 
                 <div class="space-y-3">
