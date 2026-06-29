@@ -87,6 +87,11 @@
   "lesson_failed_title": "Not Passed Yet.",
   "lesson_score_label": "Score:",
   "lesson_need_label": "Need",
+  "lesson_calculation": "Calculation",
+  "lesson_points": "points",
+  "lesson_correct": "Correct",
+  "lesson_wrong": "Wrong",
+  "lesson_correct_answer": "Correct answer",
 
   "table_name": "Name",
   "table_ic": "IC No.",

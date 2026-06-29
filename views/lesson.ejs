@@ -190,7 +190,7 @@ const moduleTitle = lesson.moduleId ? lesson.moduleId.title : ('MODUL ' + module
                             </div>
                             <% if (lesson.showPoints !== false && quizResult.earnedPoints !== undefined && quizResult.totalPoints !== undefined) { %>
                                 <div class="text-xs font-mono border-t border-current/10 pt-2 opacity-80">
-                                    Kira-kira: <%= quizResult.earnedPoints %> / <%= quizResult.totalPoints %> &times; 100 = <%= quizResult.score %>%
+                                    <%= __('lesson_calculation') || 'Kira-kira' %>: <%= quizResult.earnedPoints %> / <%= quizResult.totalPoints %> &times; 100 = <%= quizResult.score %>%
                                 </div>
                             <% } %>
                         </div>
@@ -223,13 +223,13 @@ const moduleTitle = lesson.moduleId ? lesson.moduleId.title : ('MODUL ' + module
                                         <span class="flex-grow">
                                             <%= q.text %>
                                             <% if (lesson.showPoints !== false) { %>
-                                                <span class="inline-block text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded ml-2">(<%= points %> mata)</span>
+                                                <span class="inline-block text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded ml-2">(<%= points %> <%= __('lesson_points') || 'mata' %>)</span>
                                             <% } %>
                                             <% if (quizResult) { %>
                                                 <% if (isCorrect) { %>
-                                                    <span class="inline-block text-xs font-semibold text-green-700 bg-green-50 px-2 py-0.5 rounded ml-1">✓ Betul</span>
+                                                    <span class="inline-block text-xs font-semibold text-green-700 bg-green-50 px-2 py-0.5 rounded ml-1">✓ <%= __('lesson_correct') || 'Betul' %></span>
                                                 <% } else { %>
-                                                    <span class="inline-block text-xs font-semibold text-red-700 bg-red-50 px-2 py-0.5 rounded ml-1">✗ Salah</span>
+                                                    <span class="inline-block text-xs font-semibold text-red-700 bg-red-50 px-2 py-0.5 rounded ml-1">✗ <%= __('lesson_wrong') || 'Salah' %></span>
                                                 <% } %>
                                             <% } %>
                                         </span>
@@ -279,7 +279,7 @@ const moduleTitle = lesson.moduleId ? lesson.moduleId.title : ('MODUL ' + module
                                                 
                                                 <% if (quizResult && !isCorrect) { %>
                                                     <div class="text-xs text-green-700 bg-green-50 p-2 rounded border border-green-200">
-                                                        Jawapan betul: <strong><%= q.correctAnswerText %></strong>
+                                                        <%= __('lesson_correct_answer') || 'Jawapan betul' %>: <strong><%= q.correctAnswerText %></strong>
                                                     </div>
                                                 <% } %>
                                             </div>

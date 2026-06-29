@@ -87,6 +87,11 @@
   "lesson_failed_title": "Belum Lulus.",
   "lesson_score_label": "Markah:",
   "lesson_need_label": "Perlu",
+  "lesson_calculation": "Kira-kira",
+  "lesson_points": "mata",
+  "lesson_correct": "Betul",
+  "lesson_wrong": "Salah",
+  "lesson_correct_answer": "Jawapan betul",
 
   "table_name": "Nama",
   "table_ic": "No. IC",
