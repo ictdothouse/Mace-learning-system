@@ -53,9 +53,14 @@
             background: #4b5563;
         }
         
+        <% 
+            const isPortrait = (template.orientation === 'portrait');
+            const width = isPortrait ? 794 : 1123;
+            const height = isPortrait ? 1123 : 794;
+        %>
         .certificate-container {
-            width: 1123px !important;
-            height: 794px !important;
+            width: <%= width %>px !important;
+            height: <%= height %>px !important;
             margin: 0 auto;
             position: relative;
             background: white;
@@ -200,23 +205,35 @@
         /* Print Media Query */
         @media print {
             body {
-                background: white;
-                padding: 0;
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow: hidden !important;
             }
             
             .no-print {
-                display: none;
+                display: none !important;
+            }
+            
+            .cert-scroll-wrapper {
+                padding: 0 !important;
+                margin: 0 !important;
+                display: block !important;
+                width: 100% !important;
+                height: 100% !important;
+                overflow: hidden !important;
             }
             
             .certificate-container {
-                box-shadow: none;
-                margin: 0;
-                page-break-inside: avoid;
+                box-shadow: none !important;
+                margin: 0 !important;
+                page-break-inside: avoid !important;
+                page-break-after: avoid !important;
             }
             
             @page {
-                size: A4 landscape;
-                margin: 0;
+                size: A4 <%= isPortrait ? 'portrait' : 'landscape' %>;
+                margin: 0 !important;
             }
         }
     </style>
