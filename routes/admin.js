@@ -1342,9 +1342,19 @@ router.post('/templates/delete/:id', async (req, res) => {
     }
 });
 
-// ==========================================
-// CMS PAGES MANAGEMENT ROUTES
-// ==========================================
+// POST: API upload image helper for CMS pages and general usage
+router.post('/api/upload-image', upload.single('image'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+        const uploadedUrl = await processAndUploadImage(req.file, null);
+        res.json({ success: true, url: uploadedUrl });
+    } catch (err) {
+        console.error('API Image Upload error:', err);
+        res.status(500).json({ error: 'Upload failed' });
+    }
+});
 
 // GET: Urus CMS Pages
 router.get('/pages', async (req, res) => {
@@ -1364,12 +1374,21 @@ router.get('/pages', async (req, res) => {
 // POST: Cipta Page Baru
 router.post('/pages/create', async (req, res) => {
     try {
-        const { title, slug, content, content_en, customTemplate, navigationOrder, showInNavigation, isPublished } = req.body;
+        const { title, slug, content, content_en, customTemplate, navigationOrder, showInNavigation, isPublished, modulesConfigJson } = req.body;
         
         // Ensure unique slug
         const existing = await Page.findOne({ slug: slug.toLowerCase().trim() });
         if (existing) {
             return res.redirect('/admin-mace/pages?msg=slug_exists');
+        }
+        
+        let modulesConfig = [];
+        if (modulesConfigJson) {
+            try {
+                modulesConfig = JSON.parse(modulesConfigJson);
+            } catch (e) {
+                console.error('Failed to parse modulesConfigJson:', e);
+            }
         }
         
         await Page.create({
@@ -1380,7 +1399,8 @@ router.post('/pages/create', async (req, res) => {
             customTemplate: customTemplate || 'default',
             navigationOrder: parseInt(navigationOrder) || 0,
             showInNavigation: showInNavigation === 'on',
-            isPublished: isPublished === 'on'
+            isPublished: isPublished === 'on',
+            modulesConfig
         });
         
         res.redirect('/admin-mace/pages?msg=page_created');
@@ -1393,13 +1413,22 @@ router.post('/pages/create', async (req, res) => {
 // POST: Kemaskini Page
 router.post('/pages/update/:id', async (req, res) => {
     try {
-        const { title, slug, content, content_en, customTemplate, navigationOrder, showInNavigation, isPublished } = req.body;
+        const { title, slug, content, content_en, customTemplate, navigationOrder, showInNavigation, isPublished, modulesConfigJson } = req.body;
         const normalizedSlug = slug.toLowerCase().trim().replace(/\s+/g, '-');
         
         // Check uniqueness of slug (excluding current page)
         const existing = await Page.findOne({ slug: normalizedSlug, _id: { $ne: req.params.id } });
         if (existing) {
             return res.redirect('/admin-mace/pages?msg=slug_exists');
+        }
+        
+        let modulesConfig = [];
+        if (modulesConfigJson) {
+            try {
+                modulesConfig = JSON.parse(modulesConfigJson);
+            } catch (e) {
+                console.error('Failed to parse modulesConfigJson:', e);
+            }
         }
         
         await Page.findByIdAndUpdate(req.params.id, {
@@ -1410,7 +1439,8 @@ router.post('/pages/update/:id', async (req, res) => {
             customTemplate: customTemplate || 'default',
             navigationOrder: parseInt(navigationOrder) || 0,
             showInNavigation: showInNavigation === 'on',
-            isPublished: isPublished === 'on'
+            isPublished: isPublished === 'on',
+            modulesConfig
         });
         
         res.redirect('/admin-mace/pages?msg=page_updated');

@@ -38,6 +38,10 @@ const pageSchema = new mongoose.Schema({
     type: String,
     default: 'default',
     enum: ['default', 'modules']
+  },
+  modulesConfig: {
+    type: Array,
+    default: []
   }
 }, {
   timestamps: true

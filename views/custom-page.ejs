@@ -122,45 +122,45 @@
                         </div>
                     </div>
 
-                    <!-- MODUL 2 (COMING SOON) -->
-                    <div class="bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] hover:-translate-y-1 flex flex-col h-full text-center p-6 opacity-75 hover:opacity-100">
-                        <div class="rounded-xl overflow-hidden aspect-[1.6] mb-6 bg-gray-100 grayscale">
-                            <img src="https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=600&auto=format&fit=crop" alt="Modul 2" class="w-full h-full object-cover">
-                        </div>
-                        <h3 class="text-sm font-extrabold text-gray-400 uppercase tracking-widest mb-2"><%= lang === 'en' ? 'MODULE 2' : 'MODUL 2' %></h3>
-                        <h4 class="text-xl font-bold text-gray-400 uppercase tracking-tight leading-snug mb-4">CAREER BOOST</h4>
-                        <p class="text-sm italic text-gray-400 font-medium mt-auto"><%= lang === 'en' ? 'Coming Soon' : 'Akan Datang' %></p>
-                    </div>
+                    <!-- MODUL 2 TO 5 (COMING SOON / CUSTOMIZABLE) -->
+                    <% 
+                        // Default cards if modulesConfig is empty
+                        const defaultCards = [
+                            {
+                                title: 'CAREER BOOST',
+                                statusText: lang === 'en' ? 'Coming Soon' : 'Akan Datang',
+                                imageUrl: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=600&auto=format&fit=crop'
+                            },
+                            {
+                                title: 'POCKET POWER',
+                                statusText: lang === 'en' ? 'Coming Soon' : 'Akan Datang',
+                                imageUrl: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=600&auto=format&fit=crop'
+                            },
+                            {
+                                title: 'MODE ON!',
+                                statusText: lang === 'en' ? 'Coming Soon' : 'Akan Datang',
+                                imageUrl: 'https://images.unsplash.com/photo-1530541930197-ff16ac917b0e?q=80&w=600&auto=format&fit=crop'
+                            },
+                            {
+                                title: 'SMART ATHLETE',
+                                statusText: lang === 'en' ? 'Coming Soon' : 'Akan Datang',
+                                imageUrl: 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?q=80&w=600&auto=format&fit=crop'
+                            }
+                        ];
 
-                    <!-- MODUL 3 (COMING SOON) -->
-                    <div class="bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] hover:-translate-y-1 flex flex-col h-full text-center p-6 opacity-75 hover:opacity-100">
-                        <div class="rounded-xl overflow-hidden aspect-[1.6] mb-6 bg-gray-100 grayscale">
-                            <img src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=600&auto=format&fit=crop" alt="Modul 3" class="w-full h-full object-cover">
-                        </div>
-                        <h3 class="text-sm font-extrabold text-gray-400 uppercase tracking-widest mb-2"><%= lang === 'en' ? 'MODULE 3' : 'MODUL 3' %></h3>
-                        <h4 class="text-xl font-bold text-gray-400 uppercase tracking-tight leading-snug mb-4">POCKET POWER</h4>
-                        <p class="text-sm italic text-gray-400 font-medium mt-auto"><%= lang === 'en' ? 'Coming Soon' : 'Akan Datang' %></p>
-                    </div>
+                        const cards = (page.modulesConfig && page.modulesConfig.length === 4) ? page.modulesConfig : defaultCards;
+                    %>
 
-                    <!-- MODUL 4 (COMING SOON) -->
-                    <div class="bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] hover:-translate-y-1 flex flex-col h-full text-center p-6 opacity-75 hover:opacity-100">
-                        <div class="rounded-xl overflow-hidden aspect-[1.6] mb-6 bg-gray-100 grayscale">
-                            <img src="https://images.unsplash.com/photo-1530541930197-ff16ac917b0e?q=80&w=600&auto=format&fit=crop" alt="Modul 4" class="w-full h-full object-cover">
+                    <% cards.forEach((card, idx) => { %>
+                        <div class="bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] hover:-translate-y-1 flex flex-col h-full text-center p-6 opacity-75 hover:opacity-100">
+                            <div class="rounded-xl overflow-hidden aspect-[1.6] mb-6 bg-gray-100 grayscale">
+                                <img src="<%= card.imageUrl || 'https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=600&auto=format&fit=crop' %>" alt="Modul <%= idx + 2 %>" class="w-full h-full object-cover">
+                            </div>
+                            <h3 class="text-sm font-extrabold text-gray-400 uppercase tracking-widest mb-2"><%= lang === 'en' ? 'MODULE' : 'MODUL' %> <%= idx + 2 %></h3>
+                            <h4 class="text-xl font-bold text-gray-400 uppercase tracking-tight leading-snug mb-4"><%= card.title || 'Coming Soon' %></h4>
+                            <p class="text-sm italic text-gray-400 font-medium mt-auto"><%= card.statusText || (lang === 'en' ? 'Coming Soon' : 'Akan Datang') %></p>
                         </div>
-                        <h3 class="text-sm font-extrabold text-gray-400 uppercase tracking-widest mb-2"><%= lang === 'en' ? 'MODULE 4' : 'MODUL 4' %></h3>
-                        <h4 class="text-xl font-bold text-gray-400 uppercase tracking-tight leading-snug mb-4">MODE ON!</h4>
-                        <p class="text-sm italic text-gray-400 font-medium mt-auto"><%= lang === 'en' ? 'Coming Soon' : 'Akan Datang' %></p>
-                    </div>
-
-                    <!-- MODUL 5 (COMING SOON) -->
-                    <div class="bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] hover:-translate-y-1 flex flex-col h-full text-center p-6 opacity-75 hover:opacity-100">
-                        <div class="rounded-xl overflow-hidden aspect-[1.6] mb-6 bg-gray-100 grayscale">
-                            <img src="https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?q=80&w=600&auto=format&fit=crop" alt="Modul 5" class="w-full h-full object-cover">
-                        </div>
-                        <h3 class="text-sm font-extrabold text-gray-400 uppercase tracking-widest mb-2"><%= lang === 'en' ? 'MODULE 5' : 'MODUL 5' %></h3>
-                        <h4 class="text-xl font-bold text-gray-400 uppercase tracking-tight leading-snug mb-4">SMART ATHLETE</h4>
-                        <p class="text-sm italic text-gray-400 font-medium mt-auto"><%= lang === 'en' ? 'Coming Soon' : 'Akan Datang' %></p>
-                    </div>
+                    <% }) %>
 
                 </div>
             </div>

@@ -145,7 +145,29 @@ mongoose.connect(process.env.MONGO_URI)
                     isPublished: true,
                     showInNavigation: true,
                     navigationOrder: 1,
-                    customTemplate: 'modules'
+                    customTemplate: 'modules',
+                    modulesConfig: [
+                        {
+                            title: 'CAREER BOOST',
+                            statusText: 'Akan Datang',
+                            imageUrl: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=600&auto=format&fit=crop'
+                        },
+                        {
+                            title: 'POCKET POWER',
+                            statusText: 'Akan Datang',
+                            imageUrl: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=600&auto=format&fit=crop'
+                        },
+                        {
+                            title: 'MODE ON!',
+                            statusText: 'Akan Datang',
+                            imageUrl: 'https://images.unsplash.com/photo-1530541930197-ff16ac917b0e?q=80&w=600&auto=format&fit=crop'
+                        },
+                        {
+                            title: 'SMART ATHLETE',
+                            statusText: 'Akan Datang',
+                            imageUrl: 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?q=80&w=600&auto=format&fit=crop'
+                        }
+                    ]
                 });
                 console.log('🌱 Seeded default CMS page: Modul');
             }
