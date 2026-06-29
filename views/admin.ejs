@@ -740,8 +740,13 @@
                             </div>
                             
                             <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Teks/HTML Ruangan Kiri</label>
+                                <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Teks/HTML Ruangan Kiri (Bahasa Melayu)</label>
                                 <textarea id="homeLeftColumnHtml" name="homeLeftColumnHtml" class="w-full border border-gray-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-purple-500 outline-none min-h-[150px]"><%= branding.homeLeftColumnHtml %></textarea>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Teks/HTML Ruangan Kiri (Bahasa Inggeris)</label>
+                                <textarea id="homeLeftColumnHtml_en" name="homeLeftColumnHtml_en" class="w-full border border-gray-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-purple-500 outline-none min-h-[150px]"><%= branding.homeLeftColumnHtml_en || '' %></textarea>
                             </div>
                             
                             <!-- Footer Customization Section -->
@@ -772,7 +777,7 @@
                     <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
                     <script>
                         tinymce.init({
-                            selector: '#homeLeftColumnHtml',
+                            selector: '#homeLeftColumnHtml, #homeLeftColumnHtml_en',
                             height: 250,
                             plugins: 'link lists textcolor',
                             toolbar: 'undo redo | bold italic | forecolor | alignleft aligncenter alignright | bullist numlist | link',

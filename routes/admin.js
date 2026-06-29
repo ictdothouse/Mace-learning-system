@@ -553,7 +553,7 @@ router.post('/settings/branding', async (req, res) => {
     try {
         const { 
             siteName, tagline, primaryColor, dashboardTitle, dashboardSubtitle, logoUrl, faviconUrl,
-            homeBannerTitle, homeBannerImage, homeBgImage, homeLeftColumnHtml, menuLinksJson,
+            homeBannerTitle, homeBannerImage, homeBgImage, homeLeftColumnHtml, homeLeftColumnHtml_en, menuLinksJson,
             footerText, footerLinksJson
         } = req.body;
         const Branding = require('../models/Branding');
@@ -575,6 +575,7 @@ router.post('/settings/branding', async (req, res) => {
         if (homeBannerImage !== undefined) branding.homeBannerImage = homeBannerImage;
         if (homeBgImage !== undefined) branding.homeBgImage = homeBgImage;
         if (homeLeftColumnHtml !== undefined) branding.homeLeftColumnHtml = homeLeftColumnHtml;
+        if (homeLeftColumnHtml_en !== undefined) branding.homeLeftColumnHtml_en = homeLeftColumnHtml_en;
         branding.showMenu = req.body.showMenu === 'on';
         
         if (menuLinksJson) {

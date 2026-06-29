@@ -103,12 +103,28 @@
             <!-- Left Column: Custom HTML / Info -->
             <div class="bg-white/95 backdrop-blur rounded-2xl shadow-xl border border-gray-100 p-5 sm:p-8">
                 <div class="prose text-gray-700 leading-relaxed text-sm sm:text-base">
-                    <% if (locals.branding && branding.homeLeftColumnHtml) { %>
-                        <%- branding.homeLeftColumnHtml %>
+                    <% 
+                        let displayHtml = null;
+                        if (locals.branding) {
+                            if (locals.lang === 'en' && branding.homeLeftColumnHtml_en) {
+                                displayHtml = branding.homeLeftColumnHtml_en;
+                            } else if (branding.homeLeftColumnHtml) {
+                                displayHtml = branding.homeLeftColumnHtml;
+                            }
+                        }
+                    %>
+                    <% if (displayHtml) { %>
+                        <%- displayHtml %>
                     <% } else { %>
-                        <p>Modul pembelajaran ini disediakan dari peringkat pembelajaran asas yang merangkumi pelbagai aspek topik kesejahteraan atlet dalam mengukuhkan ekosistem sukan berprestasi tinggi.</p>
-                        <br>
-                        <p>Setelah melengkapkan kuiz di akhir setiap modul, anda boleh mencetak atau memuat turun Sijil Penyertaan.</p>
+                        <% if (locals.lang === 'en') { %>
+                            <p>This learning module is prepared starting from the basic learning stage, covering various aspects of athlete well-being topics to strengthen the high-performance sports ecosystem.</p>
+                            <br>
+                            <p>Upon completing the quiz at the end of each module, you can print or download the Certificate of Participation.</p>
+                        <% } else { %>
+                            <p>Modul pembelajaran ini disediakan dari peringkat pembelajaran asas yang merangkumi pelbagai aspek topik kesejahteraan atlet dalam mengukuhkan ekosistem sukan berprestasi tinggi.</p>
+                            <br>
+                            <p>Setelah melengkapkan kuiz di akhir setiap modul, anda boleh mencetak atau memuat turun Sijil Penyertaan.</p>
+                        <% } %>
                     <% } %>
                 </div>
             </div>
