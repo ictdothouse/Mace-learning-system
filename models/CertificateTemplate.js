@@ -122,8 +122,7 @@ const certificateTemplateSchema = new mongoose.Schema({
     },
     athleteNameFont: {
         type: String,
-        default: 'Great Vibes',
-        enum: ['Great Vibes', 'Dancing Script', 'Alex Brush', 'Sacramento', 'Parisienne', 'Playfair Display', 'Poppins']
+        default: 'Great Vibes'
     },
     // Typography - Per Element (position & style)
     elements: {

@@ -1243,15 +1243,22 @@
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Font Nama Atlit</label>
-                                            <select name="athleteNameFont" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
-                                                <option value="Great Vibes">Great Vibes (Script)</option>
-                                                <option value="Dancing Script">Dancing Script (Script)</option>
-                                                <option value="Alex Brush">Alex Brush (Script)</option>
-                                                <option value="Sacramento">Sacramento (Script)</option>
-                                                <option value="Parisienne">Parisienne (Script)</option>
-                                                <option value="Playfair Display">Playfair Display (Serif)</option>
-                                                <option value="Poppins">Poppins (Sans-serif)</option>
-                                            </select>
+                                            <input type="text" name="athleteNameFont" list="googleFontsList" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Taip atau pilih Google Font (cth: Great Vibes)" value="Great Vibes">
+                                            <datalist id="googleFontsList">
+                                                <option value="Great Vibes">
+                                                <option value="Dancing Script">
+                                                <option value="Alex Brush">
+                                                <option value="Sacramento">
+                                                <option value="Parisienne">
+                                                <option value="Playfair Display">
+                                                <option value="Poppins">
+                                                <option value="Montserrat">
+                                                <option value="Inter">
+                                                <option value="Pacifico">
+                                                <option value="Caveat">
+                                                <option value="Satisfy">
+                                                <option value="Allura">
+                                            </datalist>
                                         </div>
                                     </div>
                                 </div>
@@ -1516,15 +1523,22 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Font Nama Atlit</label>
-                                    <select name="athleteNameFont" id="edit_athleteNameFont" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
-                                        <option value="Great Vibes">Great Vibes (Script)</option>
-                                        <option value="Dancing Script">Dancing Script (Script)</option>
-                                        <option value="Alex Brush">Alex Brush (Script)</option>
-                                        <option value="Sacramento">Sacramento (Script)</option>
-                                        <option value="Parisienne">Parisienne (Script)</option>
-                                        <option value="Playfair Display">Playfair Display (Serif)</option>
-                                        <option value="Poppins">Poppins (Sans-serif)</option>
-                                    </select>
+                                    <input type="text" name="athleteNameFont" id="edit_athleteNameFont" list="googleFontsListEdit" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Taip atau pilih Google Font (cth: Great Vibes)">
+                                    <datalist id="googleFontsListEdit">
+                                        <option value="Great Vibes">
+                                        <option value="Dancing Script">
+                                        <option value="Alex Brush">
+                                        <option value="Sacramento">
+                                        <option value="Parisienne">
+                                        <option value="Playfair Display">
+                                        <option value="Poppins">
+                                        <option value="Montserrat">
+                                        <option value="Inter">
+                                        <option value="Pacifico">
+                                        <option value="Caveat">
+                                        <option value="Satisfy">
+                                        <option value="Allura">
+                                    </datalist>
                                 </div>
                             </div>
                             <div class="space-y-2">
@@ -2989,6 +3003,19 @@
             const opacity = form.querySelector('[name="backgroundOpacity"]') ? form.querySelector('[name="backgroundOpacity"]').value : 1;
             const fontFamily = form.querySelector('[name="fontFamily"]') ? form.querySelector('[name="fontFamily"]').value : 'Helvetica';
             const athleteNameFont = form.querySelector('[name="athleteNameFont"]') ? form.querySelector('[name="athleteNameFont"]').value : 'Great Vibes';
+            
+            // Dynamically load Google Font for preview on-the-fly
+            if (athleteNameFont && !['Helvetica', 'Times-Roman', 'Courier', 'Arial', 'Georgia', 'Times New Roman'].includes(athleteNameFont)) {
+                const fontKey = athleteNameFont.trim().replace(/\s+/g, '+');
+                const linkId = `gfont-preview-${fontKey.toLowerCase()}`;
+                if (!document.getElementById(linkId)) {
+                    const link = document.createElement('link');
+                    link.id = linkId;
+                    link.rel = 'stylesheet';
+                    link.href = `https://fonts.googleapis.com/css2?family=${fontKey}&display=swap`;
+                    document.head.appendChild(link);
+                }
+            }
             
             preview.style.fontFamily = fontFamily;
             preview.innerHTML = '';
