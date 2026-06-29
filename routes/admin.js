@@ -271,7 +271,7 @@ router.get('/api/presigned-url', async (req, res) => {
         const sanitizeFilename = (name) => {
             return name.replace(/[^a-zA-Z0-9.\-_]/g, '-');
         };
-        const uniqueFilename = sanitizeFilename(filename);
+        const uniqueFilename = `${Date.now()}-${sanitizeFilename(filename)}`;
         if (hasR2) {
             const command = new PutObjectCommand({
                 Bucket: bucketName,

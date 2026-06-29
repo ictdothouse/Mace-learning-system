@@ -152,17 +152,24 @@
 
         const compressImageClient = (file) => {
             return new Promise((resolve) => {
+                // Tentukan jenis fail berdasarkan file.type ATAU extension
                 let fileType = file.type ? file.type.toLowerCase() : '';
-                const extMatch = file.name.match(/\.(webp|gif|svg)$/i);
-                if (extMatch && !fileType) {
-                    const ext = extMatch[1].toLowerCase();
+                const skipExtMatch = file.name.match(/\.(webp|gif|svg)$/i);
+                if (skipExtMatch) {
+                    const ext = skipExtMatch[1].toLowerCase();
                     if (ext === 'webp') fileType = 'image/webp';
                     else if (ext === 'gif') fileType = 'image/gif';
                     else if (ext === 'svg') fileType = 'image/svg+xml';
                 }
                 
                 // Jika fail adalah format yang tak patut dimampatkan (cth: webp/gif), terus guna fail asal
+                // Tapi pastikan file object mempunyai type yang betul
                 if (['image/webp', 'image/gif', 'image/svg+xml'].includes(fileType)) {
+                    // Jika file.type kosong/salah, buat File baru dengan type yang betul
+                    if (file.type !== fileType) {
+                        const fixedFile = new File([file], file.name, { type: fileType, lastModified: file.lastModified });
+                        return resolve(fixedFile);
+                    }
                     return resolve(file);
                 }
 
