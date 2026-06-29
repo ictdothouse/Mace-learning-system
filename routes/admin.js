@@ -1180,7 +1180,7 @@ router.post('/templates/create', upload.single('backgroundImage'), async (req, r
             name, title, showTitle, subtitle, showSubtitle, courseName, showCourseName, 
             description, showDescription, showAthleteName, showIcNumber, showNegeri, 
             showDate, signatoryName, showSignatory, signatoryTitle,
-            primaryColor, secondaryColor, accentColor, backgroundColor, fontFamily,
+            primaryColor, secondaryColor, accentColor, backgroundColor, fontFamily, athleteNameFont,
             showBorder, showLogo, logoUrl, logoPosition, borderStyle, borderColor, borderWidth,
             backgroundImageType, backgroundImageUrl, backgroundR2Key, backgroundOpacity,
             orientation
@@ -1214,6 +1214,7 @@ router.post('/templates/create', upload.single('backgroundImage'), async (req, r
             accentColor,
             backgroundColor,
             fontFamily,
+            athleteNameFont: athleteNameFont || 'Great Vibes',
             showBorder: showBorder === 'on',
             showLogo: showLogo === 'on',
             logoUrl,
@@ -1254,7 +1255,7 @@ router.post('/templates/update/:id', upload.single('backgroundImage'), async (re
             name, title, showTitle, subtitle, showSubtitle, courseName, showCourseName,
             description, showDescription, showAthleteName, showIcNumber, showNegeri,
             showDate, signatoryName, showSignatory, signatoryTitle,
-            primaryColor, secondaryColor, accentColor, backgroundColor, fontFamily,
+            primaryColor, secondaryColor, accentColor, backgroundColor, fontFamily, athleteNameFont,
             showBorder, showLogo, logoUrl, logoPosition, borderStyle, borderColor, borderWidth,
             backgroundImageType, backgroundImageUrl, backgroundR2Key, backgroundOpacity,
             orientation, setAsActive
@@ -1288,6 +1289,7 @@ router.post('/templates/update/:id', upload.single('backgroundImage'), async (re
             accentColor,
             backgroundColor,
             fontFamily,
+            athleteNameFont: athleteNameFont || 'Great Vibes',
             showBorder: showBorder === 'on',
             showLogo: showLogo === 'on',
             logoUrl,

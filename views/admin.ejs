@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= (locals.branding && locals.branding.siteName) ? ('Admin Panel - ' + branding.siteName) : 'Admin Panel MSN - MACE eLearning' %></title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Dancing+Script:wght@400;700&family=Great+Vibes&family=Parisienne&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Poppins:ital,wght@0,100..900;1,100..900&family=Sacramento&display=swap" rel="stylesheet">
     <% if (locals.branding && locals.branding.faviconUrl) { %>
     <link rel="icon" href="<%= branding.faviconUrl %>">
     <% } %>
@@ -1227,15 +1230,29 @@
                                             <input type="color" name="accentColor" value="#fbbf24" class="w-full h-9 border border-gray-300 rounded cursor-pointer">
                                         </div>
                                     </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Font</label>
-                                        <select name="fontFamily" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
-                                            <option value="Helvetica">Helvetica (Default)</option>
-                                            <option value="Times-Roman">Times Roman</option>
-                                            <option value="Courier">Courier</option>
-                                            <option value="Helvetica-Bold">Helvetica Bold</option>
-                                            <option value="Times-Bold">Times Bold</option>
-                                        </select>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Font Global</label>
+                                            <select name="fontFamily" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                                                <option value="Helvetica">Helvetica (Default)</option>
+                                                <option value="Times-Roman">Times Roman</option>
+                                                <option value="Courier">Courier</option>
+                                                <option value="Helvetica-Bold">Helvetica Bold</option>
+                                                <option value="Times-Bold">Times Bold</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Font Nama Atlit</label>
+                                            <select name="athleteNameFont" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                                                <option value="Great Vibes">Great Vibes (Script)</option>
+                                                <option value="Dancing Script">Dancing Script (Script)</option>
+                                                <option value="Alex Brush">Alex Brush (Script)</option>
+                                                <option value="Sacramento">Sacramento (Script)</option>
+                                                <option value="Parisienne">Parisienne (Script)</option>
+                                                <option value="Playfair Display">Playfair Display (Serif)</option>
+                                                <option value="Poppins">Poppins (Sans-serif)</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -1486,15 +1503,29 @@
                                     <input type="color" name="accentColor" id="edit_accentColor" class="w-full h-10 border border-gray-300 rounded-lg cursor-pointer">
                                 </div>
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Font</label>
-                                <select name="fontFamily" id="edit_fontFamily" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
-                                    <option value="Helvetica">Helvetica</option>
-                                    <option value="Times-Roman">Times Roman</option>
-                                    <option value="Courier">Courier</option>
-                                    <option value="Helvetica-Bold">Helvetica Bold</option>
-                                    <option value="Times-Bold">Times Bold</option>
-                                </select>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Font Global</label>
+                                    <select name="fontFamily" id="edit_fontFamily" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                                        <option value="Helvetica">Helvetica</option>
+                                        <option value="Times-Roman">Times Roman</option>
+                                        <option value="Courier">Courier</option>
+                                        <option value="Helvetica-Bold">Helvetica Bold</option>
+                                        <option value="Times-Bold">Times Bold</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Font Nama Atlit</label>
+                                    <select name="athleteNameFont" id="edit_athleteNameFont" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                                        <option value="Great Vibes">Great Vibes (Script)</option>
+                                        <option value="Dancing Script">Dancing Script (Script)</option>
+                                        <option value="Alex Brush">Alex Brush (Script)</option>
+                                        <option value="Sacramento">Sacramento (Script)</option>
+                                        <option value="Parisienne">Parisienne (Script)</option>
+                                        <option value="Playfair Display">Playfair Display (Serif)</option>
+                                        <option value="Poppins">Poppins (Sans-serif)</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="space-y-2">
                                 <label class="flex items-center gap-2">
@@ -1567,6 +1598,7 @@
                     document.getElementById('edit_secondaryColor').value = data.secondaryColor || '#333333';
                     document.getElementById('edit_accentColor').value = data.accentColor || '#fbbf24';
                     document.getElementById('edit_fontFamily').value = data.fontFamily || 'Helvetica';
+                    document.getElementById('edit_athleteNameFont').value = data.athleteNameFont || 'Great Vibes';
                     document.getElementById('edit_showBorder').checked = data.showBorder || false;
                     document.getElementById('edit_showLogo').checked = data.showLogo || false;
                     document.getElementById('edit_logoUrl').value = data.logoUrl || '';
@@ -2956,6 +2988,7 @@
             const bgType = form.querySelector('[name="backgroundImageType"]') ? form.querySelector('[name="backgroundImageType"]').value : 'none';
             const opacity = form.querySelector('[name="backgroundOpacity"]') ? form.querySelector('[name="backgroundOpacity"]').value : 1;
             const fontFamily = form.querySelector('[name="fontFamily"]') ? form.querySelector('[name="fontFamily"]').value : 'Helvetica';
+            const athleteNameFont = form.querySelector('[name="athleteNameFont"]') ? form.querySelector('[name="athleteNameFont"]').value : 'Great Vibes';
             
             preview.style.fontFamily = fontFamily;
             preview.innerHTML = '';
@@ -3006,6 +3039,10 @@
                 div.style.lineHeight = el.lineHeight;
                 div.style.letterSpacing = `${el.letterSpacing}px`;
                 div.style.zIndex = '10';
+                
+                if (key === 'athleteName') {
+                    div.style.fontFamily = `'${athleteNameFont}', cursive`;
+                }
                 
                 const handleStart = (e) => {
                     e.stopPropagation();
@@ -3170,7 +3207,7 @@
             document.querySelector('#createTemplateModal h3').innerText = 'Edit Template Sijil';
             
             // Populate text inputs
-            const fields = ['name', 'title', 'subtitle', 'courseName', 'description', 'signatoryName', 'signatoryTitle', 'primaryColor', 'secondaryColor', 'accentColor', 'fontFamily', 'logoUrl', 'backgroundImageType', 'backgroundImageUrl', 'backgroundR2Key', 'backgroundOpacity', 'orientation'];
+            const fields = ['name', 'title', 'subtitle', 'courseName', 'description', 'signatoryName', 'signatoryTitle', 'primaryColor', 'secondaryColor', 'accentColor', 'fontFamily', 'athleteNameFont', 'logoUrl', 'backgroundImageType', 'backgroundImageUrl', 'backgroundR2Key', 'backgroundOpacity', 'orientation'];
             fields.forEach(f => {
                 const input = form.querySelector(`[name="${f}"]`);
                 if (input && data[f] !== undefined) input.value = data[f];

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sijil - <%= athlete.fullName %></title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&family=Great+Vibes&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&family=Great+Vibes&family=Dancing+Script:wght@400;700&family=Alex+Brush&family=Sacramento&family=Parisienne&display=swap');
         
         * {
             margin: 0;
@@ -329,7 +329,7 @@
                             font-weight: <%= name.fontWeight || 'bold' %>;
                             line-height: <%= name.lineHeight || 1.2 %>;
                             letter-spacing: <%= name.letterSpacing || 0 %>px;
-                            font-family: 'Great Vibes', cursive;">
+                            font-family: '<%= template.athleteNameFont || "Great Vibes" %>', cursive;">
                     <%= athlete.fullName %>
                 </div>
             <% } %>
