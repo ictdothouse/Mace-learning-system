@@ -42,35 +42,17 @@
             flex-shrink: 0;
         }
 
-        /* Responsive zoom scaling for mobile screen preview */
-        @media (max-width: 1200px) {
-            .certificate-container {
-                zoom: 0.85;
-            }
-        }
-        @media (max-width: 992px) {
-            .certificate-container {
-                zoom: 0.68;
-            }
-        }
-        @media (max-width: 768px) {
-            .certificate-container {
-                zoom: 0.55;
-            }
-        }
-        @media (max-width: 600px) {
-            .certificate-container {
-                zoom: 0.42;
-            }
-        }
-        @media (max-width: 480px) {
-            .certificate-container {
-                zoom: 0.32;
-            }
+        .cert-scroll-wrapper {
+            width: 100%;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 16px 0;
+            transition: height 0.15s ease-out;
         }
 
         .certificate-container.html2pdf-printing {
-            zoom: 1 !important;
             transform: none !important;
         }
 
@@ -288,19 +270,32 @@
     <!-- Top System Header -->
     <header class="no-print bg-slate-900/90 border-b border-slate-800 backdrop-blur-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <!-- Left: Brand Logo & Title -->
+            <!-- Left: Brand Logo OR Title -->
             <div class="flex items-center gap-3">
                 <% if (locals.branding && locals.branding.logoUrl) { %>
-                    <img src="<%= branding.logoUrl %>" alt="Logo" class="h-9 w-auto object-contain">
+                    <img src="<%= branding.logoUrl %>" alt="Logo" class="h-8 md:h-10 w-auto object-contain">
+                <% } else { %>
+                    <span class="text-sm md:text-base font-extrabold tracking-wider uppercase text-white bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+                        <%= (locals.branding && locals.branding.siteName) ? locals.branding.siteName : 'MACE Learning System' %>
+                    </span>
                 <% } %>
-                <span class="text-sm md:text-base font-extrabold tracking-wider uppercase text-white bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
-                    <%= (locals.branding && locals.branding.siteName) ? locals.branding.siteName : 'MACE Learning System' %>
-                </span>
             </div>
 
-            <!-- Right: Action / Back Button -->
-            <div class="flex items-center gap-3">
-                <a href="<%= locals.backUrl || '/dashboard' %>" class="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white px-4 py-2 rounded-xl text-xs md:text-sm font-semibold border border-slate-700 transition-all shadow-sm">
+            <!-- Right: Language Toggle & Back Button -->
+            <div class="flex items-center gap-2 sm:gap-4">
+                <!-- Language Toggle -->
+                <div class="flex gap-1 bg-white/10 rounded-lg p-1">
+                    <form method="POST" action="/set-language" class="inline">
+                        <input type="hidden" name="lang" value="ms">
+                        <button type="submit" class="text-[10px] sm:text-xs px-2.5 py-1 rounded font-semibold transition-all <%= lang === 'ms' ? 'bg-white text-indigo-900' : 'text-white/60 hover:text-white' %>">BM</button>
+                    </form>
+                    <form method="POST" action="/set-language" class="inline">
+                        <input type="hidden" name="lang" value="en">
+                        <button type="submit" class="text-[10px] sm:text-xs px-2.5 py-1 rounded font-semibold transition-all <%= lang === 'en' ? 'bg-white text-indigo-900' : 'text-white/60 hover:text-white' %>">EN</button>
+                    </form>
+                </div>
+
+                <a href="<%= locals.backUrl || '/dashboard' %>" class="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold border border-slate-700 transition-all shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                     <%= lang === 'en' ? 'Back' : 'Kembali' %>
                 </a>
@@ -334,7 +329,7 @@
 
         <!-- Document Preview Canvas -->
         <div class="w-full flex items-center justify-center p-4 bg-slate-900/30 border border-slate-800/40 rounded-3xl backdrop-blur-sm min-h-[400px]">
-            <div class="cert-scroll-wrapper w-full overflow-x-auto flex justify-center py-4">
+            <div class="cert-scroll-wrapper">
                 <div class="certificate-container shadow-2xl">
         <!-- Background Layers -->
         <div class="bg-layer bg-color"></div>
@@ -522,6 +517,49 @@
     </main>
     
     <script>
+        function adjustCertificateScale() {
+            const container = document.querySelector('.certificate-container');
+            const wrapper = document.querySelector('.cert-scroll-wrapper');
+            if (!container || !wrapper) return;
+
+            // Ignore scaling during PDF generation
+            if (container.classList.contains('html2pdf-printing')) {
+                container.style.transform = 'none';
+                container.style.margin = '0 auto';
+                return;
+            }
+
+            const isPortrait = <%= isPortrait %>;
+            const targetWidth = isPortrait ? 794 : 1123;
+            const targetHeight = isPortrait ? 1123 : 794;
+
+            // Get the actual width of the parent container on screen
+            const parentWidth = wrapper.getBoundingClientRect().width;
+            
+            if (parentWidth < targetWidth) {
+                // Calculate the scale factor needed to fit
+                const scale = parentWidth / targetWidth;
+                
+                // Apply CSS transform scale
+                container.style.transform = `scale(${scale})`;
+                container.style.transformOrigin = 'center top';
+                
+                // Adjust parent container height to match the visually scaled height
+                wrapper.style.height = `${targetHeight * scale}px`;
+                wrapper.style.minHeight = 'auto';
+            } else {
+                // Reset scaling if screen is wide enough
+                container.style.transform = 'none';
+                container.style.transformOrigin = 'center center';
+                wrapper.style.height = 'auto';
+                wrapper.style.minHeight = `${targetHeight}px`;
+            }
+        }
+
+        // Run scale adjustment on load and resize
+        window.addEventListener('load', adjustCertificateScale);
+        window.addEventListener('resize', adjustCertificateScale);
+
         function downloadPDF() {
             const button = document.getElementById('btnPrintPDF');
             const originalText = button.innerHTML;
@@ -530,7 +568,11 @@
 
             const element = document.querySelector('.certificate-container');
             
-            // Add printing class to override responsive zooms during capture
+            // Save original transform styles and clear them for printing
+            const originalTransform = element.style.transform;
+            const originalTransformOrigin = element.style.transformOrigin;
+            element.style.transform = 'none';
+            element.style.transformOrigin = 'center center';
             element.classList.add('html2pdf-printing');
             
             const opt = {
@@ -555,10 +597,16 @@
             // Generate PDF on client-side
             html2pdf().set(opt).from(element).save().then(() => {
                 element.classList.remove('html2pdf-printing');
+                element.style.transform = originalTransform;
+                element.style.transformOrigin = originalTransformOrigin;
+                adjustCertificateScale();
                 button.innerHTML = originalText;
                 button.disabled = false;
             }).catch(err => {
                 element.classList.remove('html2pdf-printing');
+                element.style.transform = originalTransform;
+                element.style.transformOrigin = originalTransformOrigin;
+                adjustCertificateScale();
                 console.error('PDF Generation Error:', err);
                 alert('<%= lang === "en" ? "Failed to generate PDF. Please try again." : "Gagal menjana PDF. Sila cuba lagi." %>');
                 button.innerHTML = originalText;
