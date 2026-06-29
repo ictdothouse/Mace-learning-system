@@ -651,7 +651,13 @@ router.get('/modules', async (req, res) => {
 // GET: Form Cipta Modul Baru
 router.get('/modules/new', async (req, res) => {
     try { 
-        res.render('admin-edit-module', { page: 'modules', module: null, editMode: 'create' }); 
+        const certificateTemplates = await CertificateTemplate.find().sort({ name: 1 });
+        res.render('admin-edit-module', { 
+            page: 'modules', 
+            module: null, 
+            editMode: 'create',
+            certificateTemplates
+        }); 
     } catch (err) { 
         res.status(500).send('Ralat memuatkan borang.'); 
     }
@@ -662,7 +668,13 @@ router.get('/modules/edit/:id', async (req, res) => {
     try {
         const module = await Module.findById(req.params.id);
         if (!module) return res.redirect('/admin-mace/modules?msg=not_found');
-        res.render('admin-edit-module', { page: 'modules', module, editMode: 'edit' });
+        const certificateTemplates = await CertificateTemplate.find().sort({ name: 1 });
+        res.render('admin-edit-module', { 
+            page: 'modules', 
+            module, 
+            editMode: 'edit',
+            certificateTemplates
+        });
     } catch (err) { 
         console.error('Edit Module Form Error:', err);
         res.status(500).send('Ralat memuatkan borang.'); 
@@ -673,7 +685,7 @@ router.get('/modules/edit/:id', async (req, res) => {
 // POST: Cipta Modul Baru (Kini menggunakan Pautan R2 terus dari Client)
 router.post('/modules/new', async (req, res) => {
     try {
-        const { title, description, order, isActive, hasLevels, isSequential, minPassingScore, featuredImageUrl } = req.body;
+        const { title, description, order, isActive, hasLevels, isSequential, minPassingScore, featuredImageUrl, hasCertificate, certificateTemplate } = req.body;
         const moduleData = {
             title,
             description, // TinyMCE content
@@ -682,7 +694,9 @@ router.post('/modules/new', async (req, res) => {
             hasLevels: hasLevels === 'on',
             isSequential: isSequential === 'on',
             minPassingScore: parseInt(minPassingScore) || 0,
-            thumbnail: featuredImageUrl || ''
+            thumbnail: featuredImageUrl || '',
+            hasCertificate: hasCertificate === 'on',
+            certificateTemplate: (hasCertificate === 'on' && certificateTemplate) ? certificateTemplate : null
         };
         
         await Module.create(moduleData);
@@ -696,7 +710,7 @@ router.post('/modules/new', async (req, res) => {
 // POST: Update Modul (Kini menggunakan Pautan R2 terus dari Client)
 router.post('/modules/edit/:id', async (req, res) => {
     try {
-        const { title, description, order, isActive, hasLevels, isSequential, minPassingScore, featuredImageUrl } = req.body;
+        const { title, description, order, isActive, hasLevels, isSequential, minPassingScore, featuredImageUrl, hasCertificate, certificateTemplate } = req.body;
         
         const module = await Module.findById(req.params.id);
         if (!module) return res.redirect('/admin-mace/modules?msg=not_found');
@@ -709,7 +723,9 @@ router.post('/modules/edit/:id', async (req, res) => {
             hasLevels: hasLevels === 'on',
             isSequential: isSequential === 'on',
             minPassingScore: parseInt(minPassingScore) || 0,
-            thumbnail: featuredImageUrl !== undefined ? featuredImageUrl : module.thumbnail
+            thumbnail: featuredImageUrl !== undefined ? featuredImageUrl : module.thumbnail,
+            hasCertificate: hasCertificate === 'on',
+            certificateTemplate: (hasCertificate === 'on' && certificateTemplate) ? certificateTemplate : null
         };
         
         await Module.findByIdAndUpdate(req.params.id, updateData);

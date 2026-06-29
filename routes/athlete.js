@@ -271,6 +271,33 @@ router.get('/certificate/:id', checkSession, async (req, res) => {
     }
 });
 
+// Route untuk download sijil modul spesifik
+router.get('/certificate/module/:moduleId', checkSession, async (req, res) => {
+    try {
+        const athlete = await Athlete.findById(req.session.athleteId);
+        if (!athlete) return res.redirect('/');
+        
+        const module = await Module.findById(req.params.moduleId);
+        if (!module || !module.hasCertificate) {
+            return res.redirect('/dashboard');
+        }
+        
+        // Semak kelayakan (pastikan semua lesson dalam modul ini telah selesai)
+        const lessons = await Lesson.find({ moduleId: req.params.moduleId, isActive: true }).sort({ order: -1 });
+        if (lessons.length > 0) {
+            const lastLessonOrder = lessons[0].order;
+            if (athlete.currentStage <= lastLessonOrder) {
+                return res.status(403).send('Akses ditolak. Anda belum menyelesaikan modul ini.');
+            }
+        }
+        
+        generateCertificate(athlete, res, module.certificateTemplate);
+    } catch (err) {
+        console.error('Module Certificate Error:', err);
+        res.redirect('/dashboard');
+    }
+});
+
 router.get('/logout', (req, res) => { req.session.destroy(); res.redirect('/'); });
 
 // ✅ EXPORT OBJEK YANG BETUL

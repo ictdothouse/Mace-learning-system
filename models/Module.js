@@ -16,6 +16,14 @@ const moduleSchema = new mongoose.Schema({
   // Jika empty = semua pelajar boleh akses, jika ada group = hanya group tertentu
   isRestricted: { type: Boolean, default: false },
   
+  // === NEW: Certificate Settings ===
+  hasCertificate: { type: Boolean, default: false },
+  certificateTemplate: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'CertificateTemplate',
+    default: null 
+  },
+  
   // === NEW: Level System Settings ===
   hasLevels: { 
     type: Boolean, 

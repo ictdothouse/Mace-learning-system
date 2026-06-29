@@ -228,19 +228,37 @@
         
         // Group lessons by Module
         const modulesMap = {};
+        const modulesDataMap = {};
         lessonList.forEach((lesson, idx) => {
-            const moduleName = (lesson.moduleId && lesson.moduleId.title) ? lesson.moduleId.title : 'MODUL 1 : PLAY SAFE WIN STRONG';
+            const moduleObj = lesson.moduleId;
+            const moduleName = (moduleObj && moduleObj.title) ? moduleObj.title : 'MODUL 1 : PLAY SAFE WIN STRONG';
             if (!modulesMap[moduleName]) {
                 modulesMap[moduleName] = [];
+                modulesDataMap[moduleName] = moduleObj;
             }
             modulesMap[moduleName].push({ ...lesson, idx });
         });
         %>
         <% Object.keys(modulesMap).forEach(moduleName => { %>
             <div class="mb-8">
-                <h3 class="text-white font-bold text-lg mb-4 flex items-center gap-2">
-                    <span class="w-1.5 h-6 bg-emerald-400 rounded-full"></span>
-                    <%= moduleName %>
+                <h3 class="text-white font-bold text-lg mb-4 flex items-center justify-between gap-2 flex-wrap">
+                    <div class="flex items-center gap-2">
+                        <span class="w-1.5 h-6 bg-emerald-400 rounded-full"></span>
+                        <%= moduleName %>
+                    </div>
+                    <% const moduleObj = modulesDataMap[moduleName]; %>
+                    <% if (moduleObj && moduleObj.hasCertificate) { %>
+                        <% const isModuleCompleted = modulesMap[moduleName].every(item => athlete.currentStage > (item.order || (item.idx + 1))); %>
+                        <% if (isModuleCompleted) { %>
+                            <a href="/certificate/module/<%= moduleObj._id %>?print=1" target="_blank" class="text-xs bg-yellow-500 hover:bg-yellow-400 text-blue-900 font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors shadow-sm no-print">
+                                🎓 <%= lang === 'en' ? 'Download Certificate' : 'Muat Turun Sijil' %>
+                            </a>
+                        <% } else { %>
+                            <span class="text-xs text-white/40 border border-white/10 px-3 py-1.5 rounded-lg flex items-center gap-1.5 no-print">
+                                🔒 <%= lang === 'en' ? 'Certificate Locked' : 'Sijil Dikunci' %>
+                            </span>
+                        <% } %>
+                    <% } %>
                 </h3>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                     <% modulesMap[moduleName].forEach(item => {

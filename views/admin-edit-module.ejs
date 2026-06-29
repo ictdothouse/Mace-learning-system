@@ -118,6 +118,37 @@
                 </div>
             </div>
 
+            <!-- Certificate Settings -->
+            <div class="mb-8 p-6 bg-yellow-50/50 rounded-xl border border-yellow-100">
+                <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>
+                    Tetapan Sijil Modul
+                </h3>
+                
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <input type="checkbox" name="hasCertificate" id="hasCertificate" value="on" <%= module && module.hasCertificate ? 'checked' : '' %>
+                            class="w-5 h-5 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500 mt-1"
+                            onchange="toggleCertificateTemplateSelect(this.checked)">
+                        <div class="ml-3">
+                            <label for="hasCertificate" class="text-sm font-semibold text-gray-700 block">Sediakan Sijil untuk Modul Ini</label>
+                            <p class="text-xs text-gray-500 mt-1">Jika diaktifkan, atlit yang menamatkan modul ini akan menerima sijil khas.</p>
+                        </div>
+                    </div>
+                    
+                    <div id="certificateTemplateContainer" class="<%= module && module.hasCertificate ? '' : 'hidden' %> mt-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Pilih Template Sijil</label>
+                        <select name="certificateTemplate" class="w-full md:w-1/2 border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                            <option value="">-- Gunakan Template Aktif Lalai --</option>
+                            <% (certificateTemplates || []).forEach(t => { %>
+                                <option value="<%= t._id %>" <%= module && module.certificateTemplate && module.certificateTemplate.toString() === t._id.toString() ? 'selected' : '' %>><%= t.name %></option>
+                            <% }) %>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-2">Pilih template sijil khusus untuk modul ini. Jika tiada dipilih, sistem akan menggunakan template sijil aktif utama.</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Submit Buttons -->
             <div class="flex gap-4 pt-6 border-t border-gray-100">
                 <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition shadow-sm">
@@ -334,6 +365,15 @@
                 submitBtn.disabled = false;
             }
         });
+
+        function toggleCertificateTemplateSelect(checked) {
+            const container = document.getElementById('certificateTemplateContainer');
+            if (checked) {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
     </script>
 </body>
 </html>
