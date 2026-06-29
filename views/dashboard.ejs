@@ -117,8 +117,8 @@
                     <img src="<%= branding.logoUrl %>" alt="Logo" class="h-8 w-auto object-contain filter drop-shadow-md">
                 <% } else { %>
                     <span class="text-2xl">🏅</span>
+                    <span class="font-bold text-white text-sm sm:text-base"><%= (locals.branding && locals.branding.siteName) ? locals.branding.siteName : 'MACE eLearning' %></span>
                 <% } %>
-                <span class="font-bold text-white text-sm sm:text-base"><%= (locals.branding && locals.branding.siteName) ? locals.branding.siteName : 'MACE eLearning' %></span>
             </div>
             <div class="flex items-center gap-2 sm:gap-3">
                 <!-- Language Toggle -->
