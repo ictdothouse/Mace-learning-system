@@ -179,8 +179,16 @@
                         canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
+                        let type = file.type ? file.type.toLowerCase() : '';
+                        const extMatch = file.name.match(/\.(jpg|jpeg|png|webp)$/i);
+                        if (extMatch && (!type || !['image/jpeg', 'image/png', 'image/webp'].includes(type))) {
+                            const ext = extMatch[1].toLowerCase();
+                            if (ext === 'jpg' || ext === 'jpeg') type = 'image/jpeg';
+                            else if (ext === 'png') type = 'image/png';
+                            else if (ext === 'webp') type = 'image/webp';
+                        }
                         const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-                        const outputType = allowedTypes.includes(file.type) ? file.type : 'image/jpeg';
+                        const outputType = allowedTypes.includes(type) ? type : 'image/jpeg';
                         const extension = outputType === 'image/jpeg' ? '.jpg' : outputType === 'image/png' ? '.png' : '.webp';
                         
                         canvas.toBlob((blob) => {
