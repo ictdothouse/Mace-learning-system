@@ -268,9 +268,10 @@ router.get('/api/presigned-url', async (req, res) => {
         const hasR2 = process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_ACCOUNT_ID;
         const bucketName = process.env.R2_BUCKET_NAME || 'modulmace';
         
-        const ext = path.extname(filename);
-        const uniqueFilename = `${Date.now()}-${Math.round(Math.random() * 1E9)}${ext}`;
-
+        const sanitizeFilename = (name) => {
+            return name.replace(/[^a-zA-Z0-9.\-_]/g, '-');
+        };
+        const uniqueFilename = sanitizeFilename(filename);
         if (hasR2) {
             const command = new PutObjectCommand({
                 Bucket: bucketName,
