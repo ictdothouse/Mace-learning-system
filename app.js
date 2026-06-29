@@ -171,8 +171,31 @@ mongoose.connect(process.env.MONGO_URI)
                 });
                 console.log('🌱 Seeded default CMS page: Modul');
             }
+            
+            // Seed default CMS Page for 'hubungi-kami' if it doesn't exist
+            const hubungiPage = await Page.findOne({ slug: 'hubungi-kami' });
+            if (!hubungiPage) {
+                await Page.create({
+                    title: 'Hubungi Kami',
+                    slug: 'hubungi-kami',
+                    content: '<p>Hubungi kami untuk sebarang pertanyaan.</p>',
+                    content_en: '<p>Contact us for any inquiries.</p>',
+                    isPublished: true,
+                    showInNavigation: true,
+                    navigationOrder: 2,
+                    customTemplate: 'contact',
+                    contactConfig: {
+                        bannerTitle: 'Hubungi',
+                        bannerImage: 'https://images.unsplash.com/photo-1540747737956-37872f747802?q=80&w=1200&auto=format&fit=crop',
+                        description: 'Sebarang pertanyaan atau maklumbalas, hubungi kami menerusi email :',
+                        email: 'mace@nsc.gov.my',
+                        imageUrl: ''
+                    }
+                });
+                console.log('🌱 Seeded default CMS page: Hubungi Kami');
+            }
         } catch (err) {
-            console.error('❌ Error seeding Modul page:', err.message);
+            console.error('❌ Error seeding CMS pages:', err.message);
         }
 
         startServer(); 

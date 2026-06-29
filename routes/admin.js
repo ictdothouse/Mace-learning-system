@@ -1374,7 +1374,11 @@ router.get('/pages', async (req, res) => {
 // POST: Cipta Page Baru
 router.post('/pages/create', async (req, res) => {
     try {
-        const { title, slug, content, content_en, customTemplate, navigationOrder, showInNavigation, isPublished, modulesConfigJson } = req.body;
+        const { 
+            title, slug, content, content_en, customTemplate, navigationOrder, showInNavigation, isPublished, 
+            modulesConfigJson,
+            contact_bannerTitle, contact_bannerImage, contact_description, contact_email, contact_imageUrl
+        } = req.body;
         
         // Ensure unique slug
         const existing = await Page.findOne({ slug: slug.toLowerCase().trim() });
@@ -1391,6 +1395,14 @@ router.post('/pages/create', async (req, res) => {
             }
         }
         
+        const contactConfig = {
+            bannerTitle: contact_bannerTitle || 'Hubungi',
+            bannerImage: contact_bannerImage || '',
+            description: contact_description || '',
+            email: contact_email || '',
+            imageUrl: contact_imageUrl || ''
+        };
+        
         await Page.create({
             title,
             slug: slug.toLowerCase().trim().replace(/\s+/g, '-'),
@@ -1400,7 +1412,8 @@ router.post('/pages/create', async (req, res) => {
             navigationOrder: parseInt(navigationOrder) || 0,
             showInNavigation: showInNavigation === 'on',
             isPublished: isPublished === 'on',
-            modulesConfig
+            modulesConfig,
+            contactConfig
         });
         
         res.redirect('/admin-mace/pages?msg=page_created');
@@ -1413,7 +1426,11 @@ router.post('/pages/create', async (req, res) => {
 // POST: Kemaskini Page
 router.post('/pages/update/:id', async (req, res) => {
     try {
-        const { title, slug, content, content_en, customTemplate, navigationOrder, showInNavigation, isPublished, modulesConfigJson } = req.body;
+        const { 
+            title, slug, content, content_en, customTemplate, navigationOrder, showInNavigation, isPublished, 
+            modulesConfigJson,
+            contact_bannerTitle, contact_bannerImage, contact_description, contact_email, contact_imageUrl
+        } = req.body;
         const normalizedSlug = slug.toLowerCase().trim().replace(/\s+/g, '-');
         
         // Check uniqueness of slug (excluding current page)
@@ -1431,6 +1448,14 @@ router.post('/pages/update/:id', async (req, res) => {
             }
         }
         
+        const contactConfig = {
+            bannerTitle: contact_bannerTitle || 'Hubungi',
+            bannerImage: contact_bannerImage || '',
+            description: contact_description || '',
+            email: contact_email || '',
+            imageUrl: contact_imageUrl || ''
+        };
+        
         await Page.findByIdAndUpdate(req.params.id, {
             title,
             slug: normalizedSlug,
@@ -1440,7 +1465,8 @@ router.post('/pages/update/:id', async (req, res) => {
             navigationOrder: parseInt(navigationOrder) || 0,
             showInNavigation: showInNavigation === 'on',
             isPublished: isPublished === 'on',
-            modulesConfig
+            modulesConfig,
+            contactConfig
         });
         
         res.redirect('/admin-mace/pages?msg=page_updated');
