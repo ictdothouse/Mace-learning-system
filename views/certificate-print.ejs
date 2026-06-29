@@ -220,6 +220,8 @@
                 background: white !important;
                 padding: 0 !important;
                 margin: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
                 overflow: hidden !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
@@ -228,100 +230,20 @@
             .cert-scroll-wrapper {
                 padding: 0 !important;
                 margin: 0 !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
+                display: block !important;
                 width: 100% !important;
                 height: 100% !important;
                 overflow: hidden !important;
             }
 
             .certificate-container {
+                width: <%= isPortrait ? '210mm' : '297mm' %> !important;
+                height: <%= isPortrait ? '297mm' : '210mm' %> !important;
                 box-shadow: none !important;
                 margin: 0 !important;
                 page-break-inside: avoid !important;
                 page-break-after: avoid !important;
-                flex-shrink: 0 !important;
-            }
-
-            /* --- MATCHING ORIENTATION: NO ROTATION --- */
-            @media (orientation: landscape) {
-                <% if (!isPortrait) { %>
-                html, body {
-                    width: 1123px !important;
-                    height: 794px !important;
-                }
-                .cert-scroll-wrapper {
-                    width: 1123px !important;
-                    height: 794px !important;
-                }
-                .certificate-container {
-                    width: 1123px !important;
-                    height: 794px !important;
-                    transform: none !important;
-                }
-                <% } %>
-            }
-
-            @media (orientation: portrait) {
-                <% if (isPortrait) { %>
-                html, body {
-                    width: 794px !important;
-                    height: 1123px !important;
-                }
-                .cert-scroll-wrapper {
-                    width: 794px !important;
-                    height: 1123px !important;
-                }
-                .certificate-container {
-                    width: 794px !important;
-                    height: 1123px !important;
-                    transform: none !important;
-                }
-                <% } %>
-            }
-
-            /* --- MISMATCHING ORIENTATION: ROTATE TO FIT --- */
-            @media (orientation: portrait) {
-                <% if (!isPortrait) { %>
-                html, body {
-                    width: 794px !important;
-                    height: 1123px !important;
-                }
-                .cert-scroll-wrapper {
-                    width: 794px !important;
-                    height: 1123px !important;
-                    position: relative !important;
-                }
-                .certificate-container {
-                    width: 1123px !important;
-                    height: 794px !important;
-                    transform: rotate(90deg) !important;
-                    transform-origin: center center !important;
-                    position: absolute !important;
-                }
-                <% } %>
-            }
-
-            @media (orientation: landscape) {
-                <% if (isPortrait) { %>
-                html, body {
-                    width: 1123px !important;
-                    height: 794px !important;
-                }
-                .cert-scroll-wrapper {
-                    width: 1123px !important;
-                    height: 794px !important;
-                    position: relative !important;
-                }
-                .certificate-container {
-                    width: 794px !important;
-                    height: 1123px !important;
-                    transform: rotate(-90deg) !important;
-                    transform-origin: center center !important;
-                    position: absolute !important;
-                }
-                <% } %>
+                transform: none !important; /* Reset any editor preview scales */
             }
 
             @page {
