@@ -247,15 +247,26 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// Basic Auth Middleware
-const basicAuth = (req, res, next) => {
+// Basic Auth / Session Middleware
+const requireAdminAuth = (req, res, next) => {
+    // Jika sudah log masuk melalui borang (/auth/login) sebagai admin
+    if (req.session && req.session.userId && req.session.userRole === 'admin') {
+        return next();
+    }
+    
+    // Jika belum log masuk, gunakan Basic Auth (untuk master admin dari .env)
     const b64auth = (req.headers.authorization || '').split(' ')[1] || '';
     const [login, password] = Buffer.from(b64auth, 'base64').toString().split(':');
-    if (login === process.env.ADMIN_USER && password === process.env.ADMIN_PASS) return next();
+    if (login === process.env.ADMIN_USER && password === process.env.ADMIN_PASS) {
+        // Set info sementara supaya page tidak crash jika cari user nama
+        res.locals.isMasterAdmin = true;
+        return next();
+    }
+    
     res.set('WWW-Authenticate', 'Basic realm="MSN Admin Panel"');
-    res.status(401).send('Akses Ditolak.');
+    res.status(401).send('Akses Ditolak. Sila log masuk melalui /auth/login atau masukkan kata laluan.');
 };
-router.use(basicAuth);
+router.use(requireAdminAuth);
 
 // GET: Generate Pre-signed URL for direct browser upload to R2
 router.get('/api/presigned-url', async (req, res) => {
@@ -2226,6 +2237,116 @@ router.post('/athletes/convert/:id', async (req, res) => {
     } catch (err) {
         console.error('Convert Athlete Error:', err);
         res.redirect('/admin-mace/students?msg=convert_error');
+    }
+});
+
+// ==========================================
+// PENGURUSAN ADMIN (URUSETIA) & PROFIL SAYA
+// ==========================================
+
+// GET: Profil Saya
+router.get('/profile', async (req, res) => {
+    try {
+        let adminUser = null;
+        if (req.session && req.session.userId) {
+            adminUser = await User.findById(req.session.userId);
+        }
+        res.render('admin', { page: 'profile', adminUser, msg: req.query.msg || null });
+    } catch (err) {
+        console.error('Profile Error:', err);
+        res.redirect('/admin-mace?msg=error');
+    }
+});
+
+// POST: Update Profil Saya
+router.post('/profile', async (req, res) => {
+    try {
+        if (!req.session || !req.session.userId) {
+            return res.redirect('/admin-mace/profile?msg=not_db_admin');
+        }
+        const { fullName, email, password } = req.body;
+        const updateData = { fullName, email };
+        if (password && password.trim() !== '') {
+            updateData.password = password;
+        }
+        
+        if (email) {
+            const existing = await User.findOne({ email, _id: { $ne: req.session.userId } });
+            if (existing) return res.redirect('/admin-mace/profile?msg=email_exists');
+        }
+        
+        await User.findByIdAndUpdate(req.session.userId, updateData);
+        req.session.userName = fullName;
+        res.redirect('/admin-mace/profile?msg=profile_updated');
+    } catch (err) {
+        console.error('Update Profile Error:', err);
+        res.redirect('/admin-mace/profile?msg=error');
+    }
+});
+
+// GET: Senarai Admin (Urusetia)
+router.get('/admins', async (req, res) => {
+    try {
+        const admins = await User.find({ role: 'admin' }).sort({ createdAt: -1 });
+        res.render('admin', { page: 'admins', admins, msg: req.query.msg || null });
+    } catch (err) {
+        console.error('Admins List Error:', err);
+        res.redirect('/admin-mace?msg=error');
+    }
+});
+
+// POST: Tambah Admin
+router.post('/admins/add', async (req, res) => {
+    try {
+        const { fullName, email, password } = req.body;
+        if (!fullName || !email || !password) return res.redirect('/admin-mace/admins?msg=error_empty');
+        
+        const existing = await User.findOne({ email: email.toLowerCase() });
+        if (existing) return res.redirect('/admin-mace/admins?msg=email_exists');
+        
+        await User.create({
+            fullName,
+            email: email.toLowerCase(),
+            password,
+            role: 'admin',
+            isActive: true
+        });
+        res.redirect('/admin-mace/admins?msg=admin_added');
+    } catch (err) {
+        console.error('Add Admin Error:', err);
+        res.redirect('/admin-mace/admins?msg=error');
+    }
+});
+
+// POST: Update Admin
+router.post('/admins/edit/:id', async (req, res) => {
+    try {
+        const { fullName, email, password, isActive } = req.body;
+        const updateData = { fullName, email, isActive: isActive === 'on' };
+        if (password && password.trim() !== '') updateData.password = password;
+        
+        const existing = await User.findOne({ email, _id: { $ne: req.params.id } });
+        if (existing) return res.redirect('/admin-mace/admins?msg=email_exists');
+        
+        await User.findByIdAndUpdate(req.params.id, updateData);
+        res.redirect('/admin-mace/admins?msg=admin_updated');
+    } catch (err) {
+        console.error('Update Admin Error:', err);
+        res.redirect('/admin-mace/admins?msg=error');
+    }
+});
+
+// POST: Delete Admin
+router.post('/admins/delete/:id', async (req, res) => {
+    try {
+        if (req.session && req.session.userId === req.params.id) {
+            return res.redirect('/admin-mace/admins?msg=error_self_delete');
+        }
+        await User.findByIdAndDelete(req.params.id);
+        res.redirect('/admin-mace/admins?msg=admin_deleted');
+    } catch (err) {
+        console.error('Delete Admin Error:', err);
+        res.redirect('/admin-mace/admins?msg=error');
     }
 });
 
