@@ -242,7 +242,7 @@ router.post('/submit-quiz/:id', checkSession, async (req, res) => {
             await Athlete.findByIdAndUpdate(athlete._id, updateData);
         }
 
-        req.session.quizResult = { passed, score, userAnswers };
+        req.session.quizResult = { passed, score, userAnswers, totalPoints, earnedPoints };
         res.redirect(`/lesson/${moduleId}`);
 
     } catch (err) {

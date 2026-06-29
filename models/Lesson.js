@@ -22,6 +22,7 @@ const lessonSchema = new mongoose.Schema({
     videoUrl: { type: String, default: '' },
     quizQuestions: [questionSchema],
     passMark: { type: Number, default: 80 },
+    showPoints: { type: Boolean, default: true },
     order: { type: Number, required: true },
     isActive: { type: Boolean, default: true },
     resources: [{

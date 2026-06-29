@@ -845,7 +845,7 @@ router.get('/lessons/edit/:id', async (req, res) => {
 // POST: Cipta Lesson Baru
 router.post('/lessons/new', async (req, res) => {
     try {
-        const { moduleId, title, contentHtml, videoUrl, passMark, order, isActive, questionsJson } = req.body;
+        const { moduleId, title, contentHtml, videoUrl, passMark, showPoints, order, isActive, questionsJson } = req.body;
         let quizQuestions = [];
         try { quizQuestions = JSON.parse(questionsJson || '[]'); } catch(e) {}
         
@@ -855,6 +855,7 @@ router.post('/lessons/new', async (req, res) => {
             contentHtml, // TinyMCE content
             videoUrl: videoUrl || '',
             passMark: parseInt(passMark) || 80,
+            showPoints: showPoints === 'on',
             order: parseInt(order) || 0,
             isActive: isActive === 'on',
             quizQuestions
@@ -871,7 +872,7 @@ router.post('/lessons/new', async (req, res) => {
 // POST: Update Lesson
 router.post('/lessons/edit/:id', async (req, res) => {
     try {
-        const { moduleId, title, contentHtml, videoUrl, passMark, order, isActive, questionsJson } = req.body;
+        const { moduleId, title, contentHtml, videoUrl, passMark, showPoints, order, isActive, questionsJson } = req.body;
         let quizQuestions = [];
         try { quizQuestions = JSON.parse(questionsJson || '[]'); } catch(e) {}
         
@@ -884,6 +885,7 @@ router.post('/lessons/edit/:id', async (req, res) => {
             contentHtml,
             videoUrl: videoUrl !== undefined ? videoUrl : lesson.videoUrl,
             passMark: parseInt(passMark) || 80,
+            showPoints: showPoints === 'on',
             order: parseInt(order) || 0,
             isActive: isActive === 'on',
             quizQuestions
