@@ -1716,6 +1716,138 @@ router.post('/students/reset-password/:id', async (req, res) => {
     }
 
 });
+
+// ==========================================
+// BULK ACTIONS - PENGURUSAN PELAJAR
+// ==========================================
+
+// POST: Bulk Add to Group
+router.post('/students/bulk/add-to-group', async (req, res) => {
+    try {
+        const { studentIds, groupId } = req.body;
+        if (!studentIds || !groupId) {
+            return res.redirect('/admin-mace/students?msg=bulk_error');
+        }
+        const ids = Array.isArray(studentIds) ? studentIds : [studentIds];
+        
+        // Update Group — tambah semua pelajar ke group
+        await Group.findByIdAndUpdate(groupId, {
+            $addToSet: { students: { $each: ids } }
+        });
+        
+        // Update setiap User/Athlete — tambah group ke enrolledGroups
+        await User.updateMany(
+            { _id: { $in: ids }, role: 'student' },
+            { $addToSet: { enrolledGroups: groupId } }
+        );
+        await Athlete.updateMany(
+            { _id: { $in: ids } },
+            { $addToSet: { enrolledGroups: groupId } }
+        );
+        
+        res.redirect('/admin-mace/students?msg=bulk_added_to_group');
+    } catch (err) {
+        console.error('Bulk Add to Group Error:', err);
+        res.redirect('/admin-mace/students?msg=bulk_error');
+    }
+});
+
+// POST: Bulk Enroll by Enrollment Key
+router.post('/students/bulk/enroll-by-key', async (req, res) => {
+    try {
+        const { studentIds, enrollmentKey } = req.body;
+        if (!studentIds || !enrollmentKey) {
+            return res.redirect('/admin-mace/students?msg=bulk_error');
+        }
+        const ids = Array.isArray(studentIds) ? studentIds : [studentIds];
+        
+        // Cari group berdasarkan enrollment key
+        const group = await Group.findOne({ enrollmentKey: enrollmentKey.trim() });
+        if (!group) {
+            return res.redirect('/admin-mace/students?msg=key_not_found');
+        }
+        
+        // Tambah pelajar ke group
+        await Group.findByIdAndUpdate(group._id, {
+            $addToSet: { students: { $each: ids } }
+        });
+        
+        // Update setiap User/Athlete
+        await User.updateMany(
+            { _id: { $in: ids }, role: 'student' },
+            { $addToSet: { enrolledGroups: group._id } }
+        );
+        await Athlete.updateMany(
+            { _id: { $in: ids } },
+            { $addToSet: { enrolledGroups: group._id } }
+        );
+        
+        res.redirect('/admin-mace/students?msg=bulk_enrolled&groupName=' + encodeURIComponent(group.name));
+    } catch (err) {
+        console.error('Bulk Enroll by Key Error:', err);
+        res.redirect('/admin-mace/students?msg=bulk_error');
+    }
+});
+
+// POST: Bulk Remove from Group
+router.post('/students/bulk/remove-from-group', async (req, res) => {
+    try {
+        const { studentIds, groupId } = req.body;
+        if (!studentIds || !groupId) {
+            return res.redirect('/admin-mace/students?msg=bulk_error');
+        }
+        const ids = Array.isArray(studentIds) ? studentIds : [studentIds];
+        
+        // Keluarkan pelajar dari group
+        await Group.findByIdAndUpdate(groupId, {
+            $pull: { students: { $in: ids } }
+        });
+        
+        // Update setiap User/Athlete
+        await User.updateMany(
+            { _id: { $in: ids }, role: 'student' },
+            { $pull: { enrolledGroups: groupId } }
+        );
+        await Athlete.updateMany(
+            { _id: { $in: ids } },
+            { $pull: { enrolledGroups: groupId } }
+        );
+        
+        res.redirect('/admin-mace/students?msg=bulk_removed_from_group');
+    } catch (err) {
+        console.error('Bulk Remove from Group Error:', err);
+        res.redirect('/admin-mace/students?msg=bulk_error');
+    }
+});
+
+// POST: Bulk Delete Students
+router.post('/students/bulk/delete', async (req, res) => {
+    try {
+        const { studentIds } = req.body;
+        if (!studentIds) {
+            return res.redirect('/admin-mace/students?msg=bulk_error');
+        }
+        const ids = Array.isArray(studentIds) ? studentIds : [studentIds];
+        
+        // Keluarkan dari semua group
+        await Group.updateMany(
+            { students: { $in: ids } },
+            { $pull: { students: { $in: ids } } }
+        );
+        
+        // Padam User accounts
+        await User.deleteMany({ _id: { $in: ids }, role: 'student' });
+        
+        // Padam Athlete records
+        await Athlete.deleteMany({ _id: { $in: ids } });
+        
+        res.redirect('/admin-mace/students?msg=bulk_deleted&count=' + ids.length);
+    } catch (err) {
+        console.error('Bulk Delete Error:', err);
+        res.redirect('/admin-mace/students?msg=bulk_error');
+    }
+});
+
 // ==========================================
 
 // GET: Manage Levels untuk Modul tertentu
