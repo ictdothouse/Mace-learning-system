@@ -212,11 +212,15 @@
         
         /* Print Media Query */
         @media print {
-            body {
+            html, body {
+                width: <%= isPortrait ? '794px' : '1123px' %> !important;
+                height: <%= isPortrait ? '1123px' : '794px' %> !important;
                 background: white !important;
                 padding: 0 !important;
                 margin: 0 !important;
                 overflow: hidden !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
             
             .no-print {
@@ -233,6 +237,8 @@
             }
             
             .certificate-container {
+                width: 100% !important;
+                height: 100% !important;
                 box-shadow: none !important;
                 margin: 0 !important;
                 page-break-inside: avoid !important;
