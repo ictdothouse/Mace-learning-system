@@ -850,11 +850,12 @@
                     <script>
                         tinymce.init({
                             selector: '#homeLeftColumnHtml, #homeLeftColumnHtml_en',
-                            height: 250,
-                            plugins: 'link lists textcolor',
-                            toolbar: 'undo redo | bold italic | forecolor | alignleft aligncenter alignright | bullist numlist | link',
-                            menubar: false,
-                            branding: false
+                            height: 400,
+                            plugins: 'link lists emoticons charmap table code wordcount',
+                            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline forecolor backcolor | alignleft aligncenter alignright alignjustify | numlist bullist outdent indent | table link emoticons charmap | code',
+                            menubar: true,
+                            branding: false,
+                            content_style: 'body { font-family: "Plus Jakarta Sans", sans-serif; font-size: 14px; }'
                         });
 
                         let menuLinks = <%- JSON.stringify(branding.menuLinks || [
