@@ -161,7 +161,7 @@
                     <div class="lg:col-span-5 bg-white border-r border-slate-100 flex flex-col justify-between">
                         <div>
                             <div class="bg-gradient-to-br from-slate-900 to-slate-800 px-6 py-6 text-center text-white relative">
-                                <p class="text-xs text-slate-300 font-medium"><%= lang === 'en' ? 'Register or resume your athlete learning path' : 'Daftar atau sambung modul latihan atlet anda' %></p>
+                                <p class="text-xs text-slate-300 font-medium"><%= lang === 'en' ? (branding.homeFormSubtitle_en || 'Register or resume your athlete learning path') : (branding.homeFormSubtitle || 'Daftar atau sambung modul latihan atlet anda') %></p>
                             </div>
 
                             <!-- Error Message -->

@@ -17,6 +17,8 @@ const brandingSchema = new mongoose.Schema({
     homeBgImage: { type: String, default: '' },
     homeLeftColumnHtml: { type: String, default: '<p>Modul pembelajaran ini disediakan dari peringkat pembelajaran asas yang merangkumi pelbagai aspek topik kesejahteraan atlet dalam mengukuhkan ekosistem sukan berprestasi tinggi.</p><br><p>Setelah melengkapkan kuiz di akhir setiap modul, anda boleh mencetak atau memuat turun Sijil Penyertaan.</p>' },
     homeLeftColumnHtml_en: { type: String, default: '<p>This learning module is prepared starting from the basic learning stage, covering various aspects of athlete well-being topics to strengthen the high-performance sports ecosystem.</p><br><p>Upon completing the quiz at the end of each module, you can print or download the Certificate of Participation.</p>' },
+    homeFormSubtitle: { type: String, default: 'Daftar atau sambung modul latihan atlet anda' }, // ⚡ BARU: Teks Borang BM
+    homeFormSubtitle_en: { type: String, default: 'Register or resume your athlete learning path' }, // ⚡ BARU: Teks Borang EN
     showMenu: { type: Boolean, default: true },
     showBannerTitle: { type: Boolean, default: true }, // ⚡ BARU: On/Off tajuk banner utama
     showRegistrationForm: { type: Boolean, default: true }, // ⚡ BARU: On/Off borang login/pendaftaran

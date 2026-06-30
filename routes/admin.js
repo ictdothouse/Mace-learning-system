@@ -609,7 +609,8 @@ router.post('/settings/branding', async (req, res) => {
             siteName, tagline, primaryColor, dashboardTitle, dashboardSubtitle, logoUrl, faviconUrl,
             homeBannerTitle, homeBannerTitle_en, homeBannerImage, homeBgImage, homeLeftColumnHtml, homeLeftColumnHtml_en, menuLinksJson,
             footerText, footerLinksJson,
-            termTeacher_ms, termTeacher_en, termStudent_ms, termStudent_en
+            termTeacher_ms, termTeacher_en, termStudent_ms, termStudent_en,
+            homeFormSubtitle, homeFormSubtitle_en
         } = req.body;
         const Branding = require('../models/Branding');
         
@@ -628,6 +629,8 @@ router.post('/settings/branding', async (req, res) => {
         
         if (homeBannerTitle !== undefined) branding.homeBannerTitle = homeBannerTitle;
         if (homeBannerTitle_en !== undefined) branding.homeBannerTitle_en = homeBannerTitle_en;
+        if (homeFormSubtitle !== undefined) branding.homeFormSubtitle = homeFormSubtitle;
+        if (homeFormSubtitle_en !== undefined) branding.homeFormSubtitle_en = homeFormSubtitle_en;
         if (homeBannerImage !== undefined) branding.homeBannerImage = homeBannerImage;
         if (homeBgImage !== undefined) branding.homeBgImage = homeBgImage;
         if (homeLeftColumnHtml !== undefined) branding.homeLeftColumnHtml = homeLeftColumnHtml;
