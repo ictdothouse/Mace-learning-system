@@ -58,10 +58,10 @@ app.post('/set-language', (req, res) => {
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// 6. Rate Limiting
+// 6. Rate Limiting — Dinaikkan untuk handle 8K atlit blast serentak
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, 
-    max: 100, 
+    max: 500,  // ⚡ Dinaikkan dari 100 → 500 (atlit biasa guna ~50-80 req/15min)
     standardHeaders: true,
     legacyHeaders: false,
     message: 'Terlalu banyak permintaan, sila cuba lagi sebentar lagi.'
@@ -74,7 +74,12 @@ app.use(limiter);
 
 let isDbConnected = false;
 
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI, {
+    maxPoolSize: 50,                    // ⚡ Atlas Free max ~100, kita guna 50 untuk safety
+    minPoolSize: 5,                     // ⚡ Sentiasa ada 5 connections siap sedia
+    serverSelectionTimeoutMS: 5000,     // ⚡ Timeout cepat jika Atlas tak respons
+    socketTimeoutMS: 45000,             // ⚡ Socket timeout 45s
+})
     .then(async () => {
         console.log('✅ DB Connected successfully to MongoDB Atlas');
         isDbConnected = true;

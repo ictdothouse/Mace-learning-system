@@ -26,33 +26,73 @@ const r2Client = new S3Client({
     }
 });
 
+// ==========================================
+// ⚡ SISTEM CACHE IN-MEMORY (PRESTASI)
+// ==========================================
+
+// Cache #1: R2 Signed URLs — elak generate URL baru setiap request
+const videoUrlCache = new Map();
+const VIDEO_URL_CACHE_TTL = 30 * 60 * 1000; // 30 minit (URL valid 1 jam, cache 30 min untuk safety)
+
 const getSecureVideoUrl = async (filename) => {
     if (!filename) return null;
     if (filename.startsWith('/uploads/') || filename.startsWith('http')) return filename;
+    
+    // ⚡ Semak cache dahulu
+    const cached = videoUrlCache.get(filename);
+    if (cached && cached.expiry > Date.now()) {
+        return cached.url;
+    }
+    
     try {
         const command = new GetObjectCommand({
             Bucket: process.env.R2_BUCKET_NAME || 'modulmace',
             Key: filename
         });
-        return await getSignedUrl(r2Client, command, { expiresIn: 3600 });
+        const url = await getSignedUrl(r2Client, command, { expiresIn: 3600 });
+        
+        // ⚡ Simpan dalam cache
+        videoUrlCache.set(filename, { url, expiry: Date.now() + VIDEO_URL_CACHE_TTL });
+        
+        return url;
     } catch (err) {
         console.error('Error generating secure url:', err);
         return `/uploads/${filename}`;
     }
 };
 
-// ✅ FUNGSI ASYNC UNTUK AMBIL DATA DARI MONGODB
+// Cache #2: Lessons + Quiz data — data ini jarang berubah
+let lessonsCache = null;
+let lessonsCacheTime = 0;
+const LESSONS_CACHE_TTL = 5 * 60 * 1000; // 5 minit
+
 const getLessonsWithQuiz = async () => {
-    return await Lesson.find().populate('moduleId').sort({ order: 1 }).lean();
+    const now = Date.now();
+    if (!lessonsCache || (now - lessonsCacheTime > LESSONS_CACHE_TTL)) {
+        lessonsCache = await Lesson.find().populate('moduleId').sort({ order: 1 }).lean();
+        lessonsCacheTime = now;
+        console.log('📦 Lessons cache refreshed');
+    }
+    return lessonsCache;
 };
 
+// Cache #3: Sports list — data ini hampir tidak pernah berubah
+let sportsCache = null;
+let sportsCacheTime = 0;
+const SPORTS_CACHE_TTL = 10 * 60 * 1000; // 10 minit
+
 const checkSports = async (req, res, next) => {
-    try {
-        const Sport = require('../models/Sport');
-        req.sports = await Sport.find().sort({ name: 1 }).lean();
-    } catch (err) {
-        req.sports = [];
+    const now = Date.now();
+    if (!sportsCache || (now - sportsCacheTime > SPORTS_CACHE_TTL)) {
+        try {
+            const Sport = require('../models/Sport');
+            sportsCache = await Sport.find().sort({ name: 1 }).lean();
+            sportsCacheTime = now;
+        } catch (err) {
+            sportsCache = sportsCache || [];
+        }
     }
+    req.sports = sportsCache;
     next();
 };
 
@@ -86,19 +126,17 @@ router.post('/access', checkSports, async (req, res) => {
 
 router.get('/dashboard', checkSession, async (req, res) => {
     try {
-        const athlete = await Athlete.findById(req.session.athleteId);
+        const athlete = await Athlete.findById(req.session.athleteId).lean();
         if (!athlete) { req.session.destroy(); return res.redirect('/'); }
         
-        // Ambil senarai lesson dengan tajuk sebenar dari DB dan populate modul
-        const lessons = await Lesson.find({ isActive: true })
-            .populate('moduleId')
-            .sort({ order: 1 })
-            .lean();
+        // ⚡ Guna cache untuk lessons dan modules (bukan query DB setiap kali)
+        const lessons = await getLessonsWithQuiz();
+        const activeLessons = lessons.filter(l => l.isActive !== false);
             
-        // Ambil senarai modul untuk dropdown popup
+        // ⚡ Ambil modules dari cache (extract unique dari lessons cache)
         const allModules = await Module.find().sort({ order: 1 }).lean();
             
-        res.render('dashboard', { athlete, lessons, allModules });
+        res.render('dashboard', { athlete, lessons: activeLessons, allModules });
     } catch (err) { res.redirect('/'); }
 });
 

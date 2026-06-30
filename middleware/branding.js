@@ -1,9 +1,11 @@
 const Branding = require('../models/Branding');
 const Page = require('../models/Page');
 
-// Cache to avoid querying the DB on every request
+// ⚡ Cache to avoid querying the DB on every request
 let brandingCache = null;
 let lastCacheTime = 0;
+let navPagesCache = null;       // ⚡ BARU: Cache untuk navigation pages
+let navPagesCacheTime = 0;      // ⚡ BARU: Timestamp cache navPages
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
 
 async function fetchBranding() {
@@ -28,13 +30,30 @@ async function fetchBranding() {
     }
 }
 
+// ⚡ BARU: Fungsi fetch navPages dengan cache
+async function fetchNavPages() {
+    try {
+        return await Page.find({ isPublished: true, showInNavigation: true })
+            .sort({ navigationOrder: 1 }).lean();
+    } catch (e) {
+        console.error('Error fetching navPages:', e);
+        return [];
+    }
+}
+
 module.exports = async function brandingMiddleware(req, res, next) {
     const now = Date.now();
     
-    // Refresh cache if it's expired or doesn't exist
+    // Refresh branding cache if it's expired or doesn't exist
     if (!brandingCache || (now - lastCacheTime > CACHE_DURATION)) {
         brandingCache = await fetchBranding();
         lastCacheTime = now;
+    }
+    
+    // ⚡ Refresh navPages cache if it's expired or doesn't exist
+    if (!navPagesCache || (now - navPagesCacheTime > CACHE_DURATION)) {
+        navPagesCache = await fetchNavPages();
+        navPagesCacheTime = now;
     }
     
     // Provide a way to force refresh cache (e.g., after updating settings)
@@ -42,16 +61,14 @@ module.exports = async function brandingMiddleware(req, res, next) {
         brandingCache = await fetchBranding();
         lastCacheTime = Date.now();
         res.locals.branding = brandingCache;
+        // ⚡ Juga refresh navPages bila branding di-refresh
+        navPagesCache = await fetchNavPages();
+        navPagesCacheTime = Date.now();
+        res.locals.navPages = navPagesCache;
     };
 
     res.locals.branding = brandingCache;
-    
-    // Fetch CMS pages for navigation menu dynamically
-    try {
-        res.locals.navPages = await Page.find({ isPublished: true, showInNavigation: true }).sort({ navigationOrder: 1 }).lean();
-    } catch (e) {
-        res.locals.navPages = [];
-    }
+    res.locals.navPages = navPagesCache;  // ⚡ Guna cache, bukan DB query setiap request
     
     // Terminology translator helper with plural support for English
     res.locals.getTerm = (key, isPlural = false) => {
