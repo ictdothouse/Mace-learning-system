@@ -161,8 +161,7 @@
                     <div class="lg:col-span-5 bg-white border-r border-slate-100 flex flex-col justify-between">
                         <div>
                             <div class="bg-gradient-to-br from-slate-900 to-slate-800 px-6 py-6 text-center text-white relative">
-                                <h2 class="text-xl font-bold tracking-wide uppercase bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent"><%= __('welcome') %></h2>
-                                <p class="text-xs text-slate-400 mt-1"><%= lang === 'en' ? 'Register or resume your athlete learning path' : 'Daftar atau sambung modul latihan atlet anda' %></p>
+                                <p class="text-xs text-slate-300 font-medium"><%= lang === 'en' ? 'Register or resume your athlete learning path' : 'Daftar atau sambung modul latihan atlet anda' %></p>
                             </div>
 
                             <!-- Error Message -->
@@ -311,7 +310,7 @@
                 <% } %>
 
                 <!-- RIGHT COLUMN: Custom HTML / Info (lg:col-span-7 atau lg:col-span-12 jika tiada form) -->
-                <div class="<%= (locals.branding && branding.showRegistrationForm !== false) ? 'lg:col-span-7' : 'lg:col-span-12' %> bg-slate-50/60 p-6 sm:p-10 flex flex-col justify-center">
+                <div class="<%= (locals.branding && branding.showRegistrationForm !== false) ? 'lg:col-span-7' : 'lg:col-span-12' %> bg-slate-50 p-6 sm:p-10 flex flex-col justify-center">
                     <div class="prose text-gray-700 leading-relaxed text-sm sm:text-base mx-auto max-w-3xl">
                         <% 
                             let displayHtml = null;
