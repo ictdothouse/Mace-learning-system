@@ -607,7 +607,7 @@ router.post('/settings/branding', async (req, res) => {
     try {
         const { 
             siteName, tagline, primaryColor, dashboardTitle, dashboardSubtitle, logoUrl, faviconUrl,
-            homeBannerTitle, homeBannerImage, homeBgImage, homeLeftColumnHtml, homeLeftColumnHtml_en, menuLinksJson,
+            homeBannerTitle, homeBannerTitle_en, homeBannerImage, homeBgImage, homeLeftColumnHtml, homeLeftColumnHtml_en, menuLinksJson,
             footerText, footerLinksJson,
             termTeacher_ms, termTeacher_en, termStudent_ms, termStudent_en
         } = req.body;
@@ -627,6 +627,7 @@ router.post('/settings/branding', async (req, res) => {
         if (faviconUrl !== undefined) branding.faviconUrl = faviconUrl;
         
         if (homeBannerTitle !== undefined) branding.homeBannerTitle = homeBannerTitle;
+        if (homeBannerTitle_en !== undefined) branding.homeBannerTitle_en = homeBannerTitle_en;
         if (homeBannerImage !== undefined) branding.homeBannerImage = homeBannerImage;
         if (homeBgImage !== undefined) branding.homeBgImage = homeBgImage;
         if (homeLeftColumnHtml !== undefined) branding.homeLeftColumnHtml = homeLeftColumnHtml;

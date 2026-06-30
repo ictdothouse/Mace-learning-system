@@ -12,6 +12,7 @@ const brandingSchema = new mongoose.Schema({
     
     // Homepage Customization
     homeBannerTitle: { type: String, default: 'Modul' },
+    homeBannerTitle_en: { type: String, default: 'Modules' },
     homeBannerImage: { type: String, default: '' },
     homeBgImage: { type: String, default: '' },
     homeLeftColumnHtml: { type: String, default: '<p>Modul pembelajaran ini disediakan dari peringkat pembelajaran asas yang merangkumi pelbagai aspek topik kesejahteraan atlet dalam mengukuhkan ekosistem sukan berprestasi tinggi.</p><br><p>Setelah melengkapkan kuiz di akhir setiap modul, anda boleh mencetak atau memuat turun Sijil Penyertaan.</p>' },
