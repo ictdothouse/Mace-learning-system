@@ -54,7 +54,7 @@
                 
                 <% if (locals.branding && branding.showMenu && branding.menuLinks && branding.menuLinks.length > 0) { %>
                     <% branding.menuLinks.forEach(link => { %>
-                        <a href="<%= link.url %>" class="text-sm font-medium hover:text-gray-300 transition-colors"><%= link.label %></a>
+                        <a href="<%= link.url %>" class="text-sm font-medium hover:text-gray-300 transition-colors"><%= lang === 'en' ? (link.label_en || link.label) : link.label %></a>
                     <% }) %>
                 <% } %>
 
@@ -94,7 +94,7 @@
         </a>
         <% if (locals.branding && branding.showMenu && branding.menuLinks && branding.menuLinks.length > 0) { %>
             <% branding.menuLinks.forEach(link => { %>
-                <a href="<%= link.url %>" class="block text-sm font-medium py-2 border-b border-white/5 hover:text-gray-300 transition-colors"><%= link.label %></a>
+                <a href="<%= link.url %>" class="block text-sm font-medium py-2 border-b border-white/5 hover:text-gray-300 transition-colors"><%= lang === 'en' ? (link.label_en || link.label) : link.label %></a>
             <% }) %>
         <% } %>
         <% if (locals.navPages && navPages.length > 0) { %>

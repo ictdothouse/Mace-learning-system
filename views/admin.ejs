@@ -836,10 +836,10 @@
                         });
 
                         let menuLinks = <%- JSON.stringify(branding.menuLinks || [
-                            { label: 'Home', url: '/' },
-                            { label: 'Modul', url: '/#modul' },
-                            { label: 'Hubungi Kami', url: '/#kontak' },
-                            { label: 'Akaun', url: '/dashboard' }
+                            { label: 'Home', label_en: 'Home', url: '/' },
+                            { label: 'Modul', label_en: 'Modules', url: '/#modul' },
+                            { label: 'Hubungi Kami', label_en: 'Contact Us', url: '/#kontak' },
+                            { label: 'Akaun', label_en: 'Account', url: '/dashboard' }
                         ]) %>;
 
                         function renderMenuLinks() {
@@ -847,17 +847,29 @@
                             container.innerHTML = '';
                             menuLinks.forEach((link, idx) => {
                                 container.innerHTML += `
-                                    <div class="flex items-center gap-3 bg-white p-2 rounded border border-gray-200">
-                                        <input type="text" value="${link.label}" onchange="updateMenu(${idx}, 'label', this.value)" class="flex-1 text-sm border-none bg-transparent outline-none p-1" placeholder="Label Menu">
-                                        <input type="text" value="${link.url}" onchange="updateMenu(${idx}, 'url', this.value)" class="flex-2 text-sm border-none bg-transparent outline-none p-1 text-blue-600" placeholder="URL Pautan (cth: https://...)">
-                                        <button type="button" onclick="removeMenu(${idx})" class="text-red-500 hover:text-red-700 p-1">✕</button>
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-white p-3 rounded-lg border border-gray-200 shadow-sm mb-2">
+                                        <div>
+                                            <label class="block text-[10px] text-gray-500 font-semibold mb-1">Label (BM)</label>
+                                            <input type="text" value="${link.label || ''}" onchange="updateMenu(${idx}, 'label', this.value)" class="w-full text-xs border border-gray-200 rounded p-1.5 focus:border-purple-500 outline-none" placeholder="cth: Modul">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] text-gray-500 font-semibold mb-1">Label (EN)</label>
+                                            <input type="text" value="${link.label_en || ''}" onchange="updateMenu(${idx}, 'label_en', this.value)" class="w-full text-xs border border-gray-200 rounded p-1.5 focus:border-purple-500 outline-none" placeholder="cth: Modules">
+                                        </div>
+                                        <div class="flex items-end gap-2">
+                                            <div class="flex-1">
+                                                <label class="block text-[10px] text-gray-500 font-semibold mb-1">Pautan URL</label>
+                                                <input type="text" value="${link.url || ''}" onchange="updateMenu(${idx}, 'url', this.value)" class="w-full text-xs border border-gray-200 rounded p-1.5 text-blue-600 font-mono focus:border-purple-500 outline-none" placeholder="cth: /#modul">
+                                            </div>
+                                            <button type="button" onclick="removeMenu(${idx})" class="bg-red-50 hover:bg-red-100 text-red-500 rounded p-2 mb-[2px]">✕</button>
+                                        </div>
                                     </div>
                                 `;
                             });
                         }
                         
                         function updateMenu(idx, field, val) { menuLinks[idx][field] = val; }
-                        function addMenuLink() { menuLinks.push({ label: 'Menu Baru', url: '#' }); renderMenuLinks(); }
+                        function addMenuLink() { menuLinks.push({ label: 'Menu Baru', label_en: 'New Menu', url: '#' }); renderMenuLinks(); }
                         function removeMenu(idx) { menuLinks.splice(idx, 1); renderMenuLinks(); }
                         function saveMenuLinks() { document.getElementById('menuLinksJson').value = JSON.stringify(menuLinks); }
                         

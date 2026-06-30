@@ -19,6 +19,7 @@ const brandingSchema = new mongoose.Schema({
     showMenu: { type: Boolean, default: true },
     menuLinks: [{
         label: { type: String, required: true },
+        label_en: { type: String },
         url: { type: String, required: true }
     }],
     // Footer Customization
