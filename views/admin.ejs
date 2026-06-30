@@ -761,9 +761,19 @@
                                         <input type="text" name="homeBannerTitle_en" value="<%= branding.homeBannerTitle_en || 'Modules' %>" class="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none" placeholder="EN (cth: Modules)">
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-3 mt-6">
-                                    <input type="checkbox" name="showMenu" id="showMenu" value="on" <%= branding.showMenu !== false ? 'checked' : '' %> class="h-5 w-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
-                                    <label for="showMenu" class="text-sm font-medium text-gray-700">Tunjuk Menu di Halaman Utama</label>
+                                <div class="flex flex-col gap-3 justify-center">
+                                    <div class="flex items-center gap-3">
+                                        <input type="checkbox" name="showMenu" id="showMenu" value="on" <%= branding.showMenu !== false ? 'checked' : '' %> class="h-5 w-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                                        <label for="showMenu" class="text-sm font-medium text-gray-700">Tunjuk Menu di Halaman Utama</label>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <input type="checkbox" name="showBannerTitle" id="showBannerTitle" value="on" <%= branding.showBannerTitle !== false ? 'checked' : '' %> class="h-5 w-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                                        <label for="showBannerTitle" class="text-sm font-medium text-gray-700">Tunjuk Tajuk Banner Utama (Merah)</label>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <input type="checkbox" name="showRegistrationForm" id="showRegistrationForm" value="on" <%= branding.showRegistrationForm !== false ? 'checked' : '' %> class="h-5 w-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                                        <label for="showRegistrationForm" class="text-sm font-medium text-gray-700">Tunjuk Borang Pendaftaran/Login</label>
+                                    </div>
                                 </div>
                             </div>
                             

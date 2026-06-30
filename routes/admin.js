@@ -633,6 +633,8 @@ router.post('/settings/branding', async (req, res) => {
         if (homeLeftColumnHtml !== undefined) branding.homeLeftColumnHtml = homeLeftColumnHtml;
         if (homeLeftColumnHtml_en !== undefined) branding.homeLeftColumnHtml_en = homeLeftColumnHtml_en;
         branding.showMenu = req.body.showMenu === 'on';
+        branding.showBannerTitle = req.body.showBannerTitle === 'on';
+        branding.showRegistrationForm = req.body.showRegistrationForm === 'on';
         
         if (menuLinksJson) {
             try {
