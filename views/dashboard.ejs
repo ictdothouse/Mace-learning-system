@@ -141,6 +141,51 @@
     </nav>
 
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+        <% 
+        // Define lesson list inside dashboard scope to calculate progress
+        const preLessonList = (typeof lessons !== 'undefined' && lessons && lessons.length > 0)
+            ? lessons
+            : [
+                { title: 'Jom kuasai asas dulu sebelum jadi pro!', order: 1 }, 
+                { title: 'Kenali kesalahan, elak jadi pelaku!', order: 2 }, 
+                { title: 'Ambil tindakan yang betul, laporkan tanpa ragu!', order: 3 }
+              ];
+        
+        // Group lessons by Module to check completion dynamically
+        const preModulesMap = {};
+        preLessonList.forEach((lesson, idx) => {
+            const moduleObj = lesson.moduleId;
+            const moduleName = (moduleObj && moduleObj.title) ? moduleObj.title : 'MODUL 1 : PLAY SAFE WIN STRONG';
+            if (!preModulesMap[moduleName]) {
+                preModulesMap[moduleName] = [];
+            }
+            preModulesMap[moduleName].push({ ...lesson, idx });
+        });
+
+        // Calculate completed modules
+        let completedModulesCount = 0;
+        Object.keys(preModulesMap).forEach(mName => {
+            const isCompleted = preModulesMap[mName].every(item => athlete.currentStage > (item.order || (item.idx + 1)));
+            if (isCompleted) {
+                completedModulesCount++;
+            }
+        });
+
+        const totalModulesCount = Object.keys(preModulesMap).length || 1;
+        const overallPercent = Math.round((completedModulesCount / totalModulesCount) * 100);
+
+        // Set stage label dynamically
+        let stageLabel = "";
+        if (completedModulesCount > 0) {
+            stageLabel = lang === 'en' ? `🏆 Completed: Module ${completedModulesCount}` : `🏆 Tamat: Modul ${completedModulesCount}`;
+        } else {
+            stageLabel = lang === 'en' ? `Stage ${athlete.currentStage}` : `Peringkat ${athlete.currentStage}`;
+        }
+        const stageBg = completedModulesCount > 0 ? 'bg-emerald-500/20 border-emerald-400/30 text-emerald-300' : 'bg-indigo-500/20 border-indigo-400/30 text-indigo-300';
+        
+        const circumference = 2 * Math.PI * 38;
+        const strokeDash = circumference - (overallPercent / 100) * circumference;
+        %>
 
         <!-- HERO GREETING -->
         <div class="fade-up delay-1 mb-8 sm:mb-10">
@@ -161,28 +206,11 @@
                             ⚡ <%= athlete.sukan %>
                         </span>
                         <% } %>
-                        <% 
-                        const lastCompleted = (athlete.currentStage || 1) - 1;
-                        const stageLabel = athlete.currentStage >= 4 
-                            ? (lang === 'en' ? `🏆 Completed: Module ${lastCompleted}` : `🏆 Tamat: Modul ${lastCompleted}`)
-                            : (lang === 'en' ? `Stage ${athlete.currentStage}` : `Peringkat ${athlete.currentStage}`);
-                        const stageBg = athlete.currentStage >= 4 ? 'bg-emerald-500/20 border-emerald-400/30 text-emerald-300' : 'bg-indigo-500/20 border-indigo-400/30 text-indigo-300';
-                        %>
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 border rounded-full font-semibold <%= stageBg %>">
                             <%= stageLabel %>
                         </span>
                     </div>
                 </div>
-
-                <!-- Overall Progress Ring -->
-                <div class="flex-shrink-0">
-                    <% 
-                    const completedModules = Math.max(0, (athlete.currentStage || 1) - 1);
-                    const totalModulesCount = 3;
-                    const overallPercent = Math.round((completedModules / totalModulesCount) * 100);
-                    const circumference = 2 * Math.PI * 38;
-                    const strokeDash = circumference - (overallPercent / 100) * circumference;
-                    %>
                     <div class="flex flex-col items-center">
                         <div class="relative w-28 h-28">
                             <svg class="w-28 h-28 -rotate-90" viewBox="0 0 90 90">
