@@ -138,6 +138,18 @@ const translateText = (text, lang) => {
         {
             ms: /Ini penting bagi melindungi anda dan mewujudkan persekitaran sukan selamat dan berintegriti\./gi,
             en: "This is important to protect you and create a safe and integrated sports environment."
+        },
+        {
+            ms: /^Hubungi$/gi,
+            en: "Contact Us"
+        },
+        {
+            ms: /Hubungi Kami/gi,
+            en: "Contact Us"
+        },
+        {
+            ms: /Sebarang pertanyaan atau maklumbalas, hubungi kami menerusi email\s*:/gi,
+            en: "For any inquiries or feedback, contact us via email:"
         }
     ];
     for (const m of mappings) {
@@ -626,11 +638,21 @@ router.get('/page/:slug', checkSports, async (req, res) => {
             }
         }
         
+        const lang = res.locals.lang || 'ms';
+        const pageData = page.toObject();
+        pageData.title = lang === 'en' ? (pageData.title_en || pageData.title) : pageData.title;
+        pageData.content = lang === 'en' ? (pageData.content_en || pageData.content) : pageData.content;
+        
+        if (pageData.customTemplate === 'contact' && pageData.contactConfig) {
+            pageData.contactConfig.bannerTitle = translateText(pageData.contactConfig.bannerTitle, lang);
+            pageData.contactConfig.description = translateText(pageData.contactConfig.description, lang);
+        }
+
         res.render('custom-page', { 
-            page, 
+            page: pageData, 
             module1, 
             sports: req.sports || [],
-            lang: res.locals.lang || 'ms'
+            lang
         });
     } catch (err) {
         console.error('Error loading custom page:', err);
