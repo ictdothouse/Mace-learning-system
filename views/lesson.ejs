@@ -79,14 +79,8 @@ const moduleTitle = lesson.moduleId ? lesson.moduleId.title : ('MODUL ' + module
                 
                 <!-- Language Toggle -->
                 <div class="flex gap-1 bg-gray-100 rounded-lg p-1 ml-2">
-                    <form method="POST" action="/set-language" class="inline">
-                        <input type="hidden" name="lang" value="ms">
-                        <button type="submit" class="text-xs px-2 py-0.5 rounded font-semibold transition <%= lang === 'ms' ? 'bg-white shadow text-blue-700' : 'text-gray-400 hover:text-gray-600' %>">BM</button>
-                    </form>
-                    <form method="POST" action="/set-language" class="inline">
-                        <input type="hidden" name="lang" value="en">
-                        <button type="submit" class="text-xs px-2 py-0.5 rounded font-semibold transition <%= lang === 'en' ? 'bg-white shadow text-blue-700' : 'text-gray-400 hover:text-gray-600' %>">EN</button>
-                    </form>
+                    <a href="?lang=ms" class="text-xs px-2 py-0.5 rounded font-semibold transition <%= lang === 'ms' ? 'bg-white shadow text-blue-700' : 'text-gray-400 hover:text-gray-600' %>">BM</a>
+                    <a href="?lang=en" class="text-xs px-2 py-0.5 rounded font-semibold transition <%= lang === 'en' ? 'bg-white shadow text-blue-700' : 'text-gray-400 hover:text-gray-600' %>">EN</a>
                 </div>
             </div>
         </div>

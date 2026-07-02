@@ -19,11 +19,14 @@ const SUPPORTED_LANGS = ['ms', 'en'];
 const DEFAULT_LANG = 'ms';
 
 module.exports = function i18nMiddleware(req, res, next) {
-    // Detect bahasa dari cookie, default ke 'ms'
-    let lang = req.cookies && req.cookies.lang;
+    // Detect bahasa dari query param (?lang=xx) atau dari cookie, default ke 'ms'
+    let lang = req.query.lang || (req.cookies && req.cookies.lang);
 
     if (!lang || !SUPPORTED_LANGS.includes(lang)) {
         lang = DEFAULT_LANG;
+    } else if (req.query.lang && SUPPORTED_LANGS.includes(req.query.lang)) {
+        // Jika tukar menerusi query parameter, set cookie secara automatik
+        res.cookie('lang', lang, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: false });
     }
 
     const translations = locales[lang] || locales[DEFAULT_LANG];

@@ -81,14 +81,8 @@
 
                 <!-- Language Switcher -->
                 <div class="flex items-center gap-2 bg-white/10 rounded-lg p-1 border border-white/20">
-                    <form method="POST" action="/set-language" class="inline m-0">
-                        <input type="hidden" name="lang" value="ms">
-                        <button type="submit" class="text-xs px-2.5 py-1 rounded font-semibold transition-all <%= lang === 'ms' ? 'bg-white text-gray-900' : 'text-white/70 hover:text-white' %>">BM</button>
-                    </form>
-                    <form method="POST" action="/set-language" class="inline m-0">
-                        <input type="hidden" name="lang" value="en">
-                        <button type="submit" class="text-xs px-2.5 py-1 rounded font-semibold transition-all <%= lang === 'en' ? 'bg-white text-gray-900' : 'text-white/70 hover:text-white' %>">EN</button>
-                    </form>
+                    <a href="?lang=ms" class="text-xs px-2.5 py-1 rounded font-semibold transition-all <%= lang === 'ms' ? 'bg-white text-gray-900' : 'text-white/70 hover:text-white' %>">BM</a>
+                    <a href="?lang=en" class="text-xs px-2.5 py-1 rounded font-semibold transition-all <%= lang === 'en' ? 'bg-white text-gray-900' : 'text-white/70 hover:text-white' %>">EN</a>
                 </div>
 
                 <!-- Mobile Menu Toggle (Hamburger) -->

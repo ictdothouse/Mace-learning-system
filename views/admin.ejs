@@ -120,14 +120,8 @@
         <div class="px-6 py-3 border-t border-blue-800">
             <p class="text-xs text-blue-400 mb-2">🌐 <%= lang === 'en' ? 'Language' : 'Bahasa' %></p>
             <div class="flex gap-2">
-                <form method="POST" action="/set-language">
-                    <input type="hidden" name="lang" value="ms">
-                    <button type="submit" class="text-xs px-3 py-1.5 rounded-lg font-semibold transition <%= lang === 'ms' ? 'bg-yellow-400 text-blue-900' : 'bg-blue-800 text-blue-200 hover:bg-blue-700' %>">BM</button>
-                </form>
-                <form method="POST" action="/set-language">
-                    <input type="hidden" name="lang" value="en">
-                    <button type="submit" class="text-xs px-3 py-1.5 rounded-lg font-semibold transition <%= lang === 'en' ? 'bg-yellow-400 text-blue-900' : 'bg-blue-800 text-blue-200 hover:bg-blue-700' %>">EN</button>
-                </form>
+                <a href="?lang=ms" class="text-xs px-3 py-1.5 rounded-lg font-semibold transition <%= lang === 'ms' ? 'bg-yellow-400 text-blue-900' : 'bg-blue-800 text-blue-200 hover:bg-blue-700' %>">BM</a>
+                <a href="?lang=en" class="text-xs px-3 py-1.5 rounded-lg font-semibold transition <%= lang === 'en' ? 'bg-yellow-400 text-blue-900' : 'bg-blue-800 text-blue-200 hover:bg-blue-700' %>">EN</a>
             </div>
         </div>
 
@@ -165,12 +159,9 @@
             </div>
             <div class="flex items-center gap-2">
                 <!-- Quick Info or Language Change -->
-                <form method="POST" action="/set-language" class="inline">
-                    <input type="hidden" name="lang" value="<%= lang === 'ms' ? 'en' : 'ms' %>">
-                    <button type="submit" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2.5 py-1.5 rounded-lg font-semibold transition">
-                        <%= lang === 'ms' ? 'EN' : 'BM' %>
-                    </button>
-                </form>
+                <a href="?lang=<%= lang === 'ms' ? 'en' : 'ms' %>" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2.5 py-1.5 rounded-lg font-semibold transition">
+                    <%= lang === 'ms' ? 'EN' : 'BM' %>
+                </a>
             </div>
         </div>
 
