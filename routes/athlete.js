@@ -547,7 +547,7 @@ router.get('/module/:id', checkSports, async (req, res) => {
             if (athlete) isLoggedIn = true;
         }
 
-        // Cari lesson pertama untuk butang permulaan
+        // Cari lesson pertama untuk butang permulaan modul keseluruhan
         const LessonModel = require('../models/Lesson');
         const firstLesson = await LessonModel.findOne({ moduleId: module._id, isActive: true }).sort({ order: 1 }).lean();
         const firstLessonId = firstLesson ? firstLesson._id : null;
@@ -561,12 +561,16 @@ router.get('/module/:id', checkSports, async (req, res) => {
             description: translateText(module.description, lang)
         };
 
-        const translatedLevels = levels.map(l => ({
-            ...l,
-            name: lang === 'en' ? (l.name_en || l.name) : l.name,
-            description: lang === 'en' ? (l.description_en || l.description) : l.description,
-            targetAudience: lang === 'en' ? (l.targetAudience_en || l.targetAudience) : l.targetAudience,
-            duration: lang === 'en' ? (l.duration_en || l.duration) : l.duration
+        const translatedLevels = await Promise.all(levels.map(async (l) => {
+            const levelFirstLesson = await LessonModel.findOne({ levelId: l._id, isActive: true }).sort({ order: 1 }).lean();
+            return {
+                ...l,
+                firstLessonId: levelFirstLesson ? levelFirstLesson._id : null,
+                name: lang === 'en' ? (l.name_en || l.name) : l.name,
+                description: lang === 'en' ? (l.description_en || l.description) : l.description,
+                targetAudience: lang === 'en' ? (l.targetAudience_en || l.targetAudience) : l.targetAudience,
+                duration: lang === 'en' ? (l.duration_en || l.duration) : l.duration
+            };
         }));
 
         res.render('module-landing', {
