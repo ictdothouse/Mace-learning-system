@@ -126,6 +126,18 @@ const translateText = (text, lang) => {
         {
             ms: /Ambil tindakan yang betul, laporkan tanpa ragu!/gi,
             en: "Take the right action, report it without hesitation!"
+        },
+        {
+            ms: /MODUL 1\s*:\s*PLAY SAFE WIN STRONG/gi,
+            en: "MODULE 1: PLAY SAFE WIN STRONG"
+        },
+        {
+            ms: /Di akhir modul ini anda akan dapat memahami peraturan asas, jenis\s*(&ndash;|-)\s*jenis salah laku serta tindakan yang anda perlu lakukan sekiranya sesuatu perkara yang tidak diingini berlaku terhadap anda atau orang sekeliling anda\./gi,
+            en: "At the end of this module you will be able to understand basic rules, types of misconduct, and the actions you need to take if something undesirable happens to you or those around you."
+        },
+        {
+            ms: /Ini penting bagi melindungi anda dan mewujudkan persekitaran sukan selamat dan berintegriti\./gi,
+            en: "This is important to protect you and create a safe and integrated sports environment."
         }
     ];
     for (const m of mappings) {
@@ -190,11 +202,19 @@ router.get('/dashboard', checkSession, async (req, res) => {
 
         // ⚡ Menterjemah tajuk & deskripsi lesson jika bahasa english dipilih
         const lang = res.locals.lang || 'ms';
-        const translatedLessons = activeLessons.map(l => ({
-            ...l,
-            title: translateText(l.title, lang),
-            contentHtml: translateText(l.contentHtml, lang)
-        }));
+        const translatedLessons = activeLessons.map(l => {
+            const cloned = { ...l };
+            cloned.title = translateText(l.title, lang);
+            cloned.contentHtml = translateText(l.contentHtml, lang);
+            if (cloned.moduleId) {
+                cloned.moduleId = {
+                    ...cloned.moduleId,
+                    title: translateText(cloned.moduleId.title, lang),
+                    description: translateText(cloned.moduleId.description, lang)
+                };
+            }
+            return cloned;
+        });
             
         // ⚡ Ambil modules dari cache (extract unique dari lessons cache)
         const allModules = await Module.find().sort({ order: 1 }).lean();
