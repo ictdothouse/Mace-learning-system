@@ -198,7 +198,7 @@
 
                     <% cards.forEach((card, idx) => { %>
                         <div class="bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] hover:-translate-y-1 flex flex-col h-full text-center p-6 opacity-75 hover:opacity-100">
-                            <div class="rounded-xl overflow-hidden aspect-[1.6] mb-6 bg-gray-100 grayscale">
+                            <div class="rounded-xl overflow-hidden aspect-[1.6] mb-6 bg-gray-100">
                                 <img src="<%= card.imageUrl || 'https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=600&auto=format&fit=crop' %>" alt="Modul <%= idx + 2 %>" class="w-full h-full object-cover">
                             </div>
                             <h3 class="text-sm font-extrabold text-gray-400 uppercase tracking-widest mb-2"><%= lang === 'en' ? 'MODULE' : 'MODUL' %> <%= idx + 2 %></h3>
