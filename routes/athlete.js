@@ -9,6 +9,7 @@ const Module = require('../models/Module');
 const { generateCertificate } = require('../utils/certificate');
 const Page = require('../models/Page');
 const CertificateTemplate = require('../models/CertificateTemplate');
+const Level = require('../models/Level');
 
 // ==========================================
 // KONFIGURASI CLOUDFLARE R2 (VIDEO SULIT)
@@ -471,7 +472,11 @@ router.get('/module/:id', checkSports, async (req, res) => {
         let levels = await Level.find({ moduleId: module._id }).sort({ order: 1 }).lean();
         
         // Auto-seed default levels untuk Modul 1 jika sistem level diaktifkan dan tiada level lagi
-        if (levels.length === 0 && module.hasLevels) {
+        if (levels.length === 0 && (module.hasLevels || module.order === 1)) {
+            if (!module.hasLevels) {
+                await Module.findByIdAndUpdate(module._id, { hasLevels: true });
+                module.hasLevels = true;
+            }
             const defaultLevels = [
                 {
                     moduleId: module._id,
