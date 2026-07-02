@@ -107,10 +107,10 @@
                     <% levels.forEach((lvl, index) => { %>
                         <div class="bg-white">
                             <!-- Accordion Header -->
-                            <button onclick="toggleAccordion(<%= index %>)" class="w-full flex justify-between items-center px-6 py-5 text-left font-bold text-gray-800 transition hover:bg-gray-50 select-none">
+                            <button onclick="toggleAccordion(<%= index %>)" class="w-full flex justify-between items-center px-6 py-5 text-left font-bold transition hover:bg-gray-50 select-none <%= index === 0 ? 'bg-orange-50/80 text-orange-800' : 'text-gray-800' %>">
                                 <div class="flex items-center gap-3">
                                     <% if (index === 0) { %>
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M18 12H6" /></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M18 12H6" /></svg>
                                     <% } else { %>
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-orange-500 fill-orange-500" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                                     <% } %>
@@ -118,7 +118,7 @@
                                         <%= lvl.name %> <%= index === 0 ? (lang === 'en' ? '- ACTIVE MODULE' : '- MODUL AKTIF') : '' %>
                                     </span>
                                 </div>
-                                <span id="icon-<%= index %>" class="text-gray-400 text-lg transition-transform duration-200 <%= index === 0 ? 'rotate-180' : '' %>">&#9662;</span>
+                                <span id="icon-<%= index %>" class="<%= index === 0 ? 'text-orange-500' : 'text-gray-400' %> text-lg transition-transform duration-200 <%= index === 0 ? 'rotate-180' : '' %>">&#9662;</span>
                             </button>
 
                             <!-- Accordion Body -->
