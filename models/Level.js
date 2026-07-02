@@ -12,7 +12,31 @@ const levelSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  name_en: {
+    type: String,
+    trim: true
+  },
   description: {
+    type: String,
+    trim: true
+  },
+  description_en: {
+    type: String,
+    trim: true
+  },
+  targetAudience: {
+    type: String,
+    trim: true
+  },
+  targetAudience_en: {
+    type: String,
+    trim: true
+  },
+  duration: {
+    type: String,
+    trim: true
+  },
+  duration_en: {
     type: String,
     trim: true
   },

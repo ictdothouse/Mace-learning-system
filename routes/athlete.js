@@ -462,6 +462,123 @@ router.get('/certificate/module/:moduleId', checkSession, async (req, res) => {
 
 router.get('/logout', (req, res) => { req.session.destroy(); res.redirect('/'); });
 
+// GET: Landing Page Modul
+router.get('/module/:id', checkSports, async (req, res) => {
+    try {
+        const module = await Module.findById(req.params.id).lean();
+        if (!module) return res.redirect('/');
+
+        let levels = await Level.find({ moduleId: module._id }).sort({ order: 1 }).lean();
+        
+        // Auto-seed default levels untuk Modul 1 jika sistem level diaktifkan dan tiada level lagi
+        if (levels.length === 0 && module.hasLevels) {
+            const defaultLevels = [
+                {
+                    moduleId: module._id,
+                    name: 'BRONZE (LEVEL 1)',
+                    name_en: 'BRONZE (LEVEL 1)',
+                    description: 'Peringkat Gangsa - Pengenalan Asas',
+                    description_en: 'Bronze Level - Basic Introduction',
+                    targetAudience: 'Atlet di peringkat kebangsaan',
+                    targetAudience_en: 'Athlete at national level',
+                    duration: '10 - 15 minit',
+                    duration_en: '10 - 15 mins',
+                    order: 1
+                },
+                {
+                    moduleId: module._id,
+                    name: 'SILVER (LEVEL 2)',
+                    name_en: 'SILVER (LEVEL 2)',
+                    description: 'Peringkat Perak - Salah Laku Sukan',
+                    description_en: 'Silver Level - Sports Misconduct',
+                    targetAudience: 'Atlet di peringkat negeri',
+                    targetAudience_en: 'Athlete at state level',
+                    duration: '15 - 20 minit',
+                    duration_en: '15 - 20 mins',
+                    order: 2
+                },
+                {
+                    moduleId: module._id,
+                    name: 'GOLD (LEVEL 3)',
+                    name_en: 'GOLD (LEVEL 3)',
+                    description: 'Peringkat Emas - Kesedaran Buli & Gangguan',
+                    description_en: 'Gold Level - Bullying & Harassment Awareness',
+                    targetAudience: 'Atlet elit',
+                    targetAudience_en: 'Elite athlete',
+                    duration: '20 - 30 minit',
+                    duration_en: '20 - 30 mins',
+                    order: 3
+                },
+                {
+                    moduleId: module._id,
+                    name: 'PLATINUM (ADVANCED)',
+                    name_en: 'PLATINUM (ADVANCED)',
+                    description: 'Peringkat Platinum - Pelaporan dan Tindakan',
+                    description_en: 'Platinum Level - Reporting and Action',
+                    targetAudience: 'Atlet profesional',
+                    targetAudience_en: 'Professional athlete',
+                    duration: '30 - 45 minit',
+                    duration_en: '30 - 45 mins',
+                    order: 4
+                }
+            ];
+            const inserted = await Level.insertMany(defaultLevels);
+            
+            // Kaitkan lesson sedia ada ke level yang baru di-seed
+            const Lesson = require('../models/Lesson');
+            const currentLessons = await Lesson.find({ moduleId: module._id }).sort({ order: 1 });
+            if (currentLessons.length >= 1) await Lesson.findByIdAndUpdate(currentLessons[0]._id, { levelId: inserted[0]._id });
+            if (currentLessons.length >= 2) await Lesson.findByIdAndUpdate(currentLessons[1]._id, { levelId: inserted[1]._id });
+            if (currentLessons.length >= 3) await Lesson.findByIdAndUpdate(currentLessons[2]._id, { levelId: inserted[2]._id });
+
+            levels = await Level.find({ moduleId: module._id }).sort({ order: 1 }).lean();
+        }
+
+        // Semak status log masuk atlet
+        let athlete = null;
+        let isLoggedIn = false;
+        if (req.session.athleteId) {
+            athlete = await Athlete.findById(req.session.athleteId).lean();
+            if (athlete) isLoggedIn = true;
+        }
+
+        // Cari lesson pertama untuk butang permulaan
+        const LessonModel = require('../models/Lesson');
+        const firstLesson = await LessonModel.findOne({ moduleId: module._id, isActive: true }).sort({ order: 1 }).lean();
+        const firstLessonId = firstLesson ? firstLesson._id : null;
+
+        const lang = res.locals.lang || 'ms';
+
+        // Terjemah nama modul & penerangan jika english
+        const translatedModule = {
+            ...module,
+            title: translateText(module.title, lang),
+            description: translateText(module.description, lang)
+        };
+
+        const translatedLevels = levels.map(l => ({
+            ...l,
+            name: lang === 'en' ? (l.name_en || l.name) : l.name,
+            description: lang === 'en' ? (l.description_en || l.description) : l.description,
+            targetAudience: lang === 'en' ? (l.targetAudience_en || l.targetAudience) : l.targetAudience,
+            duration: lang === 'en' ? (l.duration_en || l.duration) : l.duration
+        }));
+
+        res.render('module-landing', {
+            module: translatedModule,
+            levels: translatedLevels,
+            athlete,
+            isLoggedIn,
+            firstLessonId,
+            lang,
+            sports: req.sports || []
+        });
+    } catch (err) {
+        console.error('Module Landing Page Error:', err);
+        res.redirect('/');
+    }
+});
+
 // Route untuk dynamic CMS pages
 router.get('/page/:slug', checkSports, async (req, res) => {
     try {

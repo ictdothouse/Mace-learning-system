@@ -40,7 +40,7 @@ router.get('/module/:moduleId', requireAdminOrTeacher, async (req, res) => {
 // POST /api/levels - Create new level dalam modul
 router.post('/', requireAdminOrTeacher, async (req, res) => {
   try {
-    const { moduleId, name, description, order } = req.body;
+    const { moduleId, name, name_en, description, description_en, targetAudience, targetAudience_en, duration, duration_en, order } = req.body;
     
     // Validation
     if (!moduleId || !name) {
@@ -70,7 +70,13 @@ router.post('/', requireAdminOrTeacher, async (req, res) => {
     const level = new Level({
       moduleId,
       name,
+      name_en: name_en || '',
       description: description || '',
+      description_en: description_en || '',
+      targetAudience: targetAudience || '',
+      targetAudience_en: targetAudience_en || '',
+      duration: duration || '',
+      duration_en: duration_en || '',
       order: finalOrder
     });
     
@@ -91,7 +97,7 @@ router.post('/', requireAdminOrTeacher, async (req, res) => {
 router.put('/:id', requireAdminOrTeacher, async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, description, order, isLocked } = req.body;
+    const { name, name_en, description, description_en, targetAudience, targetAudience_en, duration, duration_en, order, isLocked } = req.body;
     
     const level = await Level.findById(id);
     if (!level) {
@@ -100,7 +106,13 @@ router.put('/:id', requireAdminOrTeacher, async (req, res) => {
     
     // Update fields
     if (name !== undefined) level.name = name;
+    if (name_en !== undefined) level.name_en = name_en;
     if (description !== undefined) level.description = description;
+    if (description_en !== undefined) level.description_en = description_en;
+    if (targetAudience !== undefined) level.targetAudience = targetAudience;
+    if (targetAudience_en !== undefined) level.targetAudience_en = targetAudience_en;
+    if (duration !== undefined) level.duration = duration;
+    if (duration_en !== undefined) level.duration_en = duration_en;
     if (order !== undefined) level.order = order;
     if (isLocked !== undefined) level.isLocked = isLocked;
     

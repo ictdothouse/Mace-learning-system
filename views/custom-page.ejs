@@ -146,8 +146,8 @@
                             <%= module1 ? module1.title : 'PLAY SAFE, WIN STRONG' %>
                         </h4>
                         <div>
-                            <% if (module1 && module1.firstLessonId) { %>
-                                <a href="/lesson/<%= module1.firstLessonId %>" class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-2.5 rounded-lg transition shadow-md hover:shadow-lg">
+                            <% if (module1) { %>
+                                <a href="/module/<%= module1._id %>" class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-2.5 rounded-lg transition shadow-md hover:shadow-lg">
                                     <%= lang === 'en' ? 'Start' : 'Mula' %>
                                 </a>
                             <% } else { %>

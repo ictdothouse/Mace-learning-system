@@ -149,6 +149,26 @@
                 </div>
             </div>
 
+            <!-- Levels Management UI (Only when editing and module system is enabled) -->
+            <% if (editMode === 'edit') { %>
+                <div id="levels-manager-section" class="mb-8 p-6 bg-purple-50/50 rounded-xl border border-purple-100 <%= module.hasLevels ? '' : 'hidden' %>">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-bold text-purple-900 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+                            Peringkat Modul (Levels)
+                        </h3>
+                        <button type="button" onclick="openAddLevelModal()" class="bg-purple-600 hover:bg-purple-700 text-white text-xs px-4 py-2 rounded-lg font-semibold transition shadow-sm">
+                            + Tambah Level
+                        </button>
+                    </div>
+
+                    <!-- Levels List Container -->
+                    <div id="levels-list" class="space-y-3">
+                        <p class="text-sm text-gray-500 italic">Memuatkan peringkat...</p>
+                    </div>
+                </div>
+            <% } %>
+
             <!-- Submit Buttons -->
             <div class="flex gap-4 pt-6 border-t border-gray-100">
                 <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition shadow-sm">
@@ -375,5 +395,229 @@
             }
         }
     </script>
+
+    <% if (editMode === 'edit') { %>
+    <!-- Add/Edit Level Modal -->
+    <div id="levelModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl w-full max-w-2xl p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center mb-6 border-b pb-4">
+                <h3 id="modalTitle" class="text-xl font-bold text-gray-900">Tambah Level Baru</h3>
+                <button type="button" onclick="closeLevelModal()" class="text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
+            </div>
+            
+            <form id="levelForm" onsubmit="saveLevel(event)">
+                <input type="hidden" id="levelId" name="id">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Level (BM)</label>
+                        <input type="text" id="levelName" required class="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Level (EN)</label>
+                        <input type="text" id="levelNameEn" class="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Penerangan (BM)</label>
+                        <textarea id="levelDesc" rows="2" class="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Penerangan (EN)</label>
+                        <textarea id="levelDescEn" rows="2" class="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Kumpulan Sasaran (BM)</label>
+                        <input type="text" id="levelTarget" placeholder="Contoh: Atlet peringkat kebangsaan" class="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Kumpulan Sasaran (EN)</label>
+                        <input type="text" id="levelTargetEn" placeholder="Contoh: Athlete at national level" class="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Anggaran Masa (BM)</label>
+                        <input type="text" id="levelDuration" placeholder="Contoh: 10 - 15 minit" class="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Anggaran Masa (EN)</label>
+                        <input type="text" id="levelDurationEn" placeholder="Contoh: 10 - 15 mins" class="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Susunan (Order)</label>
+                        <input type="number" id="levelOrder" value="1" min="1" class="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="flex items-center mt-6">
+                        <input type="checkbox" id="levelLocked" class="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                        <label for="levelLocked" class="ml-2 text-sm font-semibold text-gray-700">Kunci Level (Locked)</label>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 border-t pt-4">
+                    <button type="submit" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 rounded-lg transition" id="saveLevelBtn">Simpan</button>
+                    <button type="button" onclick="closeLevelModal()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 rounded-lg transition">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Levels Manager JS -->
+    <script>
+        const moduleId = '<%= module ? module._id : "" %>';
+        
+        async function loadLevels() {
+            if (!moduleId) return;
+            const container = document.getElementById('levels-list');
+            try {
+                const res = await fetch(`/api/levels/${moduleId}`);
+                const result = await res.json();
+                if (result.success && result.data.length > 0) {
+                    container.innerHTML = result.data.map(lvl => {
+                        // Secure stringifying for HTML onclick arguments
+                        const safeLvl = encodeURIComponent(JSON.stringify(lvl));
+                        return `
+                        <div class="bg-white p-4 rounded-xl border border-purple-100 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition hover:border-purple-200">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded font-bold">Order ${lvl.order}</span>
+                                    <h4 class="font-bold text-gray-800 text-base">${lvl.name}</h4>
+                                    ${lvl.name_en ? `<span class="text-xs text-gray-400">/ ${lvl.name_en}</span>` : ''}
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">${lvl.description || 'Tiada penerangan.'}</p>
+                                <div class="flex flex-wrap gap-x-4 mt-2 text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                                    <span><strong>Sasaran:</strong> ${lvl.targetAudience || '-'} ${lvl.targetAudience_en ? `(${lvl.targetAudience_en})` : ''}</span>
+                                    <span>|</span>
+                                    <span><strong>Masa:</strong> ${lvl.duration || '-'} ${lvl.duration_en ? `(${lvl.duration_en})` : ''}</span>
+                                    ${lvl.isLocked ? `<span>|</span><span class="text-red-500 font-bold">✓ Terkunci</span>` : ''}
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button type="button" onclick="openEditLevelModal('${safeLvl}')" class="bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded-lg text-xs font-semibold transition">Edit</button>
+                                <button type="button" onclick="deleteLevel('${lvl._id}')" class="bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded-lg text-xs font-semibold transition">Padam</button>
+                            </div>
+                        </div>
+                    `;
+                    }).join('');
+                } else {
+                    container.innerHTML = '<p class="text-sm text-gray-500 italic p-4 text-center bg-white rounded-xl border">Tiada peringkat (levels) didaftarkan untuk modul ini.</p>';
+                }
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = '<p class="text-sm text-red-500 font-semibold p-4 text-center bg-white rounded-xl border">Gagal memuatkan peringkat.</p>';
+            }
+        }
+
+        // Toggle levels manager based on page hasLevels checkbox
+        const hasLevelsCheckbox = document.getElementById('hasLevels');
+        const levelsManagerSection = document.getElementById('levels-manager-section');
+        if (hasLevelsCheckbox && levelsManagerSection) {
+            hasLevelsCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    levelsManagerSection.classList.remove('hidden');
+                    loadLevels();
+                } else {
+                    levelsManagerSection.classList.add('hidden');
+                }
+            });
+            // Initial load
+            if (hasLevelsCheckbox.checked) {
+                loadLevels();
+            }
+        }
+
+        function openAddLevelModal() {
+            document.getElementById('modalTitle').innerText = 'Tambah Level Baru';
+            document.getElementById('levelId').value = '';
+            document.getElementById('levelForm').reset();
+            document.getElementById('levelModal').classList.remove('hidden');
+        }
+
+        function openEditLevelModal(encodedLvl) {
+            const lvl = JSON.parse(decodeURIComponent(encodedLvl));
+            document.getElementById('modalTitle').innerText = 'Edit Level';
+            document.getElementById('levelId').value = lvl._id;
+            document.getElementById('levelName').value = lvl.name || '';
+            document.getElementById('levelNameEn').value = lvl.name_en || '';
+            document.getElementById('levelDesc').value = lvl.description || '';
+            document.getElementById('levelDescEn').value = lvl.description_en || '';
+            document.getElementById('levelTarget').value = lvl.targetAudience || '';
+            document.getElementById('levelTargetEn').value = lvl.targetAudience_en || '';
+            document.getElementById('levelDuration').value = lvl.duration || '';
+            document.getElementById('levelDurationEn').value = lvl.duration_en || '';
+            document.getElementById('levelOrder').value = lvl.order || 1;
+            document.getElementById('levelLocked').checked = lvl.isLocked || false;
+            document.getElementById('levelModal').classList.remove('hidden');
+        }
+
+        function closeLevelModal() {
+            document.getElementById('levelModal').classList.add('hidden');
+        }
+
+        async function saveLevel(e) {
+            e.preventDefault();
+            const id = document.getElementById('levelId').value;
+            const data = {
+                moduleId,
+                name: document.getElementById('levelName').value,
+                name_en: document.getElementById('levelNameEn').value,
+                description: document.getElementById('levelDesc').value,
+                description_en: document.getElementById('levelDescEn').value,
+                targetAudience: document.getElementById('levelTarget').value,
+                targetAudience_en: document.getElementById('levelTargetEn').value,
+                duration: document.getElementById('levelDuration').value,
+                duration_en: document.getElementById('levelDurationEn').value,
+                order: parseInt(document.getElementById('levelOrder').value) || 1,
+                isLocked: document.getElementById('levelLocked').checked
+            };
+
+            const url = id ? `/api/levels/${id}` : '/api/levels';
+            const method = id ? 'PUT' : 'POST';
+
+            try {
+                const res = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                if (result.success) {
+                    closeLevelModal();
+                    loadLevels();
+                } else {
+                    alert(result.message || 'Ralat menyimpan level');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Ralat sistem untuk menyimpan level');
+            }
+        }
+
+        async function deleteLevel(id) {
+            if (!confirm('Adakah anda pasti untuk memadam level ini?')) return;
+            try {
+                const res = await fetch(`/api/levels/${id}`, { method: 'DELETE' });
+                const result = await res.json();
+                if (result.success) {
+                    loadLevels();
+                } else {
+                    alert(result.message || 'Gagal memadam level');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Ralat sistem untuk memadam level');
+            }
+        }
+    </script>
+    <% } %>
 </body>
 </html>
