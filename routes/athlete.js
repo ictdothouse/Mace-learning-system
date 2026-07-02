@@ -101,7 +101,26 @@ const checkSession = (req, res, next) => req.session.athleteId ? next() : res.re
 // ==========================================
 // ROUTES UTAMA
 // ==========================================
-router.get('/', checkSports, (req, res) => res.render('entry', { error: null, sports: req.sports }));
+router.get('/', (req, res) => {
+    let lang = req.cookies && req.cookies.lang;
+    if (lang === 'en') {
+        res.redirect('/en');
+    } else {
+        res.redirect('/ms');
+    }
+});
+
+router.get('/ms', checkSports, (req, res) => {
+    res.cookie('lang', 'ms', { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: false });
+    res.locals.lang = 'ms';
+    res.render('entry', { error: null, sports: req.sports });
+});
+
+router.get('/en', checkSports, (req, res) => {
+    res.cookie('lang', 'en', { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: false });
+    res.locals.lang = 'en';
+    res.render('entry', { error: null, sports: req.sports });
+});
 
 router.post('/access', checkSports, async (req, res) => {
     const { action, fullName, icNumber, jantina, umur, negeri, sukan } = req.body;
