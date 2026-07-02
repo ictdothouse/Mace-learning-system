@@ -98,6 +98,41 @@ const checkSports = async (req, res, next) => {
 
 const checkSession = (req, res, next) => req.session.athleteId ? next() : res.redirect('/');
 
+const translateText = (text, lang) => {
+    if (!text || lang !== 'en') return text;
+    let result = text;
+    const mappings = [
+        {
+            ms: /Jom kuasai asas dulu sebelum jadi pro!/gi,
+            en: "Let's master the basics first before becoming a pro!"
+        },
+        {
+            ms: /Topik pembelajaran ini mengenai Peraturan Asas. Tonton topik ini dan uji kefahaman anda melalui Kuiz!/gi,
+            en: "This learning topic is about Basic Rules. Watch this topic and test your understanding through the Quiz!"
+        },
+        {
+            ms: /Jenis-Jenis Salah Laku: Kenali kesalahan, elak jadi pelaku!/gi,
+            en: "Types of Misconduct: Recognize mistakes, avoid being a perpetrator!"
+        },
+        {
+            ms: /Kenali kesalahan, elak jadi pelaku!/gi,
+            en: "Recognize mistakes, avoid being a perpetrator!"
+        },
+        {
+            ms: /Tonton topik ini dan uji kefahaman anda melalui Kuiz!/gi,
+            en: "Watch this topic and test your understanding through the Quiz!"
+        },
+        {
+            ms: /Ambil tindakan yang betul, laporkan tanpa ragu!/gi,
+            en: "Take the right action, report it without hesitation!"
+        }
+    ];
+    for (const m of mappings) {
+        result = result.replace(m.ms, m.en);
+    }
+    return result;
+};
+
 // ==========================================
 // ROUTES UTAMA
 // ==========================================
@@ -151,11 +186,19 @@ router.get('/dashboard', checkSession, async (req, res) => {
         // ⚡ Guna cache untuk lessons dan modules (bukan query DB setiap kali)
         const lessons = await getLessonsWithQuiz();
         const activeLessons = lessons.filter(l => l.isActive !== false);
+
+        // ⚡ Menterjemah tajuk & deskripsi lesson jika bahasa english dipilih
+        const lang = res.locals.lang || 'ms';
+        const translatedLessons = activeLessons.map(l => ({
+            ...l,
+            title: translateText(l.title, lang),
+            contentHtml: translateText(l.contentHtml, lang)
+        }));
             
         // ⚡ Ambil modules dari cache (extract unique dari lessons cache)
         const allModules = await Module.find().sort({ order: 1 }).lean();
             
-        res.render('dashboard', { athlete, lessons: activeLessons, allModules });
+        res.render('dashboard', { athlete, lessons: translatedLessons, allModules });
     } catch (err) { res.redirect('/'); }
 });
 
@@ -167,7 +210,16 @@ router.get('/lesson/:id', checkSession, async (req, res) => {
 
         // ✅ AMBIL DATA DARI DATABASE
         const lessons = await getLessonsWithQuiz();
-        const lesson = lessons[moduleId - 1];
+
+        // ⚡ Menterjemah tajuk & deskripsi lesson jika bahasa english dipilih
+        const lang = res.locals.lang || 'ms';
+        const translatedLessons = lessons.map(l => ({
+            ...l,
+            title: translateText(l.title, lang),
+            contentHtml: translateText(l.contentHtml, lang)
+        }));
+
+        const lesson = translatedLessons[moduleId - 1];
         if (!lesson) return res.status(404).send('Modul tidak dijumpai');
 
         let secureVideoUrl = null;
@@ -178,7 +230,7 @@ router.get('/lesson/:id', checkSession, async (req, res) => {
 
         res.render('lesson', { 
             athlete, lesson, moduleId, secureVideoUrl, quizResult,
-            allLessons: lessons,
+            allLessons: translatedLessons,
             error: req.session.error, success: req.session.success 
         });
         
