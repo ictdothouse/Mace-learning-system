@@ -829,7 +829,7 @@ router.get('/lessons', async (req, res) => {
 router.get('/lessons/new', async (req, res) => {
     try {
         const modules = await Module.find().sort({ title: 1 });
-        res.render('admin-edit-lesson', { page: 'lessons', lesson: null, modules, editMode: 'create', secureVideoUrl: null }); 
+        res.render('admin-edit-lesson', { page: 'lessons', lesson: null, modules, levels: [], editMode: 'create', secureVideoUrl: null }); 
     } catch (err) { 
         res.status(500).send('Ralat memuatkan borang.'); 
     }
@@ -847,8 +847,11 @@ router.get('/lessons/edit/:id', async (req, res) => {
             secureVideoUrl = await getSecureVideoUrl(lesson.videoUrl);
         }
         
-        res.render('admin-edit-lesson', { page: 'lessons', lesson, modules, editMode: 'edit', secureVideoUrl });
+        const levels = lesson.moduleId ? await Level.find({ moduleId: lesson.moduleId._id }).sort({ order: 1 }) : [];
+        
+        res.render('admin-edit-lesson', { page: 'lessons', lesson, modules, levels, editMode: 'edit', secureVideoUrl });
     } catch (err) { 
+        console.error('Edit Lesson Form Error:', err);
         res.status(500).send('Ralat memuatkan borang.'); 
     }
 });
@@ -856,12 +859,13 @@ router.get('/lessons/edit/:id', async (req, res) => {
 // POST: Cipta Lesson Baru
 router.post('/lessons/new', async (req, res) => {
     try {
-        const { moduleId, title, contentHtml, videoUrl, passMark, showPoints, order, isActive, questionsJson } = req.body;
+        const { moduleId, levelId, title, contentHtml, videoUrl, passMark, showPoints, order, isActive, questionsJson } = req.body;
         let quizQuestions = [];
         try { quizQuestions = JSON.parse(questionsJson || '[]'); } catch(e) {}
         
         const lessonData = {
             moduleId,
+            levelId: levelId || null,
             title,
             contentHtml, // TinyMCE content
             videoUrl: videoUrl || '',
@@ -883,7 +887,7 @@ router.post('/lessons/new', async (req, res) => {
 // POST: Update Lesson
 router.post('/lessons/edit/:id', async (req, res) => {
     try {
-        const { moduleId, title, contentHtml, videoUrl, passMark, showPoints, order, isActive, questionsJson } = req.body;
+        const { moduleId, levelId, title, contentHtml, videoUrl, passMark, showPoints, order, isActive, questionsJson } = req.body;
         let quizQuestions = [];
         try { quizQuestions = JSON.parse(questionsJson || '[]'); } catch(e) {}
         
@@ -892,6 +896,7 @@ router.post('/lessons/edit/:id', async (req, res) => {
 
         const updateData = {
             moduleId,
+            levelId: levelId || null,
             title,
             contentHtml,
             videoUrl: videoUrl !== undefined ? videoUrl : lesson.videoUrl,

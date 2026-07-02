@@ -22,7 +22,7 @@
         <!-- Form -->
         <form action="" method="POST" class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 space-y-6">
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- Pilihan Silibus/Modul Induk -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Modul Utama *</label>
@@ -30,6 +30,17 @@
                         <option value="">-- Pilih Modul --</option>
                         <% (modules || []).forEach(m => { %>
                             <option value="<%= m._id %>" <%= (lesson && lesson.moduleId && lesson.moduleId._id.toString() === m._id.toString()) ? 'selected' : '' %>><%= m.title %></option>
+                        <% }) %>
+                    </select>
+                </div>
+
+                <!-- Peringkat (Level) Dropdown -->
+                <div id="levelSelectContainer" class="hidden">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Peringkat (Level)</label>
+                    <select name="levelId" id="levelId" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none bg-white transition">
+                        <option value="">-- Tiada (Standalone Lesson) --</option>
+                        <% (levels || []).forEach(lvl => { %>
+                            <option value="<%= lvl._id %>" <%= (lesson && lesson.levelId && lesson.levelId.toString() === lvl._id.toString()) ? 'selected' : '' %>><%= lvl.name %></option>
                         <% }) %>
                     </select>
                 </div>
@@ -527,6 +538,53 @@
                 }
             }
         });
+
+        // Dynamic Level dropdown handler
+        const moduleSelect = document.querySelector('select[name="moduleId"]');
+        const levelSelectContainer = document.getElementById('levelSelectContainer');
+        const levelSelect = document.getElementById('levelId');
+
+        async function updateLevelsDropdown(moduleId, selectedLevelId = null) {
+            if (!moduleId) {
+                levelSelectContainer.classList.add('hidden');
+                levelSelect.innerHTML = '<option value="">-- Tiada (Standalone Lesson) --</option>';
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/levels/module/${moduleId}`);
+                const result = await res.json();
+                
+                if (result.success && result.data && result.data.length > 0) {
+                    levelSelectContainer.classList.remove('hidden');
+                    let html = '<option value="">-- Tiada (Standalone Lesson) --</option>';
+                    result.data.forEach(lvl => {
+                        const isSel = selectedLevelId && selectedLevelId.toString() === lvl._id.toString() ? 'selected' : '';
+                        html += `<option value="${lvl._id}" ${isSel}>${lvl.name}</option>`;
+                    });
+                    levelSelect.innerHTML = html;
+                } else {
+                    levelSelectContainer.classList.add('hidden');
+                    levelSelect.innerHTML = '<option value="">-- Tiada (Standalone Lesson) --</option>';
+                }
+            } catch (err) {
+                console.error('Error fetching levels:', err);
+                levelSelectContainer.classList.add('hidden');
+            }
+        }
+
+        if (moduleSelect) {
+            moduleSelect.addEventListener('change', function() {
+                updateLevelsDropdown(this.value);
+            });
+            
+            // Initial load on page mount
+            const initialModuleId = moduleSelect.value;
+            const initialLevelId = '<%= lesson && lesson.levelId ? lesson.levelId.toString() : "" %>';
+            if (initialModuleId) {
+                updateLevelsDropdown(initialModuleId, initialLevelId);
+            }
+        }
 
         // Form submit overlay for saving status
         document.querySelector('form').addEventListener('submit', function(e) {

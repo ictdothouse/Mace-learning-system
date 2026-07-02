@@ -479,7 +479,7 @@
             if (!moduleId) return;
             const container = document.getElementById('levels-list');
             try {
-                const res = await fetch(`/api/levels/${moduleId}`);
+                const res = await fetch(`/api/levels/module/${moduleId}`);
                 const result = await res.json();
                 if (result.success && result.data.length > 0) {
                     container.innerHTML = result.data.map(lvl => {
