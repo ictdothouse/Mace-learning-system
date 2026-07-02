@@ -184,7 +184,16 @@
                             }
                         ];
 
-                        const cards = (page.modulesConfig && page.modulesConfig.length === 4) ? page.modulesConfig : defaultCards;
+                        const cards = [...defaultCards];
+                        if (page.modulesConfig && Array.isArray(page.modulesConfig)) {
+                            page.modulesConfig.forEach((card, idx) => {
+                                if (idx < cards.length) {
+                                    if (card.title) cards[idx].title = card.title;
+                                    if (card.statusText) cards[idx].statusText = card.statusText;
+                                    if (card.imageUrl) cards[idx].imageUrl = card.imageUrl;
+                                }
+                            });
+                        }
                     %>
 
                     <% cards.forEach((card, idx) => { %>
