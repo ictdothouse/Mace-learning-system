@@ -14,7 +14,7 @@
   "nav_logout": "Log Keluar",
   "nav_back_main": "Kembali ke Laman Utama",
 
-  "site_title": "eLearning Atlit MACE",
+  "site_title": "eLearning Atlet MACE",
   "site_subtitle": "Majlis Sukan Negara Malaysia",
 
   "entry_tab_new": "Pengguna Baru",
@@ -45,14 +45,14 @@
   "entry_footer": "© 2024 Majlis Sukan Negara. Hak cipta terpelihara.",
 
   "dashboard_title": "Dashboard Pemantauan",
-  "dashboard_subtitle": "Statistik terkini prestasi atlit MACE secara live.",
+  "dashboard_subtitle": "Statistik terkini prestasi atlet MACE secara live.",
   "dashboard_total": "Jumlah Keseluruhan",
-  "dashboard_passed": "Atlit Lulus",
+  "dashboard_passed": "Atlet Lulus",
   "dashboard_learning": "Masih Belajar",
-  "dashboard_progress": "Kemajuan Atlit",
+  "dashboard_progress": "Kemajuan Atlet",
   "dashboard_by_state": "Mengikut Negeri",
   "dashboard_by_state_header": "Pecahan Mengikut Negeri",
-  "dashboard_athlete_list": "Senarai Atlit Terkini (100 Terakhir)",
+  "dashboard_athlete_list": "Senarai Atlet Terkini (100 Terakhir)",
   "dashboard_csv": "Muat Turun CSV",
   "dashboard_welcome_back": "Selamat kembali",
   "dashboard_overall": "Kemajuan Keseluruhan",
@@ -68,7 +68,7 @@
   "dashboard_btn_start": "▶ Mula Sekarang",
   "dashboard_btn_locked": "🔒 Terkunci",
   "dashboard_congrats": "Tahniah! Anda Berjaya!",
-  "dashboard_cert_msg": "Anda telah berjaya menyelesaikan semua modul eLearning Atlit MACE. Muat turun sijil anda sekarang!",
+  "dashboard_cert_msg": "Anda telah berjaya menyelesaikan semua modul eLearning Atlet MACE. Muat turun sijil anda sekarang!",
   "dashboard_download_cert": "📜 Muat Turun Sijil",
 
   "lesson_nav_back": "← Dashboard",
