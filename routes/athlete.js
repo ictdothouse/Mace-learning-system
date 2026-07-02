@@ -640,8 +640,8 @@ router.get('/page/:slug', checkSports, async (req, res) => {
         
         const lang = res.locals.lang || 'ms';
         const pageData = page.toObject();
-        pageData.title = lang === 'en' ? (pageData.title_en || pageData.title) : pageData.title;
-        pageData.content = lang === 'en' ? (pageData.content_en || pageData.content) : pageData.content;
+        pageData.title = translateText(lang === 'en' ? (pageData.title_en || pageData.title) : pageData.title, lang);
+        pageData.content = translateText(lang === 'en' ? (pageData.content_en || pageData.content) : pageData.content, lang);
         
         if (pageData.customTemplate === 'contact' && pageData.contactConfig) {
             pageData.contactConfig.bannerTitle = translateText(pageData.contactConfig.bannerTitle, lang);
