@@ -5,14 +5,32 @@ const Level = require('../models/Level');
 const Lesson = require('../models/Lesson');
 const { authenticate, authorize } = require('../middleware/auth');
 
-// Middleware untuk check role (Admin atau Teacher sahaja)
-const requireAdminOrTeacher = [authenticate, (req, res, next) => {
-  if (req.user.role === 'admin' || req.user.role === 'teacher') {
-    next();
-  } else {
-    res.status(403).json({ message: 'Akses ditolak. Hanya Admin dan Teacher.' });
+// Middleware untuk check role (Admin atau Teacher sahaja) atau Master Admin (Basic Auth)
+const requireAdminOrTeacher = async (req, res, next) => {
+  // 1. Cuba check session dlu
+  if (req.session && req.session.userId) {
+    try {
+      const User = require('../models/User');
+      const user = await User.findById(req.session.userId);
+      if (user && user.isActive && (user.role === 'admin' || user.role === 'teacher')) {
+        req.user = user;
+        return next();
+      }
+    } catch (e) {
+      console.error('Session user check error in levels API:', e);
+    }
   }
-}];
+  
+  // 2. Cuba check Basic Auth (untuk Master Admin)
+  const b64auth = (req.headers.authorization || '').split(' ')[1] || '';
+  const [login, password] = Buffer.from(b64auth, 'base64').toString().split(':');
+  if (login && password && login === process.env.ADMIN_USER && password === process.env.ADMIN_PASS) {
+    req.user = { role: 'admin', fullName: 'Master Admin' };
+    return next();
+  }
+  
+  res.status(401).json({ message: 'Sila login terlebih dahulu' });
+};
 
 // ==================== LEVEL MANAGEMENT ====================
 
