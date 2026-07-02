@@ -140,16 +140,16 @@ const translateText = (text, lang) => {
             en: "This is important to protect you and create a safe and integrated sports environment."
         },
         {
+            ms: /Sebarang pertanyaan atau maklumbalas, hubungi kami menerusi email\s*:/gi,
+            en: "For any inquiries or feedback, contact us via email:"
+        },
+        {
             ms: /^Hubungi$/gi,
             en: "Contact Us"
         },
         {
             ms: /Hubungi Kami/gi,
             en: "Contact Us"
-        },
-        {
-            ms: /Sebarang pertanyaan atau maklumbalas, hubungi kami menerusi email\s*:/gi,
-            en: "For any inquiries or feedback, contact us via email:"
         }
     ];
     for (const m of mappings) {
