@@ -1,66 +1,50 @@
 <!DOCTYPE html>
 <html lang="<%= lang === 'en' ? 'en' : 'ms' %>">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>
-        <%= lang==='en' ? 'System Busy - Please Wait' : 'Sistem Sibuk - Sila Tunggu' %> - MACE
-    </title>
+    <title><%= lang === 'en' ? 'Preparing Your Profile - Please Wait' : 'Menyediakan Profil - Sila Tunggu' %> - MACE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
+        body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-
 <body class="bg-gray-50 min-h-screen flex items-center justify-center p-6">
-    <div
-        class="max-w-md w-full bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.08)] p-8 text-center">
-        <!-- Spinner -->
+    <div class="max-w-md w-full bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.08)] p-8 text-center">
+        <!-- Loader Spinner (Beautiful Emerald Green Spinner) -->
         <div class="flex justify-center mb-6">
-            <svg class="animate-spin h-16 w-16 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none"
-                viewBox="0 0 24 24">
+            <svg class="animate-spin h-16 w-16 text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                </path>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
         </div>
 
         <h1 class="text-2xl font-extrabold text-gray-900 mb-3 uppercase tracking-tight">
-            <%= lang==='en' ? 'Server is Busy' : 'Trafik Sangat Tinggi' %>
+            <%= lang === 'en' ? 'Preparing Your Profile' : 'Profil Anda Sedang Disediakan' %>
         </h1>
         <p class="text-gray-600 mb-6 text-sm leading-relaxed">
-            <%= lang==='en'
-                ? 'To ensure system stability, we are managing the registration flow. Please wait while we process your request.'
-                : 'Bagi memastikan kestabilan portal, kemasukan pendaftaran sedang dihadkan seketika. Sila tunggu sebentar.'
-                %>
+            <%= lang === 'en' ? 'Please wait a moment while we set up your athlete profile. This is to ensure a smooth and seamless learning experience.' : 'Sila tunggu sebentar sementara sistem kami menyediakan profil pembelajaran anda. Ini bagi memastikan kelancaran sesi pembelajaran anda.' %>
         </p>
 
-        <!-- Countdown -->
-        <div class="bg-orange-50 rounded-xl p-4 mb-6 border border-orange-100">
-            <p class="text-sm font-semibold text-orange-800">
-                <%= lang==='en' ? 'Auto-retrying in' : 'Cubaan semula automatik dalam' %> <span id="countdown"
-                        class="text-lg font-bold">8</span>
-                    <%= lang==='en' ? 'seconds...' : 'saat...' %>
+        <!-- Countdown in Emerald Soft Green Theme -->
+        <div class="bg-emerald-50 rounded-xl p-4 mb-6 border border-emerald-100">
+            <p class="text-sm font-semibold text-emerald-800">
+                <%= lang === 'en' ? 'Launching portal in' : 'Melancarkan portal dalam masa' %> <span id="countdown" class="text-lg font-bold">8</span> <%= lang === 'en' ? 'seconds...' : 'saat...' %>
             </p>
         </div>
 
         <!-- Hidden Form to preserve inputs -->
         <form id="retryForm" action="/access" method="POST" class="hidden">
             <% if (locals.formData) { %>
-                <% Object.keys(formData).forEach(key=> { %>
+                <% Object.keys(formData).forEach(key => { %>
                     <input type="hidden" name="<%= key %>" value="<%= formData[key] %>">
-                    <% }) %>
-                        <% } %>
+                <% }) %>
+            <% } %>
         </form>
 
         <p class="text-[11px] text-gray-400">
-            <%= lang==='en' ? 'Please do not close or refresh this page.'
-                : 'Sila jangan tutup atau refresh halaman ini.' %>
+            <%= lang === 'en' ? 'Your data is safe. Please do not close this page.' : 'Data anda selamat disimpan. Sila jangan tutup halaman ini.' %>
         </p>
     </div>
 
@@ -79,5 +63,4 @@
         }, 1000);
     </script>
 </body>
-
 </html>
