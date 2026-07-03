@@ -20,6 +20,12 @@
             </svg>
         </div>
 
+        <!-- Waiting Room Badge -->
+        <div class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-full mb-4 border border-emerald-100">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <%= lang === 'en' ? 'You are in the Waiting Room' : 'Anda berada di Ruang Menunggu' %>
+        </div>
+
         <h1 class="text-2xl font-extrabold text-gray-900 mb-3 uppercase tracking-tight">
             <%= lang === 'en' ? 'Preparing Your Profile' : 'Profil Anda Sedang Disediakan' %>
         </h1>
