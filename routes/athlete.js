@@ -82,6 +82,12 @@ let sportsCache = null;
 let sportsCacheTime = 0;
 const SPORTS_CACHE_TTL = 10 * 60 * 1000; // 10 minit
 
+// Queue Guard for Registration: Mencegah MongoDB Atlas Free Tier tersumbat semasa peak pendaftaran
+let registrationCounter = 0;
+setInterval(() => {
+    registrationCounter = 0;
+}, 10000); // Reset pembilang setiap 10 saat
+
 const checkSports = async (req, res, next) => {
     const now = Date.now();
     if (!sportsCache || (now - sportsCacheTime > SPORTS_CACHE_TTL)) {
@@ -186,6 +192,16 @@ router.post('/access', checkSports, async (req, res) => {
     const { action, fullName, icNumber, jantina, umur, negeri, sukan } = req.body;
     try {
         if (action === 'new') {
+            // Mencegah lambakan pendaftaran (maksima 20 pendaftaran dalam 10 saat)
+            if (registrationCounter >= 20) {
+                const lang = res.locals.lang || 'ms';
+                return res.render('waiting-room', {
+                    lang,
+                    formData: req.body
+                });
+            }
+            registrationCounter++;
+
             const existing = await Athlete.findOne({ icNumber });
             if (existing) return res.render('entry', { error: 'No. IC sudah berdaftar. Sila guna "Semak Akaun".', sports: req.sports });
             const newAthlete = await Athlete.create({ fullName, icNumber, jantina, umur, negeriWakil: negeri, sukan });
