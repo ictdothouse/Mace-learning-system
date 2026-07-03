@@ -6,6 +6,7 @@ const MongoStore = require('connect-mongo');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 const i18nMiddleware = require('./middleware/i18n');
 const brandingMiddleware = require('./middleware/branding');
 
@@ -32,6 +33,10 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // 4. Middleware Dasar
+app.use(helmet({
+    contentSecurityPolicy: false, // Ditutup supaya tidak menghalang pemuatan video R2/TinyMCE/FontCDN luaran
+    crossOriginEmbedderPolicy: false
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
