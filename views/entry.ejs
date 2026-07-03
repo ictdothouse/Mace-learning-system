@@ -166,16 +166,25 @@
                                 <p class="text-xs text-slate-300 font-medium"><%= lang === 'en' ? (branding.homeFormSubtitle_en || 'Register or resume your athlete learning path') : (branding.homeFormSubtitle || 'Daftar atau sambung modul latihan atlet anda') %></p>
                             </div>
 
-                            <!-- Error Message -->
+                            <!-- Error/Info Message -->
                             <% if (locals.error) { %>
-                                <div class="mx-6 mt-4 bg-red-50/50 border border-red-200 p-4 rounded-2xl">
+                                <% 
+                                    const isInfo = error.includes('berdaftar') || error.includes('registered') || error.includes('ditemui') || error.includes('found');
+                                %>
+                                <div class="mx-6 mt-4 p-4 rounded-2xl border <%= isInfo ? 'bg-blue-50/50 border-blue-200 text-blue-800' : 'bg-red-50/50 border-red-200 text-red-800' %>">
                                     <div class="flex items-start gap-2.5">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
+                                        <% if (isInfo) { %>
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        <% } else { %>
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        <% } %>
                                         <div>
-                                            <p class="font-bold text-red-800 text-xs"><%= __('entry_error_label') %></p>
-                                            <p class="text-red-700 text-xs mt-0.5"><%= error %></p>
+                                            <p class="font-bold text-xs"><%= isInfo ? (lang === 'en' ? 'Account Active' : 'Akaun Sedia Ada') : __('entry_error_label') %></p>
+                                            <p class="text-xs mt-0.5 <%= isInfo ? 'text-blue-700' : 'text-red-700' %>"><%= error %></p>
                                         </div>
                                     </div>
                                 </div>
