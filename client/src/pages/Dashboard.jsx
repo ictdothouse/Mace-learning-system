@@ -45,6 +45,13 @@ export default function Dashboard() {
     }
   }, [auth, navigate]);
 
+  useEffect(() => {
+    if (branding.siteName) {
+      const siteName = lang === 'en' ? (branding.siteName_en || branding.siteName) : branding.siteName;
+      document.title = `${siteName} - ${t('dashboard_title_tab', 'Dashboard')}`;
+    }
+  }, [branding, lang]);
+
   const handleLogout = async () => {
     try {
       await axios.post('/api/auth/logout');

@@ -31,6 +31,27 @@ export function AppProvider({ children }) {
     return () => axios.interceptors.response.eject(interceptor);
   }, []);
 
+  const updateBrandingMetadata = (metadata, currentLang) => {
+    if (!metadata) return;
+    const titleVal = currentLang === 'en' 
+      ? (metadata.siteName_en || metadata.siteName || 'MACE Learning System')
+      : (metadata.siteName || 'MACE Learning System');
+
+    if (document.title !== titleVal) {
+      document.title = titleVal;
+    }
+
+    if (metadata.faviconUrl) {
+      let link = document.querySelector("link[rel~='icon']");
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        document.head.appendChild(link);
+      }
+      link.href = metadata.faviconUrl;
+    }
+  };
+
   const fetchStatus = async () => {
     try {
       // Parallel requests for optimal loading speed
@@ -43,6 +64,7 @@ export function AppProvider({ children }) {
       setAuth(authRes.data);
       setBranding(brandingRes.data);
       setTranslations(localesRes.data);
+      updateBrandingMetadata(brandingRes.data, lang);
     } catch (err) {
       console.error('Error initializing MACE app context:', err);
     } finally {

@@ -86,6 +86,13 @@ export default function LessonPlayer() {
     }
   }, [auth, id, navigate]);
 
+  useEffect(() => {
+    if (branding.siteName && data?.lesson) {
+      const siteName = lang === 'en' ? (branding.siteName_en || branding.siteName) : branding.siteName;
+      document.title = `${siteName} - ${data.lesson.title}`;
+    }
+  }, [branding, data, lang]);
+
   // Video time update event to trigger watched state when 95% complete
   const handleVideoTimeUpdate = () => {
     if (videoWatched || !videoRef.current) return;
