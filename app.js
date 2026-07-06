@@ -12,6 +12,13 @@ const compression = require('compression');
 const i18nMiddleware = require('./middleware/i18n');
 const brandingMiddleware = require('./middleware/branding');
 
+// 0. WAJIB: Pastikan SESSION_SECRET dikonfigurasikan dalam .env
+if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.length < 32) {
+    console.error('❌ FATAL: SESSION_SECRET tidak dikonfigurasikan atau terlalu pendek (min 32 chars) dalam .env');
+    console.error('   Sila jana dengan: node -e "console.log(require(\'crypto\').randomBytes(48).toString(\'hex\'))"');
+    process.exit(1);
+}
+
 // 1. IMPORT ROUTES
 const athleteRoutes = require('./routes/athlete').router; 
 const adminRoutes = require('./routes/admin');
@@ -231,7 +238,7 @@ function startServer() {
 
     // 7. Konfigurasi Session
     app.use(session({
-        secret: process.env.SESSION_SECRET || 'rahsia_default_yang_perlu_ditukar',
+        secret: process.env.SESSION_SECRET,
         resave: false,
         saveUninitialized: false,
         store: MongoStore.create({

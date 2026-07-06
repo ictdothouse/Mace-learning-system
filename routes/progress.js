@@ -20,99 +20,109 @@ const requireStudent = [authenticate, (req, res, next) => {
 // ==================== GET PROGRESS PELAJAR ====================
 
 // GET /api/progress/modules - Dapatkan semua modul yang boleh diakses pelajar dengan progress
+// ⚡ OPTIMIZED: Guna batch query + in-memory aggregation untuk elak N+1 problem
 router.get('/modules', requireStudent, async (req, res) => {
   try {
     const userId = req.user._id;
     
-    // Dapatkan semua modul aktif
-    const modules = await Module.find({ isActive: true }).sort({ order: 1 });
+    // Step 1: Dapatkan semua data sekaligus (3 queries sahaja, tanpa mengira bilangan modul/level)
+    const [modules, allLessons, allLessonProgress, allLevelProgress] = await Promise.all([
+      Module.find({ isActive: true }).sort({ order: 1 }).lean(),
+      Lesson.find({ isActive: true }).select('moduleId levelId _id').lean(),
+      LessonProgress.find({ userId }).select('moduleId levelId lessonId isCompleted bestScore').lean(),
+      LevelProgress.find({ userId }).select('moduleId levelId isCompleted bestScore averageScore').lean()
+    ]);
     
-    const modulesWithProgress = await Promise.all(
-      modules.map(async (module) => {
-        let progressData = {
-          moduleId: module._id,
-          title: module.title,
-          description: module.description,
-          thumbnail: module.thumbnail,
-          hasLevels: module.hasLevels,
-          isSequential: module.isSequential,
-          totalLessons: 0,
-          completedLessons: 0,
-          overallProgress: 0,
-          bestScore: 0
-        };
-        
-        if (module.hasLevels) {
-          // Modul dengan level system
-          const levels = await Level.find({ moduleId: module._id }).sort({ order: 1 });
-          
-          const levelsWithProgress = await Promise.all(
-            levels.map(async (level) => {
-              const lessonCount = await Lesson.countDocuments({ 
-                moduleId: module._id, 
-                levelId: level._id,
-                isActive: true 
-              });
-              
-              const completedCount = await LessonProgress.countDocuments({
-                userId,
-                moduleId: module._id,
-                levelId: level._id,
-                isCompleted: true
-              });
-              
-              const levelProg = await LevelProgress.findOne({
-                userId,
-                levelId: level._id
-              });
-              
-              return {
-                levelId: level._id,
-                name: level.name,
-                description: level.description,
-                order: level.order,
-                isLocked: level.isLocked,
-                totalLessons: lessonCount,
-                completedLessons: completedCount,
-                progress: lessonCount > 0 ? Math.round((completedCount / lessonCount) * 100) : 0,
-                isCompleted: levelProg?.isCompleted || false,
-                bestScore: levelProg?.bestScore || 0,
-                averageScore: levelProg?.averageScore || 0
-              };
-            })
-          );
-          
-          const totalLessons = levelsWithProgress.reduce((sum, l) => sum + l.totalLessons, 0);
-          const completedLessons = levelsWithProgress.reduce((sum, l) => sum + l.completedLessons, 0);
-          
-          progressData.levels = levelsWithProgress;
-          progressData.totalLessons = totalLessons;
-          progressData.completedLessons = completedLessons;
-          progressData.overallProgress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
-          
-        } else {
-          // Modul tanpa level (standalone lessons)
-          const lessonCount = await Lesson.countDocuments({ 
-            moduleId: module._id, 
-            levelId: null,
-            isActive: true 
-          });
-          
-          const completedCount = await LessonProgress.countDocuments({
-            userId,
-            moduleId: module._id,
-            levelId: null,
-            isCompleted: true
-          });
-          
-          progressData.totalLessons = lessonCount;
-          progressData.completedLessons = completedCount;
-          progressData.overallProgress = lessonCount > 0 ? Math.round((completedCount / lessonCount) * 100) : 0;
-        }
-        
-        return progressData;
-      })
-    );
+    // Step 2: Bina lookup maps dalam memory (tiada query DB tambahan)
+    const lessonsByModule = {};
+    const lessonsByLevel = {};
+    for (const l of allLessons) {
+      const mKey = l.moduleId?.toString();
+      const lvKey = l.levelId?.toString() || 'none';
+      if (mKey) {
+        if (!lessonsByModule[mKey]) lessonsByModule[mKey] = [];
+        lessonsByModule[mKey].push(l);
+        const combined = `${mKey}__${lvKey}`;
+        if (!lessonsByLevel[combined]) lessonsByLevel[combined] = [];
+        lessonsByLevel[combined].push(l);
+      }
+    }
+    
+    const progressByLesson = {};
+    for (const p of allLessonProgress) {
+      progressByLesson[p.lessonId?.toString()] = p;
+    }
+    
+    const progressByLevel = {};
+    for (const p of allLevelProgress) {
+      progressByLevel[p.levelId?.toString()] = p;
+    }
+    
+    // Step 3: Compute progress sepenuhnya dalam memory
+    const [levels] = await Promise.all([
+      Level.find({ moduleId: { $in: modules.map(m => m._id) } }).sort({ order: 1 }).lean()
+    ]);
+    
+    const levelsByModule = {};
+    for (const lv of levels) {
+      const key = lv.moduleId?.toString();
+      if (!levelsByModule[key]) levelsByModule[key] = [];
+      levelsByModule[key].push(lv);
+    }
+    
+    const modulesWithProgress = modules.map(module => {
+      const mKey = module._id.toString();
+      let progressData = {
+        moduleId: module._id,
+        title: module.title,
+        description: module.description,
+        thumbnail: module.thumbnail,
+        hasLevels: module.hasLevels,
+        isSequential: module.isSequential,
+        totalLessons: 0,
+        completedLessons: 0,
+        overallProgress: 0,
+        bestScore: 0
+      };
+      
+      if (module.hasLevels) {
+        const moduleLevels = levelsByModule[mKey] || [];
+        const levelsWithProgress = moduleLevels.map(level => {
+          const lvKey = level._id.toString();
+          const combined = `${mKey}__${lvKey}`;
+          const levelLessons = lessonsByLevel[combined] || [];
+          const completedCount = levelLessons.filter(l => progressByLesson[l._id.toString()]?.isCompleted).length;
+          const levelProg = progressByLevel[lvKey];
+          return {
+            levelId: level._id,
+            name: level.name,
+            description: level.description,
+            order: level.order,
+            isLocked: level.isLocked,
+            totalLessons: levelLessons.length,
+            completedLessons: completedCount,
+            progress: levelLessons.length > 0 ? Math.round((completedCount / levelLessons.length) * 100) : 0,
+            isCompleted: levelProg?.isCompleted || false,
+            bestScore: levelProg?.bestScore || 0,
+            averageScore: levelProg?.averageScore || 0
+          };
+        });
+        const totalLessons = levelsWithProgress.reduce((s, l) => s + l.totalLessons, 0);
+        const completedLessons = levelsWithProgress.reduce((s, l) => s + l.completedLessons, 0);
+        progressData.levels = levelsWithProgress;
+        progressData.totalLessons = totalLessons;
+        progressData.completedLessons = completedLessons;
+        progressData.overallProgress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+      } else {
+        const moduleLessons = (lessonsByModule[mKey] || []).filter(l => !l.levelId);
+        const completedCount = moduleLessons.filter(l => progressByLesson[l._id.toString()]?.isCompleted).length;
+        progressData.totalLessons = moduleLessons.length;
+        progressData.completedLessons = completedCount;
+        progressData.overallProgress = moduleLessons.length > 0 ? Math.round((completedCount / moduleLessons.length) * 100) : 0;
+      }
+      
+      return progressData;
+    });
     
     res.json({ success: true, data: modulesWithProgress });
   } catch (error) {

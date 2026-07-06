@@ -65,4 +65,13 @@ const athleteSchema = new mongoose.Schema({
     timestamps: true // Auto-generate createdAt & updatedAt
 });
 
+// ⚡ Index untuk carian & filter yang kerap digunakan dalam admin dashboard
+// Elak full collection scan ke atas 8,000 rekod
+athleteSchema.index({ negeriWakil: 1 });           // Filter by state
+athleteSchema.index({ sukan: 1 });                  // Filter by sport
+athleteSchema.index({ currentStage: 1 });           // Filter by stage
+athleteSchema.index({ jantina: 1 });               // Filter by gender
+athleteSchema.index({ completedAt: 1 });           // Sort by completion date
+athleteSchema.index({ negeriWakil: 1, sukan: 1 }); // Compound: state + sport filter
+
 module.exports = mongoose.model('Athlete', athleteSchema);

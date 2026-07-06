@@ -5,6 +5,29 @@ const User = require('../models/User');
 const Athlete = require('../models/Athlete');
 const Group = require('../models/Group');
 const crypto = require('crypto');
+const rateLimit = require('express-rate-limit');
+
+// ==========================================
+// RATE LIMITER KHUSUS: LOGIN BRUTE-FORCE PROTECTION
+// ==========================================
+// Lebih ketat dari limiter global: hanya 10 cubaan login per 15 minit per IP
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minit
+    max: 10,                   // 10 cubaan sahaja
+    standardHeaders: true,
+    legacyHeaders: false,
+    skipSuccessfulRequests: true, // Kiraan hanya untuk cubaan GAGAL
+    message: {
+        error: 'Terlalu banyak cubaan log masuk. Sila cuba lagi selepas 15 minit.'
+    },
+    handler: (req, res) => {
+        // HTML response untuk browser (bukan API)
+        res.status(429).render('auth-login', {
+            error: 'Terlalu banyak cubaan log masuk. Sila cuba lagi selepas 15 minit.',
+            success: null
+        });
+    }
+});
 
 // Middleware untuk check authentication
 const requireAuth = (req, res, next) => {
@@ -33,8 +56,8 @@ router.get('/login', (req, res) => {
     res.render('auth-login', { error: null, success: req.query.success });
 });
 
-// POST: Process Login
-router.post('/login', async (req, res) => {
+// POST: Process Login — dilindungi oleh loginLimiter
+router.post('/login', loginLimiter, async (req, res) => {
     try {
         const { email, password } = req.body;
         
@@ -70,14 +93,15 @@ router.post('/login', async (req, res) => {
             return res.render('auth-login', { error: 'Password salah', success: null });
         }
         
-        // Update last login
-        user.lastLogin = new Date();
-        await user.save();
+        // Update last login - guna updateOne untuk elak trigger bcrypt pre-save hook
+        await User.updateOne({ _id: user._id }, { $set: { lastLogin: new Date() } });
         
-        // Set session
+        // Set session — simpan role & isActive dalam session supaya middleware
+        // authenticate() tidak perlu query DB setiap request
         req.session.userId = user._id.toString();
         req.session.userRole = user.role;
         req.session.userName = user.fullName;
+        req.session.userIsActive = true; // cached — elak extra DB query
         
         // Redirect based on role
         if (user.role === 'admin') {
@@ -261,18 +285,44 @@ router.post('/admin/teachers/reset-password/:id', requireAdmin, async (req, res)
 // ADMIN: PENGURUSAN STUDENT (Hanya Admin)
 // ==========================================
 
-// GET: Senarai Student untuk Admin (Admin Only)
+// GET: Senarai Student untuk Admin (Admin Only) — dengan Pagination
 router.get('/admin/students', requireAdmin, async (req, res) => {
     try {
-        const students = await User.find({ role: 'student' })
-            .populate('athleteId')
-            .populate('enrolledGroups')
-            .sort({ createdAt: -1 });
-        const groups = await Group.find({ isActive: true }).sort({ name: 1 });
-        res.render('admin-students', { students, groups, msg: req.query.msg || null, error: null });
+        const PAGE_SIZE = 50;
+        const page = Math.max(1, parseInt(req.query.page) || 1);
+        const search = req.query.search ? req.query.search.trim() : '';
+        
+        // Build search filter
+        let filter = { role: 'student' };
+        if (search) {
+            filter.$or = [
+                { fullName: { $regex: search, $options: 'i' } },
+                { email: { $regex: search, $options: 'i' } }
+            ];
+        }
+        
+        const [students, total, groups] = await Promise.all([
+            User.find(filter)
+                .populate('athleteId', 'fullName icNumber sukan negeriWakil')
+                .populate('enrolledGroups', 'name')
+                .sort({ createdAt: -1 })
+                .skip((page - 1) * PAGE_SIZE)
+                .limit(PAGE_SIZE)
+                .lean(),
+            User.countDocuments(filter),
+            Group.find({ isActive: true }).select('name').sort({ name: 1 }).lean()
+        ]);
+        
+        const totalPages = Math.ceil(total / PAGE_SIZE);
+        res.render('admin-students', { 
+            students, groups, 
+            msg: req.query.msg || null, 
+            error: null,
+            pagination: { page, totalPages, total, search }
+        });
     } catch (err) {
         console.error('Get Students Error:', err);
-        res.render('admin-students', { students: [], groups: [], msg: null, error: 'Ralat memuatkan senarai pelajar.' });
+        res.render('admin-students', { students: [], groups: [], msg: null, error: 'Ralat memuatkan senarai pelajar.', pagination: null });
     }
 });
 
