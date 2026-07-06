@@ -5,6 +5,7 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const cookieParser = require('cookie-parser');
 const path = require('path');
+const fs = require('fs');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const compression = require('compression');
@@ -249,7 +250,24 @@ function startServer() {
     app.get('/favicon.ico', (req, res) => res.status(204).end());
 
     // 8. AKTIFKAN ROUTES
-    app.use('/', athleteRoutes);
+    
+    // Serve React SPA client/dist if it has been compiled/exists
+    const reactDistPath = path.join(__dirname, 'client', 'dist');
+    if (fs.existsSync(reactDistPath)) {
+        app.use(express.static(reactDistPath));
+        
+        // Serve index.html for main athlete routes (client-side routing fallback)
+        const spaPaths = ['/', '/login', '/dashboard', '/lesson/:id', '/p/:slug'];
+        spaPaths.forEach(routePath => {
+            app.get(routePath, (req, res) => {
+                res.sendFile(path.join(reactDistPath, 'index.html'));
+            });
+        });
+    } else {
+        // Fallback to legacy EJS views if client/dist is not built
+        app.use('/', athleteRoutes);
+    }
+
     app.use('/admin-mace', adminRoutes);
     app.use('/auth', authRoutes);
     app.use('/teacher', teacherRoutes);
