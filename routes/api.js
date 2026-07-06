@@ -235,7 +235,7 @@ router.get('/branding', (req, res) => {
 // 3. ATHLETE DASHBOARD & LESSONS API
 // ==========================================
 
-// ⚡ Lindungi semua laluan /athlete dengan sistem giliran
+// âš¡ Lindungi semua laluan /athlete dengan sistem giliran
 router.use('/athlete', checkAthleteSession, concurrencyGuardApi);
 
 // GET: Data Dashboard Atlet (Modul, Levels & Lessons)
@@ -280,7 +280,8 @@ router.get('/athlete/lesson/:id', async (req, res) => {
         res.json({
             athlete,
             lesson,
-            secureVideoUrl
+            secureVideoUrl,
+            allLessons: lessons
         });
     } catch (err) {
         console.error('API Lesson Fetch Error:', err);
