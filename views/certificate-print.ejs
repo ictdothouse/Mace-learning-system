@@ -569,13 +569,22 @@
             button.disabled = true;
 
             const element = document.querySelector('.certificate-container');
-            
-            // Save original transform styles and clear them for printing
-            const originalTransform = element.style.transform;
-            const originalTransformOrigin = element.style.transformOrigin;
-            element.style.transform = 'none';
-            element.style.transformOrigin = 'center center';
-            element.classList.add('html2pdf-printing');
+            if (!element) {
+                button.innerHTML = originalText;
+                button.disabled = false;
+                return;
+            }
+
+            // Create a deep clone of the certificate container to avoid visual jump on screen
+            const clone = element.cloneNode(true);
+            clone.style.transform = 'none';
+            clone.style.transformOrigin = 'center center';
+            clone.style.position = 'fixed';
+            clone.style.left = '-9999px';
+            clone.style.top = '-9999px';
+            clone.style.margin = '0';
+            clone.style.boxShadow = 'none';
+            document.body.appendChild(clone);
             
             const opt = {
                 margin:       0,
@@ -597,19 +606,17 @@
                 }
             };
 
-            // Generate PDF on client-side
-            html2pdf().set(opt).from(element).save().then(() => {
-                element.classList.remove('html2pdf-printing');
-                element.style.transform = originalTransform;
-                element.style.transformOrigin = originalTransformOrigin;
-                adjustCertificateScale();
+            // Generate PDF using the clone
+            html2pdf().set(opt).from(clone).save().then(() => {
+                if (document.body.contains(clone)) {
+                    document.body.removeChild(clone);
+                }
                 button.innerHTML = originalText;
                 button.disabled = false;
             }).catch(err => {
-                element.classList.remove('html2pdf-printing');
-                element.style.transform = originalTransform;
-                element.style.transformOrigin = originalTransformOrigin;
-                adjustCertificateScale();
+                if (document.body.contains(clone)) {
+                    document.body.removeChild(clone);
+                }
                 console.error('PDF Generation Error:', err);
                 alert('<%= lang === "en" ? "Failed to generate PDF. Please try again." : "Gagal menjana PDF. Sila cuba lagi." %>');
                 button.innerHTML = originalText;
