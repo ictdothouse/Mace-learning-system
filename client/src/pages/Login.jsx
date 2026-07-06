@@ -132,9 +132,9 @@ export default function Login() {
             </span>
 
             {/* Desktop Menu Links */}
-            {!loading && branding.showMenu && (branding.menuLinks?.length > 0 || branding.navPages?.length > 0) && (
+            {!loading && ((branding.showMenu && branding.menuLinks?.length > 0) || branding.navPages?.length > 0) && (
               <div className="hidden md:flex items-center gap-6 ml-8">
-                {branding.menuLinks?.map((link, index) => {
+                {branding.showMenu && branding.menuLinks?.map((link, index) => {
                   const label = lang === 'en'
                     ? (link.label_en || (link.label?.toLowerCase() === 'modul' ? 'Modules' : link.label?.toLowerCase() === 'hubungi kami' ? 'Contact Us' : link.label))
                     : link.label;
@@ -155,7 +155,7 @@ export default function Login() {
 
           <div className="flex items-center gap-4">
             {/* Mobile Hamburger Button */}
-            {!loading && branding.showMenu && (branding.menuLinks?.length > 0 || branding.navPages?.length > 0) && (
+            {!loading && ((branding.showMenu && branding.menuLinks?.length > 0) || branding.navPages?.length > 0) && (
               <button 
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="md:hidden text-white/80 hover:text-white focus:outline-none p-1 rounded-lg hover:bg-white/10 transition"
@@ -188,9 +188,9 @@ export default function Login() {
         </div>
 
         {/* Mobile Menu Drawer */}
-        {!loading && branding.showMenu && mobileMenuOpen && (branding.menuLinks?.length > 0 || branding.navPages?.length > 0) && (
+        {!loading && mobileMenuOpen && ((branding.showMenu && branding.menuLinks?.length > 0) || branding.navPages?.length > 0) && (
           <div className="md:hidden bg-[#0f172a] border-t border-white/10 text-white py-3 px-6 space-y-1 transition-all duration-300 absolute left-0 right-0 z-30">
-            {branding.menuLinks?.map((link, index) => {
+            {branding.showMenu && branding.menuLinks?.map((link, index) => {
               const label = lang === 'en'
                 ? (link.label_en || (link.label?.toLowerCase() === 'modul' ? 'Modules' : link.label?.toLowerCase() === 'hubungi kami' ? 'Contact Us' : link.label))
                 : link.label;
