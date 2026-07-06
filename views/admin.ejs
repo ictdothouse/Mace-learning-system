@@ -199,8 +199,8 @@
         <% if (page === 'dashboard' || !page) { %>
             <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-900"><%= (locals.branding && locals.branding.dashboardTitle) ? locals.branding.dashboardTitle : __('dashboard_title') %></h2>
-                    <p class="text-gray-500 text-sm mt-1"><%= (locals.branding && locals.branding.dashboardSubtitle) ? locals.branding.dashboardSubtitle : __('dashboard_subtitle') %></p>
+                    <h2 class="text-2xl font-bold text-gray-900"><%= lang === 'en' ? ((locals.branding && locals.branding.dashboardTitle_en) ? locals.branding.dashboardTitle_en : 'ATHLETES DASHBOARD') : ((locals.branding && locals.branding.dashboardTitle) ? locals.branding.dashboardTitle : 'DASHBOARD ATLET') %></h2>
+                    <p class="text-gray-500 text-sm mt-1"><%= lang === 'en' ? ((locals.branding && locals.branding.dashboardSubtitle_en) ? locals.branding.dashboardSubtitle_en : 'Monitor athlete progress here.') : ((locals.branding && locals.branding.dashboardSubtitle) ? locals.branding.dashboardSubtitle : 'Pantau kemajuan pembelajaran anda di sini.') %></p>
                 </div>
                 <a href="/admin-mace/download" class="shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
@@ -701,12 +701,20 @@
                             <!-- Dashboard Info -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Tajuk Dashboard</label>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Tajuk Dashboard (BM)</label>
                                     <input type="text" name="dashboardTitle" value="<%= branding.dashboardTitle %>" class="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Subtajuk Dashboard</label>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Subtajuk Dashboard (BM)</label>
                                     <input type="text" name="dashboardSubtitle" value="<%= branding.dashboardSubtitle %>" class="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Tajuk Dashboard (EN)</label>
+                                    <input type="text" name="dashboardTitle_en" value="<%= branding.dashboardTitle_en || '' %>" class="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Subtajuk Dashboard (EN)</label>
+                                    <input type="text" name="dashboardSubtitle_en" value="<%= branding.dashboardSubtitle_en || '' %>" class="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
                                 </div>
                             </div>
 

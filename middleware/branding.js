@@ -25,7 +25,9 @@ async function fetchBranding() {
             faviconUrl: '',
             primaryColor: '#2563eb',
             dashboardTitle: 'Dashboard Pemantauan',
-            dashboardSubtitle: 'Statistik terkini prestasi atlit MACE secara live.'
+            dashboardTitle_en: 'Monitoring Dashboard',
+            dashboardSubtitle: 'Statistik terkini prestasi atlit MACE secara live.',
+            dashboardSubtitle_en: 'Live monitoring statistics of MACE athletes performance.'
         };
     }
 }

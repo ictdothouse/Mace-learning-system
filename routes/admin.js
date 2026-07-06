@@ -606,7 +606,7 @@ router.get('/download-system-data', async (req, res) => {
 router.post('/settings/branding', async (req, res) => {
     try {
         const { 
-            siteName, tagline, primaryColor, dashboardTitle, dashboardSubtitle, logoUrl, faviconUrl,
+            siteName, tagline, primaryColor, dashboardTitle, dashboardTitle_en, dashboardSubtitle, dashboardSubtitle_en, logoUrl, faviconUrl,
             homeBannerTitle, homeBannerTitle_en, homeBannerImage, homeBgImage, homeLeftColumnHtml, homeLeftColumnHtml_en, menuLinksJson,
             footerText, footerLinksJson,
             termTeacher_ms, termTeacher_en, termStudent_ms, termStudent_en,
@@ -623,7 +623,9 @@ router.post('/settings/branding', async (req, res) => {
         if (tagline !== undefined) branding.tagline = tagline;
         if (primaryColor !== undefined) branding.primaryColor = primaryColor;
         if (dashboardTitle !== undefined) branding.dashboardTitle = dashboardTitle;
+        if (dashboardTitle_en !== undefined) branding.dashboardTitle_en = dashboardTitle_en;
         if (dashboardSubtitle !== undefined) branding.dashboardSubtitle = dashboardSubtitle;
+        if (dashboardSubtitle_en !== undefined) branding.dashboardSubtitle_en = dashboardSubtitle_en;
         if (logoUrl !== undefined) branding.logoUrl = logoUrl;
         if (faviconUrl !== undefined) branding.faviconUrl = faviconUrl;
         

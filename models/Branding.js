@@ -7,7 +7,9 @@ const brandingSchema = new mongoose.Schema({
     faviconUrl: { type: String, default: '' },
     primaryColor: { type: String, default: '#2563eb' },
     dashboardTitle: { type: String, default: 'DASHBOARD ATLET' },
+    dashboardTitle_en: { type: String, default: 'ATHLETES DASHBOARD' },
     dashboardSubtitle: { type: String, default: 'Pantau kemajuan pembelajaran anda di sini.' },
+    dashboardSubtitle_en: { type: String, default: 'Monitor your learning progress here.' },
     allowModuleSelectionInEnrollment: { type: Boolean, default: false },
     
     // Homepage Customization
