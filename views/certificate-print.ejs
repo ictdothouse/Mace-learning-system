@@ -152,7 +152,7 @@
             transform: translate(-50%, -50%);
             z-index: 5;
             white-space: pre-wrap;
-            max-width: 80%;
+            max-width: 95%;
             word-wrap: break-word;
             text-align: center;
         }
@@ -594,6 +594,7 @@
             
             const opt = {
                 margin:       0,
+                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] },
                 filename:     'Sijil_<%= athlete.fullName.trim().replace(/[^a-zA-Z0-9]/g, "_") %>.pdf',
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { 
