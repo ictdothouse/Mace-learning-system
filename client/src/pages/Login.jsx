@@ -34,17 +34,6 @@ export default function Login() {
       .catch(err => console.error('Failed to load sports:', err));
   }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0f0c29] text-white font-sans">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
-          <p className="text-white/60 text-sm font-medium animate-pulse">Memuatkan penjenamaan...</p>
-        </div>
-      </div>
-    );
-  }
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -103,9 +92,11 @@ export default function Login() {
               {branding.logoUrl ? (
                 <img src={branding.logoUrl} alt="Logo" className="h-8 md:h-10 w-auto object-contain" />
               ) : (
-                <h1 className="text-lg md:text-xl font-extrabold uppercase tracking-wider">
-                  {branding.siteName || 'MACE'}
-                </h1>
+                !loading && (
+                  <h1 className="text-lg md:text-xl font-extrabold uppercase tracking-wider">
+                    {branding.siteName || 'MACE'}
+                  </h1>
+                )
               )}
             </span>
           </div>
@@ -133,14 +124,14 @@ export default function Login() {
       <header className="pt-12 pb-24 md:pb-32 px-6 md:px-12 relative shadow-inner flex items-center min-h-[180px] z-10" style={headerStyle}>
         <div className="absolute inset-0 bg-red-900/40 mix-blend-multiply z-0"></div>
         <div className="relative z-10 max-w-6xl mx-auto w-full">
-          {branding.showBannerTitle !== false && (
+          {branding.showBannerTitle !== false && !loading && (
             <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-md">
               {lang === 'en' ? (branding.homeBannerTitle_en || 'Modules') : (branding.homeBannerTitle || 'Modul')}
             </h1>
           )}
         </div>
       </header>
-
+ 
       {/* Access Form Layout */}
       <main className="flex-1 relative py-8 px-4 sm:px-6 z-10">
         <div className="max-w-6xl mx-auto -mt-20 md:-mt-28 bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100/80 animate-fade-in">
@@ -152,7 +143,7 @@ export default function Login() {
                 <div>
                   <div className="bg-gradient-to-br from-slate-900 to-slate-800 px-6 py-6 text-center text-white">
                     <p className="text-xs text-slate-300 font-medium">
-                      {lang === 'en' ? (branding.homeFormSubtitle_en || 'Register or resume your athlete learning path') : (branding.homeFormSubtitle || 'Daftar atau sambung modul latihan atlet anda')}
+                      {!loading && (lang === 'en' ? (branding.homeFormSubtitle_en || 'Register or resume your athlete learning path') : (branding.homeFormSubtitle || 'Daftar atau sambung modul latihan atlet anda'))}
                     </p>
                   </div>
 

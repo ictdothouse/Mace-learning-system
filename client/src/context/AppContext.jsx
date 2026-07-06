@@ -52,7 +52,6 @@ export function AppProvider({ children }) {
 
   const changeLang = async (newLang) => {
     try {
-      setLoading(true);
       document.cookie = `lang=${newLang}; max-age=${30 * 24 * 60 * 60}; path=/`;
       localStorage.setItem('lang', newLang);
       setLang(newLang);
@@ -61,8 +60,6 @@ export function AppProvider({ children }) {
       setTranslations(localesRes.data);
     } catch (err) {
       console.error('Failed to change language:', err);
-    } finally {
-      setLoading(false);
     }
   };
 
