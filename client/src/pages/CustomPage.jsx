@@ -57,6 +57,70 @@ export default function CustomPage() {
 
   const { page, module1 } = data;
 
+  const translateStatus = (text, language) => {
+    if (!text) return '';
+    if (language !== 'en') return text;
+    
+    const lowerText = text.trim().toLowerCase();
+    const mapping = {
+      'akan datang': 'Coming Soon',
+      'belum mula': 'Not Started',
+      'sedang berjalan': 'In Progress',
+      'tamat': 'Completed',
+      'mula': 'Start',
+      'selesai': 'Completed'
+    };
+    
+    if (mapping[lowerText]) {
+      return mapping[lowerText];
+    }
+    
+    if (lowerText.includes('akan datang')) return text.replace(/akan datang/gi, 'Coming Soon');
+    if (lowerText.includes('belum mula')) return text.replace(/belum mula/gi, 'Not Started');
+    if (lowerText.includes('sedang berjalan')) return text.replace(/sedang berjalan/gi, 'In Progress');
+    if (lowerText.includes('tamat')) return text.replace(/tamat/gi, 'Completed');
+    
+    return text;
+  };
+
+  const defaultCards = [
+    {
+      title: 'CAREER BOOST',
+      statusText: lang === 'en' ? 'Coming Soon' : 'Akan Datang',
+      imageUrl: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=600&auto=format&fit=crop'
+    },
+    {
+      title: 'POCKET POWER',
+      statusText: lang === 'en' ? 'Coming Soon' : 'Akan Datang',
+      imageUrl: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=600&auto=format&fit=crop'
+    },
+    {
+      title: 'MODE ON!',
+      statusText: lang === 'en' ? 'Coming Soon' : 'Akan Datang',
+      imageUrl: 'https://images.unsplash.com/photo-1530541930197-ff16ac917b0e?q=80&w=600&auto=format&fit=crop'
+    },
+    {
+      title: 'SMART ATHLETE',
+      statusText: lang === 'en' ? 'Coming Soon' : 'Akan Datang',
+      imageUrl: 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?q=80&w=600&auto=format&fit=crop'
+    }
+  ];
+
+  const cards = [...defaultCards];
+  if (page.modulesConfig && Array.isArray(page.modulesConfig)) {
+    page.modulesConfig.forEach((card, idx) => {
+      if (idx < cards.length) {
+        // Clone card object to avoid mutating original defaultCards array
+        cards[idx] = {
+          ...cards[idx],
+          title: card.title || cards[idx].title,
+          statusText: card.statusText ? translateStatus(card.statusText, lang) : cards[idx].statusText,
+          imageUrl: card.imageUrl || cards[idx].imageUrl
+        };
+      }
+    });
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 font-sans">
       
@@ -188,20 +252,20 @@ export default function CustomPage() {
                   </div>
                 </div>
 
-                {/* Modules 2 to 5 (Coming Soon) */}
-                {[2, 3, 4, 5].map((num) => (
-                  <div key={num} className="bg-slate-50/50 rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full text-center p-6 opacity-60">
-                    <div className="rounded-xl overflow-hidden aspect-[1.6] mb-6 bg-slate-200 flex items-center justify-center">
-                      <span className="text-slate-400 text-3xl font-extrabold">MODUL {num}</span>
+                {/* Modules 2 to 5 (Customizable from CMS) */}
+                {cards.map((card, idx) => (
+                  <div key={idx} className="bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] hover:-translate-y-1 flex flex-col h-full text-center p-6 opacity-75 hover:opacity-100">
+                    <div className="rounded-xl overflow-hidden aspect-[1.6] mb-6 bg-gray-100">
+                      <img src={card.imageUrl} alt={`Modul ${idx + 2}`} className="w-full h-full object-cover" />
                     </div>
                     <h3 className="text-sm font-extrabold text-gray-400 uppercase tracking-widest mb-2">
-                      {lang === 'en' ? `MODULE ${num}` : `MODUL ${num}`}
+                      {lang === 'en' ? 'MODULE' : 'MODUL'} {idx + 2}
                     </h3>
                     <h4 className="text-xl font-bold text-gray-400 uppercase tracking-tight leading-snug mb-4">
-                      Akan Datang
+                      {card.title || (lang === 'en' ? 'Coming Soon' : 'Akan Datang')}
                     </h4>
                     <p className="text-sm italic text-gray-400 font-medium mt-auto">
-                      {lang === 'en' ? 'Coming Soon' : 'Akan Datang'}
+                      {card.statusText || (lang === 'en' ? 'Coming Soon' : 'Akan Datang')}
                     </p>
                   </div>
                 ))}
