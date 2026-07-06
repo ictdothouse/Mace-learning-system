@@ -198,12 +198,12 @@
 
     <!-- Footer -->
     <footer class="bg-white px-5 py-6 text-center border-t border-gray-200 z-10 relative mt-auto">
-        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500 font-medium">
+        <div class="max-w-6xl mx-auto flex flex-col items-center justify-center gap-2 text-xs text-gray-500 font-medium">
             <div>
                 <%- (locals.branding && branding.footerText) ? branding.footerText : '&copy; 2026 Majlis Sukan Negara Malaysia. Sistem eLearning Atlet MACE v2.0' %>
             </div>
             <% if (locals.branding && branding.footerLinks && branding.footerLinks.length > 0) { %>
-                <div class="flex flex-wrap justify-center gap-3">
+                <div class="flex flex-wrap justify-center gap-3 mt-1">
                     <% branding.footerLinks.forEach((link, idx) => { %>
                         <a href="<%= link.url %>" class="hover:underline transition-colors"><%= lang === 'en' ? (link.label_en || link.label) : link.label %></a>
                         <% if (idx < branding.footerLinks.length - 1) { %><span class="text-gray-300">|</span><% } %>
