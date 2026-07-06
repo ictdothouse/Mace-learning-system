@@ -1796,7 +1796,52 @@ router.get('/students', async (req, res) => {
         }
         
         const groups = await Group.find().sort({ name: 1 });
-        res.render('admin', { page: 'students', students: combinedStudents, groups, msg: req.query.msg || null });
+        const states = [...new Set(allAthletes.map(a => a.negeriWakil).filter(Boolean))].sort();
+
+        // Retrieve query parameters
+        const selectedNegeri = req.query.negeri || '';
+        const selectedGroupId = req.query.groupId || '';
+        const startDateStr = req.query.startDate || '';
+        const endDateStr = req.query.endDate || '';
+
+        // Apply filters in-memory
+        let filteredStudents = combinedStudents;
+
+        if (selectedNegeri) {
+            filteredStudents = filteredStudents.filter(s => s.athleteData && s.athleteData.negeriWakil === selectedNegeri);
+        }
+
+        if (selectedGroupId) {
+            filteredStudents = filteredStudents.filter(s => 
+                s.enrolledGroups && s.enrolledGroups.some(g => g._id.toString() === selectedGroupId)
+            );
+        }
+
+        if (startDateStr) {
+            const start = new Date(startDateStr);
+            start.setHours(0, 0, 0, 0);
+            filteredStudents = filteredStudents.filter(s => new Date(s.createdAt) >= start);
+        }
+
+        if (endDateStr) {
+            const end = new Date(endDateStr);
+            end.setHours(23, 59, 59, 999);
+            filteredStudents = filteredStudents.filter(s => new Date(s.createdAt) <= end);
+        }
+
+        res.render('admin', { 
+            page: 'students', 
+            students: filteredStudents, 
+            groups, 
+            states,
+            filters: {
+                negeri: selectedNegeri,
+                groupId: selectedGroupId,
+                startDate: startDateStr,
+                endDate: endDateStr
+            },
+            msg: req.query.msg || null 
+        });
     } catch (err) {
         console.error('Students Error:', err);
         res.status(500).send('Ralat memuatkan senarai pelajar.');
