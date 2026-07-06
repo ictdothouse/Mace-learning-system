@@ -44,13 +44,26 @@ export default function LessonPlayer() {
       const hasPassed = athlete.quizScores && athlete.quizScores[scoreKey] >= 80;
       if (hasPassed) {
         setIsQuizOpen(true);
+        
+        // Pre-fill correct answers so the UI renders green checkmarks
+        const correctAnswers = {};
+        lesson.quizQuestions?.forEach((q, qIdx) => {
+          if (q.type === 'multiple-choice' || q.type === 'true-false') {
+            correctAnswers[qIdx] = q.correctIndex !== undefined ? q.correctIndex.toString() : '0';
+          } else if (q.type === 'short-answer') {
+            correctAnswers[qIdx] = q.correctAnswerText || '';
+          }
+        });
+
+        setUserAnswers(correctAnswers);
+
         // Pre-fill quizResult to show completed status
         setQuizResult({
           passed: true,
           score: athlete.quizScores[scoreKey],
-          earnedPoints: lesson.quizQuestions?.length || 0, // Mock points for display
+          earnedPoints: lesson.quizQuestions?.length || 0, 
           totalPoints: lesson.quizQuestions?.length || 0,
-          userAnswers: {}
+          userAnswers: correctAnswers
         });
       }
     } catch (err) {
