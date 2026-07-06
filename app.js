@@ -244,6 +244,9 @@ function startServer() {
         }
     }));
 
+    // Fast 204 response for favicon to avoid redundant 404 routing overhead
+    app.get('/favicon.ico', (req, res) => res.status(204).end());
+
     // 8. AKTIFKAN ROUTES
     app.use('/', athleteRoutes);
     app.use('/admin-mace', adminRoutes);
