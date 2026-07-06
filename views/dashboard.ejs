@@ -111,24 +111,24 @@
     
     <!-- TOP NAV BAR -->
     <nav class="no-print sticky top-0 z-50 border-b border-white/10 backdrop-blur-xl bg-black/20">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-3">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 sm:gap-3 min-w-0">
                 <% if (locals.branding && locals.branding.logoUrl) { %>
-                    <img src="<%= branding.logoUrl %>" alt="Logo" class="h-8 w-auto object-contain filter drop-shadow-md">
+                    <img src="<%= branding.logoUrl %>" alt="Logo" class="h-7 sm:h-8 w-auto object-contain filter drop-shadow-md shrink-0">
                 <% } else { %>
-                    <span class="text-2xl">🏅</span>
-                    <span class="font-bold text-white text-sm sm:text-base"><%= (locals.branding && locals.branding.siteName) ? locals.branding.siteName : 'MACE eLearning' %></span>
+                    <span class="text-xl sm:text-2xl shrink-0">🏅</span>
+                    <span class="font-bold text-white text-xs sm:text-base truncate"><%= (locals.branding && locals.branding.siteName) ? locals.branding.siteName : 'MACE eLearning' %></span>
                 <% } %>
             </div>
-            <div class="flex items-center gap-2 sm:gap-3">
+            <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
                 <!-- Language Toggle -->
-                <div class="flex gap-1 bg-white/10 rounded-lg p-1">
-                    <a href="?lang=ms" class="text-xs px-2.5 py-1 rounded font-semibold transition-all <%= lang === 'ms' ? 'bg-white text-indigo-900' : 'text-white/60 hover:text-white' %>">BM</a>
-                    <a href="?lang=en" class="text-xs px-2.5 py-1 rounded font-semibold transition-all <%= lang === 'en' ? 'bg-white text-indigo-900' : 'text-white/60 hover:text-white' %>">EN</a>
+                <div class="flex gap-0.5 bg-white/10 rounded-lg p-0.5 sm:p-1 shrink-0">
+                    <a href="?lang=ms" class="text-[10px] sm:text-xs px-2 sm:px-2.5 py-0.5 sm:py-1 rounded font-semibold transition-all <%= lang === 'ms' ? 'bg-white text-indigo-900' : 'text-white/60 hover:text-white' %>">BM</a>
+                    <a href="?lang=en" class="text-[10px] sm:text-xs px-2 sm:px-2.5 py-0.5 sm:py-1 rounded font-semibold transition-all <%= lang === 'en' ? 'bg-white text-indigo-900' : 'text-white/60 hover:text-white' %>">EN</a>
                 </div>
-                <a href="/logout" class="flex items-center gap-1.5 text-sm text-white/60 hover:text-red-400 transition-colors font-medium px-3 py-1.5 rounded-lg hover:bg-red-500/10">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                    <%= __('nav_logout') %>
+                <a href="/logout" class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-white/60 hover:text-red-400 transition-colors font-medium px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-red-500/10 whitespace-nowrap shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 sm:h-4 w-3.5 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                    <span class="whitespace-nowrap"><%= __('nav_logout') %></span>
                 </a>
             </div>
         </div>
