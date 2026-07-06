@@ -3109,6 +3109,24 @@
                 
                 preview.appendChild(div);
             });
+            
+            // Footer Live Preview
+            const showFooter = form.querySelector('[name="showFooter"]') ? form.querySelector('[name="showFooter"]').checked : true;
+            if (showFooter) {
+                const footerLine1 = form.querySelector('[name="footerLine1"]') ? form.querySelector('[name="footerLine1"]').value : '';
+                const footerLine2 = form.querySelector('[name="footerLine2"]') ? form.querySelector('[name="footerLine2"]').value : '';
+                
+                const fDiv = document.createElement('div');
+                fDiv.className = 'absolute whitespace-pre-wrap max-w-[80%] break-words px-2 py-1 select-none text-center';
+                fDiv.style.left = '50%';
+                fDiv.style.top = '95%';
+                fDiv.style.transform = 'translate(-50%, -50%)';
+                fDiv.style.fontSize = '5px'; // Scaled down similar to print template
+                fDiv.style.color = '#999999';
+                fDiv.style.lineHeight = '1.3';
+                fDiv.innerHTML = `${footerLine1}<br>${footerLine2}`;
+                preview.appendChild(fDiv);
+            }
         }
 
         function selectElement(key) {
@@ -3261,18 +3279,18 @@
             document.querySelector('#createTemplateModal h3').innerText = 'Edit Template Sijil';
             
             // Populate text inputs
-            const fields = ['name', 'title', 'subtitle', 'courseName', 'description', 'signatoryName', 'signatoryTitle', 'primaryColor', 'secondaryColor', 'accentColor', 'fontFamily', 'athleteNameFont', 'logoUrl', 'backgroundImageType', 'backgroundImageUrl', 'backgroundR2Key', 'backgroundOpacity', 'orientation'];
+            const fields = ['name', 'title', 'subtitle', 'courseName', 'description', 'signatoryName', 'signatoryTitle', 'primaryColor', 'secondaryColor', 'accentColor', 'fontFamily', 'athleteNameFont', 'logoUrl', 'backgroundImageType', 'backgroundImageUrl', 'backgroundR2Key', 'backgroundOpacity', 'orientation', 'footerLine1', 'footerLine2'];
             fields.forEach(f => {
                 const input = form.querySelector(`[name="${f}"]`);
                 if (input && data[f] !== undefined) input.value = data[f];
             });
             
             // Populate checkboxes
-            const checkboxes = ['showTitle', 'showSubtitle', 'showCourseName', 'showDescription', 'showAthleteName', 'showIcNumber', 'showNegeri', 'showSukan', 'showDate', 'showSignatory', 'showBorder', 'showLogo'];
+            const checkboxes = ['showTitle', 'showSubtitle', 'showCourseName', 'showDescription', 'showAthleteName', 'showIcNumber', 'showNegeri', 'showSukan', 'showDate', 'showSignatory', 'showBorder', 'showLogo', 'showFooter'];
             checkboxes.forEach(f => {
                 const input = form.querySelector(`[name="${f}"]`);
                 if (input) {
-                    if (['showBorder', 'showLogo', 'showIcNumber', 'showSukan'].includes(f)) {
+                    if (['showBorder', 'showLogo', 'showIcNumber', 'showSukan', 'showFooter'].includes(f)) {
                         input.checked = data[f] === true;
                     } else {
                         input.checked = data[f] !== false;

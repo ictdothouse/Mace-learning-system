@@ -1193,6 +1193,7 @@ router.post('/templates/create', upload.single('backgroundImage'), async (req, r
             showDate, signatoryName, showSignatory, signatoryTitle,
             primaryColor, secondaryColor, accentColor, backgroundColor, fontFamily, athleteNameFont,
             showBorder, showLogo, logoUrl, logoPosition, borderStyle, borderColor, borderWidth,
+            showFooter, footerLine1, footerLine2,
             backgroundImageType, backgroundImageUrl, backgroundR2Key, backgroundOpacity,
             orientation
         } = req.body;
@@ -1228,6 +1229,9 @@ router.post('/templates/create', upload.single('backgroundImage'), async (req, r
             fontFamily,
             athleteNameFont: athleteNameFont || 'Great Vibes',
             showBorder: showBorder === 'on',
+            showFooter: showFooter === 'on',
+            footerLine1,
+            footerLine2,
             showLogo: showLogo === 'on',
             logoUrl,
             logoPosition,
@@ -1269,6 +1273,7 @@ router.post('/templates/update/:id', upload.single('backgroundImage'), async (re
             showDate, signatoryName, showSignatory, signatoryTitle,
             primaryColor, secondaryColor, accentColor, backgroundColor, fontFamily, athleteNameFont,
             showBorder, showLogo, logoUrl, logoPosition, borderStyle, borderColor, borderWidth,
+            showFooter, footerLine1, footerLine2,
             backgroundImageType, backgroundImageUrl, backgroundR2Key, backgroundOpacity,
             orientation, setAsActive
         } = req.body;
@@ -1304,6 +1309,9 @@ router.post('/templates/update/:id', upload.single('backgroundImage'), async (re
             fontFamily,
             athleteNameFont: athleteNameFont || 'Great Vibes',
             showBorder: showBorder === 'on',
+            showFooter: showFooter === 'on',
+            footerLine1,
+            footerLine2,
             showLogo: showLogo === 'on',
             logoUrl,
             logoPosition,

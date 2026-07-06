@@ -242,6 +242,18 @@ const certificateTemplateSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    showFooter: {
+        type: Boolean,
+        default: true
+    },
+    footerLine1: {
+        type: String,
+        default: 'Sijil ini dijana secara elektronik'
+    },
+    footerLine2: {
+        type: String,
+        default: 'Tidak memerlukan cop rasmi'
+    },
     showLogo: {
         type: Boolean,
         default: false
