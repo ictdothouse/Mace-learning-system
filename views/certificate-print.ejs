@@ -579,9 +579,10 @@
             const clone = element.cloneNode(true);
             clone.style.transform = 'none';
             clone.style.transformOrigin = 'center center';
-            clone.style.position = 'fixed';
-            clone.style.left = '-9999px';
-            clone.style.top = '-9999px';
+            clone.style.position = 'absolute';
+            clone.style.left = '0';
+            clone.style.top = '0';
+            clone.style.zIndex = '-9999';
             clone.style.margin = '0';
             clone.style.boxShadow = 'none';
             document.body.appendChild(clone);
