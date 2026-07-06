@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useApp } from '../context/AppContext';
@@ -13,6 +13,14 @@ export default function Login() {
   const [success, setSuccess] = useState(null);
   const [showNameHint, setShowNameHint] = useState(false);
 
+  // Form states
+  const [fullName, setFullName] = useState('');
+  const [icNumber, setIcNumber] = useState('');
+  const [jantina, setJantina] = useState('');
+  const [umur, setUmur] = useState('');
+  const [negeri, setNegeri] = useState('');
+  const [sukan, setSukan] = useState('');
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0f0c29] text-white font-sans">
@@ -23,14 +31,6 @@ export default function Login() {
       </div>
     );
   }
-
-  // Form states
-  const [fullName, setFullName] = useState('');
-  const [icNumber, setIcNumber] = useState('');
-  const [jantina, setJantina] = useState('');
-  const [umur, setUmur] = useState('');
-  const [negeri, setNegeri] = useState('');
-  const [sukan, setSukan] = useState('');
 
   useEffect(() => {
     // If already logged in, redirect to dashboard
