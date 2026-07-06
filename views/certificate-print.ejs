@@ -28,8 +28,8 @@
         
         <% 
             const isPortrait = (template.orientation === 'portrait');
-            const width = isPortrait ? 794 : 1123;
-            const height = isPortrait ? 1123 : 794;
+            const width = isPortrait ? 793 : 1122;
+            const height = isPortrait ? 1122 : 793;
         %>
         .certificate-container {
             width: <%= width %>px !important;
@@ -522,8 +522,8 @@
             }
 
             const isPortrait = <%= isPortrait %>;
-            const targetWidth = isPortrait ? 794 : 1123;
-            const targetHeight = isPortrait ? 1123 : 794;
+            const targetWidth = isPortrait ? 793 : 1122;
+            const targetHeight = isPortrait ? 1122 : 793;
 
             // Get available width and height (accounting for header/padding)
             const availableWidth = wrapper.getBoundingClientRect().width;
@@ -577,13 +577,11 @@
                     allowTaint: false,
                     logging: false,
                     scrollX: 0,
-                    scrollY: 0,
-                    windowWidth: <%= width %>,
-                    windowHeight: <%= height %>
+                    scrollY: 0
                 },
                 jsPDF:        { 
-                    unit: 'px', 
-                    format: [<%= width %>, <%= height %>], 
+                    unit: 'mm', 
+                    format: 'a4', 
                     orientation: '<%= isPortrait ? "portrait" : "landscape" %>' 
                 }
             };
