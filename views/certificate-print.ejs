@@ -568,24 +568,25 @@
             button.innerHTML = '<%= lang === "en" ? "⏳ Generating PDF..." : "⏳ Menjana PDF..." %>';
             button.disabled = true;
 
+            const overlay = document.getElementById('pdfLoadingOverlay');
+            if (overlay) {
+                overlay.querySelector('#overlayText').innerText = '<%= lang === "en" ? "Generating PDF... Please wait" : "Menjana PDF... Sila tunggu sebentar" %>';
+                overlay.classList.remove('hidden');
+            }
+
             const element = document.querySelector('.certificate-container');
             if (!element) {
                 button.innerHTML = originalText;
                 button.disabled = false;
+                if (overlay) overlay.classList.add('hidden');
                 return;
             }
 
-            // Create a deep clone of the certificate container to avoid visual jump on screen
-            const clone = element.cloneNode(true);
-            clone.style.transform = 'none';
-            clone.style.transformOrigin = 'center center';
-            clone.style.position = 'absolute';
-            clone.style.left = '0';
-            clone.style.top = '0';
-            clone.style.zIndex = '-9999';
-            clone.style.margin = '0';
-            clone.style.boxShadow = 'none';
-            document.body.appendChild(clone);
+            // Save original transform styles and clear them for printing
+            const originalTransform = element.style.transform;
+            const originalTransformOrigin = element.style.transformOrigin;
+            element.style.transform = 'none';
+            element.style.transformOrigin = 'center center';
             
             const opt = {
                 margin:       0,
@@ -607,17 +608,21 @@
                 }
             };
 
-            // Generate PDF using the clone
-            html2pdf().set(opt).from(clone).save().then(() => {
-                if (document.body.contains(clone)) {
-                    document.body.removeChild(clone);
-                }
+            // Generate PDF on client-side from original element
+            html2pdf().set(opt).from(element).save().then(() => {
+                element.style.transform = originalTransform;
+                element.style.transformOrigin = originalTransformOrigin;
+                adjustCertificateScale();
+                
+                if (overlay) overlay.classList.add('hidden');
                 button.innerHTML = originalText;
                 button.disabled = false;
             }).catch(err => {
-                if (document.body.contains(clone)) {
-                    document.body.removeChild(clone);
-                }
+                element.style.transform = originalTransform;
+                element.style.transformOrigin = originalTransformOrigin;
+                adjustCertificateScale();
+                
+                if (overlay) overlay.classList.add('hidden');
                 console.error('PDF Generation Error:', err);
                 alert('<%= lang === "en" ? "Failed to generate PDF. Please try again." : "Gagal menjana PDF. Sila cuba lagi." %>');
                 button.innerHTML = originalText;
@@ -625,5 +630,13 @@
             });
         }
     </script>
+    
+    <!-- Full-screen loading overlay to mask the visual jump during PDF capture -->
+    <div id="pdfLoadingOverlay" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-[99999] flex flex-col items-center justify-center hidden">
+        <div class="flex flex-col items-center gap-4">
+            <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-white font-semibold text-lg animate-pulse" id="overlayText">Menjana PDF...</p>
+        </div>
+    </div>
 </body>
 </html>
