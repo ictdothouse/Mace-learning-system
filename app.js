@@ -7,6 +7,7 @@ const cookieParser = require('cookie-parser');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
+const compression = require('compression');
 const i18nMiddleware = require('./middleware/i18n');
 const brandingMiddleware = require('./middleware/branding');
 
@@ -33,6 +34,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // 4. Middleware Dasar
+app.use(compression());
 app.use(helmet({
     contentSecurityPolicy: false, // Ditutup supaya tidak menghalang pemuatan video R2/TinyMCE/FontCDN luaran
     crossOriginEmbedderPolicy: false
@@ -59,9 +61,13 @@ app.post('/set-language', (req, res) => {
     res.redirect(referer);
 });
 
-// 5. Static Files
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// 5. Static Files with 30-day Browser & CDN Caching
+app.use(express.static(path.join(__dirname, 'public'), {
+    maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days in milliseconds
+}));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+    maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days in milliseconds
+}));
 
 // 6. Rate Limiting — Dinaikkan untuk handle 8K atlit blast serentak
 const limiter = rateLimit({
