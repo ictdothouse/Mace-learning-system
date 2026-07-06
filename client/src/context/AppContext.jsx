@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import WaitingRoom from '../components/WaitingRoom';
 
 const AppContext = createContext(null);
 
@@ -13,6 +14,22 @@ export function AppProvider({ children }) {
     return match ? match[1] : (localStorage.getItem('lang') || 'ms');
   });
   const [loading, setLoading] = useState(true);
+  const [queueStatus, setQueueStatus] = useState(null);
+
+  // Setup Axios interceptor to catch 503 Queue errors globally
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response && error.response.status === 503 && error.response.data?.error === 'queue') {
+          setQueueStatus(error.response.data);
+          return new Promise(() => {}); // Suspend the promise so components don't crash
+        }
+        return Promise.reject(error);
+      }
+    );
+    return () => axios.interceptors.response.eject(interceptor);
+  }, []);
 
   const fetchStatus = async () => {
     try {
@@ -59,7 +76,15 @@ export function AppProvider({ children }) {
 
   return (
     <AppContext.Provider value={{ auth, setAuth, branding, translations, lang, changeLang, t, loading, fetchStatus }}>
-      {children}
+      {queueStatus ? (
+        <WaitingRoom 
+          lang={lang} 
+          queueData={queueStatus} 
+          onEnter={() => { setQueueStatus(null); fetchStatus(); }} 
+        />
+      ) : (
+        children
+      )}
     </AppContext.Provider>
   );
 }
