@@ -382,9 +382,7 @@
                             font-weight: <%= t.fontWeight || 'bold' %>;
                             line-height: <%= t.lineHeight || 1.2 %>;
                             letter-spacing: <%= t.letterSpacing || 0 %>px;
-                            font-family: 'Playfair Display', serif;">
-                    <%= template.title %>
-                </div>
+                            font-family: 'Playfair Display', serif;"><%= template.title %></div>
             <% } %>
             
             <!-- Subtitle -->
@@ -395,9 +393,7 @@
                             color: <%= sub.color || '#333333' %>; 
                             font-weight: <%= sub.fontWeight || 'normal' %>;
                             line-height: <%= sub.lineHeight || 1.3 %>;
-                            letter-spacing: <%= sub.letterSpacing || 0 %>px;">
-                    <%= template.subtitle %>
-                </div>
+                            letter-spacing: <%= sub.letterSpacing || 0 %>px;"><%= template.subtitle %></div>
             <% } %>
             
             <!-- Description -->
@@ -408,9 +404,7 @@
                             color: <%= desc.color || '#000000' %>; 
                             font-weight: <%= desc.fontWeight || 'normal' %>;
                             line-height: <%= desc.lineHeight || 1.4 %>;
-                            letter-spacing: <%= desc.letterSpacing || 0 %>px;">
-                    <%= template.description %>
-                </div>
+                            letter-spacing: <%= desc.letterSpacing || 0 %>px;"><%= template.description %></div>
             <% } %>
             
             <!-- Athlete Name -->
@@ -422,9 +416,7 @@
                             font-weight: <%= name.fontWeight || 'bold' %>;
                             line-height: <%= name.lineHeight || 1.2 %>;
                             letter-spacing: <%= name.letterSpacing || 0 %>px;
-                            font-family: '<%= template.athleteNameFont || "Great Vibes" %>', cursive;">
-                    <%= athlete.fullName %>
-                </div>
+                            font-family: '<%= template.athleteNameFont || "Great Vibes" %>', cursive;"><%= athlete.fullName %></div>
             <% } %>
             
             <!-- IC Number -->
@@ -435,9 +427,7 @@
                             color: <%= ic.color || '#666666' %>; 
                             font-weight: <%= ic.fontWeight || 'normal' %>;
                             line-height: <%= ic.lineHeight || 1.3 %>;
-                            letter-spacing: <%= ic.letterSpacing || 0 %>px;">
-                    No. IC: <%= athlete.icNumber %>
-                </div>
+                            letter-spacing: <%= ic.letterSpacing || 0 %>px;">No. IC: <%= athlete.icNumber %></div>
             <% } %>
             
             <!-- Negeri -->
@@ -448,9 +438,7 @@
                             color: <%= negeri.color || '#000000' %>; 
                             font-weight: <%= negeri.fontWeight || 'normal' %>;
                             line-height: <%= negeri.lineHeight || 1.3 %>;
-                            letter-spacing: <%= negeri.letterSpacing || 0 %>px;">
-                    Mewakili Negeri: <strong><%= athlete.negeriWakil %></strong>
-                </div>
+                            letter-spacing: <%= negeri.letterSpacing || 0 %>px;">Mewakili Negeri: <strong><%= athlete.negeriWakil %></strong></div>
             <% } %>
             
             <!-- Sukan -->
@@ -461,9 +449,7 @@
                             color: <%= sukan.color || '#004aad' %>; 
                             font-weight: <%= sukan.fontWeight || 'bold' %>;
                             line-height: <%= sukan.lineHeight || 1.3 %>;
-                            letter-spacing: <%= sukan.letterSpacing || 0 %>px;">
-                    Cabang Sukan: <strong><%= athlete.sukan || '-' %></strong>
-                </div>
+                            letter-spacing: <%= sukan.letterSpacing || 0 %>px;">Cabang Sukan: <strong><%= athlete.sukan || '-' %></strong></div>
             <% } %>
             
             <!-- Course Name -->
@@ -474,9 +460,7 @@
                             color: <%= course.color || '#004aad' %>; 
                             font-weight: <%= course.fontWeight || 'bold' %>;
                             line-height: <%= course.lineHeight || 1.3 %>;
-                            letter-spacing: <%= course.letterSpacing || 0 %>px;">
-                    <%= course.name || template.courseName %>
-                </div>
+                            letter-spacing: <%= course.letterSpacing || 0 %>px;"><%= course.name || template.courseName %></div>
             <% } %>
             
             <!-- Date -->
@@ -487,9 +471,7 @@
                             color: <%= date.color || '#000000' %>; 
                             font-weight: <%= date.fontWeight || 'normal' %>;
                             line-height: <%= date.lineHeight || 1.3 %>;
-                            letter-spacing: <%= date.letterSpacing || 0 %>px;">
-                    Tarikh: <%= courseDate %>
-                </div>
+                            letter-spacing: <%= date.letterSpacing || 0 %>px;">Tarikh: <%= courseDate %></div>
             <% } %>
             
             <!-- Signatory -->
@@ -500,9 +482,7 @@
                             color: <%= sign.color || '#000000' %>; 
                             font-weight: <%= sign.fontWeight || 'bold' %>;
                             line-height: <%= sign.lineHeight || 1.3 %>;
-                            letter-spacing: <%= sign.letterSpacing || 0 %>px;">
-                    <%= template.signatoryName %>
-                </div>
+                            letter-spacing: <%= sign.letterSpacing || 0 %>px;"><%= template.signatoryName %></div>
                 
                 <div class="element align-<%= signTitle.align || 'left' %>" 
                      style="left: <%= signTitle.positionX || 20 %>%; top: <%= signTitle.positionY || 85 %>%; 
@@ -510,9 +490,7 @@
                             color: <%= signTitle.color || '#666666' %>; 
                             font-weight: <%= signTitle.fontWeight || 'normal' %>;
                             line-height: <%= signTitle.lineHeight || 1.3 %>;
-                            letter-spacing: <%= signTitle.letterSpacing || 0 %>px;">
-                    <%= template.signatoryTitle %>
-                </div>
+                            letter-spacing: <%= signTitle.letterSpacing || 0 %>px;"><%= template.signatoryTitle %></div>
             <% } %>
             
             <!-- Footer -->
@@ -523,10 +501,7 @@
                             color: #999999; 
                             font-weight: normal;
                             line-height: 1.3;
-                            letter-spacing: 0px;">
-                    <%= template.footerLine1 %><br>
-                    <%= template.footerLine2 %>
-                </div>
+                            letter-spacing: 0px;"><%= template.footerLine1 %><br><%= template.footerLine2 %></div>
             <% } %>
         </div>
     </div>
