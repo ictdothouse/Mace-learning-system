@@ -89,18 +89,18 @@ export default function Login() {
         <div className="max-w-6xl mx-auto flex justify-between items-center w-full">
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-3">
-              {branding.logoUrl ? (
+              {loading ? (
+                <div className="h-6 w-24 bg-white/20 rounded animate-pulse" />
+              ) : branding.logoUrl ? (
                 <img src={branding.logoUrl} alt="Logo" className="h-8 md:h-10 w-auto object-contain" />
               ) : (
-                !loading && (
-                  <h1 className="text-lg md:text-xl font-extrabold uppercase tracking-wider">
-                    {branding.siteName || 'MACE'}
-                  </h1>
-                )
+                <h1 className="text-lg md:text-xl font-extrabold uppercase tracking-wider">
+                  {branding.siteName || 'MACE'}
+                </h1>
               )}
             </span>
           </div>
-
+ 
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 bg-white/10 rounded-lg p-1 border border-white/20">
               <button
@@ -119,15 +119,19 @@ export default function Login() {
           </div>
         </div>
       </nav>
-
+ 
       {/* Hero Banner Section */}
-      <header className="pt-12 pb-24 md:pb-32 px-6 md:px-12 relative shadow-inner flex items-center min-h-[180px] z-10" style={headerStyle}>
+      <header className="bg-slate-900 pt-12 pb-24 md:pb-32 px-6 md:px-12 relative shadow-inner flex items-center min-h-[180px] z-10" style={headerStyle}>
         <div className="absolute inset-0 bg-red-900/40 mix-blend-multiply z-0"></div>
         <div className="relative z-10 max-w-6xl mx-auto w-full">
-          {branding.showBannerTitle !== false && !loading && (
-            <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-md">
-              {lang === 'en' ? (branding.homeBannerTitle_en || 'Modules') : (branding.homeBannerTitle || 'Modul')}
-            </h1>
+          {branding.showBannerTitle !== false && (
+            loading ? (
+              <div className="h-10 w-48 bg-white/20 rounded-lg animate-pulse" />
+            ) : (
+              <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-md">
+                {lang === 'en' ? (branding.homeBannerTitle_en || 'Modules') : (branding.homeBannerTitle || 'Modul')}
+              </h1>
+            )
           )}
         </div>
       </header>
@@ -141,9 +145,13 @@ export default function Login() {
             {branding.showRegistrationForm !== false && (
               <div className="lg:col-span-5 bg-white border-r border-slate-100 flex flex-col justify-between">
                 <div>
-                  <div className="bg-gradient-to-br from-slate-900 to-slate-800 px-6 py-6 text-center text-white">
+                  <div className="bg-gradient-to-br from-slate-900 to-slate-800 px-6 py-6 text-center text-white relative">
                     <p className="text-xs text-slate-300 font-medium">
-                      {!loading && (lang === 'en' ? (branding.homeFormSubtitle_en || 'Register or resume your athlete learning path') : (branding.homeFormSubtitle || 'Daftar atau sambung modul latihan atlet anda'))}
+                      {loading ? (
+                        <span className="inline-block h-3 w-48 bg-white/20 rounded animate-pulse" />
+                      ) : (
+                        lang === 'en' ? (branding.homeFormSubtitle_en || 'Register or resume your athlete learning path') : (branding.homeFormSubtitle || 'Daftar atau sambung modul latihan atlet anda')
+                      )}
                     </p>
                   </div>
 
