@@ -165,6 +165,27 @@
             }
         });
 
+        // Find completed modules that have certificates dynamically
+        const completedCertModules = [];
+        if (typeof allModules !== 'undefined' && allModules && Array.isArray(allModules)) {
+            allModules.forEach(m => {
+                const mLessons = preLessonList.filter(l => l.moduleId && l.moduleId._id.toString() === m._id.toString());
+                const isCompleted = mLessons.length > 0 && mLessons.every(l => athlete.currentStage > l.order);
+                if (isCompleted && m.hasCertificate) {
+                    completedCertModules.push(m);
+                }
+            });
+        }
+
+        // Fallback for legacy database or Module 1
+        if (completedCertModules.length === 0 && athlete.currentStage >= 4) {
+            completedCertModules.push({
+                _id: 'legacy',
+                title: 'MODUL 1 : PLAY SAFE WIN STRONG',
+                hasCertificate: true
+            });
+        }
+
         const totalModulesCount = Object.keys(preModulesMap).length || 1;
         const overallPercent = Math.round((completedModulesCount / totalModulesCount) * 100);
 
@@ -368,32 +389,54 @@
         <% }) %>
 
         <!-- CERTIFICATE SECTION (if completed) -->
-        <% if(athlete.currentStage >= 4) { %>
-        <div class="fade-up delay-5 relative overflow-hidden rounded-3xl p-6 sm:p-10 mb-8 text-center"
-             style="background: linear-gradient(135deg, #f59e0b, #ef4444, #ec4899);">
-            <!-- Decorative circles -->
-            <div class="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
-            <div class="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full translate-y-12 -translate-x-8"></div>
-            
-            <div class="relative">
-                <div class="trophy-float inline-block text-6xl mb-4">🏆</div>
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-white mb-3">
-                    <%= lang === 'en' ? 'Congratulations! You did it!' : 'Tahniah! Anda Berjaya!' %>
-                </h2>
-                <p class="text-white/90 text-sm sm:text-base max-w-lg mx-auto mb-6">
-                    <%= lang === 'en' 
-                        ? 'You have successfully completed all MACE eLearning modules. Download your certificate now!' 
-                        : 'Anda telah berjaya menyelesaikan semua pembelajaran ' + ((locals.branding && locals.branding.siteName) ? locals.branding.siteName : 'sistem') + '. Muat turun sijil anda sekarang!' %>
-                </p>
-                <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                    <a href="/certificate/<%= athlete._id %>" target="_blank"
-                       class="inline-flex items-center justify-center gap-2 bg-white text-amber-600 px-6 py-3.5 rounded-xl font-bold hover:bg-amber-50 transition-all shadow-xl hover:shadow-2xl transform hover:scale-105">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                        <%= lang === 'en' ? '📜 Print Certificate' : '📜 Cetak Sijil' %>
-                    </a>
+        <% if (completedCertModules.length > 0) { %>
+            <% completedCertModules.forEach(m => { %>
+                <% 
+                    const certUrl = m._id === 'legacy' ? `/certificate/${athlete._id}` : `/certificate/module/${m._id}`;
+                %>
+                <div class="fade-up delay-5 relative overflow-hidden rounded-3xl p-6 sm:p-10 mb-8 text-center bg-slate-900/60 backdrop-blur-xl border border-amber-500/20 shadow-[0_8px_30px_rgba(245,158,11,0.05)]">
+                    <!-- Subtle Golden Glow Behind -->
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-amber-500/5 rounded-full blur-[100px] pointer-events-none"></div>
+                    
+                    <div class="relative z-10">
+                        <!-- Premium Gold Award Icon (SVG) -->
+                        <svg class="w-16 h-16 mx-auto mb-4 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M32 4C24.268 4 18 10.268 18 18C18 24.363 22.242 29.743 28 31.4V48L32 52L36 48V31.4C41.758 29.743 46 24.363 46 18C46 10.268 39.732 4 32 4Z" fill="url(#goldGrad)" />
+                            <circle cx="32" cy="18" r="8" fill="#FFF" fill-opacity="0.2" />
+                            <path d="M26 18L30 22L38 14" stroke="#FFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M22 50L14 58H50L42 50" stroke="url(#goldGrad)" stroke-width="2" stroke-linecap="round" />
+                            <defs>
+                                <linearGradient id="goldGrad" x1="18" y1="4" x2="46" y2="48" gradientUnits="userSpaceOnUse">
+                                    <stop offset="0%" stop-color="#FBBF24" />
+                                    <stop offset="50%" stop-color="#F59E0B" />
+                                    <stop offset="100%" stop-color="#D97706" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mb-3 tracking-wide">
+                            <%= lang === 'en' ? 'Congratulations! You Have Succeeded!' : 'Tahniah! Anda Telah Berjaya!' %>
+                        </h2>
+                        
+                        <p class="text-white/80 text-sm sm:text-base max-w-xl mx-auto mb-6 leading-relaxed">
+                            <%= lang === 'en' 
+                                ? `You have successfully completed all requirements for `
+                                : `Anda telah berjaya menyelesaikan semua pembelajaran bagi ` %><strong><%= m.title %></strong>. 
+                            <%= lang === 'en'
+                                ? 'Your official certificate of achievement is now ready.'
+                                : 'Sijil pencapaian rasmi anda kini sedia untuk dimuat turun.' %>
+                        </p>
+                        
+                        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                            <a href="<%= certUrl %>" target="_blank"
+                               class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-slate-900 font-extrabold px-8 py-3.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(245,158,11,0.25)] hover:shadow-[0_4px_25px_rgba(245,158,11,0.45)] transform hover:-translate-y-0.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                <%= lang === 'en' ? 'Download Certificate' : 'Muat Turun Sijil' %>
+                            </a>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
+            <% }) %>
         <% } %>
 
         <!-- LEARNING GUIDE -->
@@ -405,20 +448,20 @@
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
                     <div class="flex items-start gap-3">
                         <div class="step-badge bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">1</div>
-                        <p class="text-white/60 pt-1">
-                            <%= lang === 'en' ? 'Watch the full lesson video to unlock the quiz' : 'Tonton video pelajaran sepenuhnya untuk buka kuiz' %>
+                        <p class="text-white/60 pt-1 leading-relaxed">
+                            <%= lang === 'en' ? 'Watch the full video lessons to activate the module evaluation' : 'Tonton video pelajaran secara keseluruhan untuk mengaktifkan sesi penilaian' %>
                         </p>
                     </div>
                     <div class="flex items-start gap-3">
                         <div class="step-badge bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">2</div>
-                        <p class="text-white/60 pt-1">
-                            <%= lang === 'en' ? 'Answer the quiz and score at least 80% to pass' : 'Jawab kuiz dan capai sekurang-kurangnya 80% untuk lulus' %>
+                        <p class="text-white/60 pt-1 leading-relaxed">
+                            <%= lang === 'en' ? 'Complete the evaluation quiz with a minimum score of 80% to pass' : 'Jawab kuiz dengan mencapai markah minimum 80% untuk kelayakan lulus' %>
                         </p>
                     </div>
                     <div class="flex items-start gap-3">
                         <div class="step-badge bg-amber-500/20 text-amber-400 border border-amber-500/30">3</div>
-                        <p class="text-white/60 pt-1">
-                            <%= lang === 'en' ? 'Complete all 3 modules to earn your certificate' : 'Siapkan ketiga-tiga modul untuk dapat sijil anda' %>
+                        <p class="text-white/60 pt-1 leading-relaxed">
+                            <%= lang === 'en' ? 'Complete all lessons within the module to be awarded your certificate of achievement' : 'Sempurnakan semua pembelajaran dalam modul untuk dianugerahkan sijil pencapaian' %>
                         </p>
                     </div>
                 </div>
