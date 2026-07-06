@@ -1361,6 +1361,10 @@
                             </h4>
                             
                             <!-- Preview Container -->
+                            <div class="mb-3">
+                                <label class="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-wider">Uji Nama Atlet (Untuk Preview Sahaja)</label>
+                                <input type="text" id="previewTestName" placeholder="Contoh: AHMAD FAIZ BIN AB AZIZ" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" oninput="updateDataFromForm(); updatePreview();">
+                            </div>
                             <div id="certificatePreview" class="relative w-full aspect-[1.414] bg-white shadow-lg mx-auto overflow-hidden select-none" style="min-height: 500px;">
                                 <!-- Elements will be rendered here -->
                             </div>
@@ -2991,6 +2995,9 @@
             if(form.querySelector('[name="courseName"]')) templateData.elements.courseName.text = form.querySelector('[name="courseName"]').value;
             if(form.querySelector('[name="signatoryName"]')) templateData.elements.signatory.text = form.querySelector('[name="signatoryName"]').value;
             if(form.querySelector('[name="signatoryTitle"]')) templateData.elements.signatoryTitle.text = form.querySelector('[name="signatoryTitle"]').value;
+            
+            const testNameInput = document.getElementById('previewTestName');
+            templateData.elements.athleteName.text = (testNameInput && testNameInput.value.trim() !== '') ? testNameInput.value.trim() : 'NAMA ATLET';
             
             if(form.querySelector('[name="showTitle"]')) templateData.elements.title.show = form.querySelector('[name="showTitle"]').checked;
             if(form.querySelector('[name="showSubtitle"]')) templateData.elements.subtitle.show = form.querySelector('[name="showSubtitle"]').checked;
