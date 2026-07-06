@@ -30,6 +30,15 @@ export default function CustomPage() {
     fetchPageData();
   }, [slug]);
 
+  useEffect(() => {
+    if (!loading && data.page) {
+      const pageTitle = lang === 'en' 
+        ? (data.page.title_en || translateText(data.page.title))
+        : data.page.title;
+      document.title = `${pageTitle} | ${branding.siteName || 'MACE'}`;
+    }
+  }, [loading, data.page, lang, branding.siteName]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white font-sans">
@@ -81,6 +90,29 @@ export default function CustomPage() {
     if (lowerText.includes('tamat')) return text.replace(/tamat/gi, 'Completed');
     
     return text;
+  };
+
+  const translateText = (text) => {
+    if (!text || lang !== 'en') return text;
+    let result = text;
+    const mappings = [
+      {
+        ms: /Sebarang pertanyaan atau maklumbalas, hubungi kami menerusi email\s*:/gi,
+        en: "For any inquiries or feedback, contact us via email:"
+      },
+      {
+        ms: /^Hubungi$/gi,
+        en: "Contact Us"
+      },
+      {
+        ms: /Hubungi Kami/gi,
+        en: "Contact Us"
+      }
+    ];
+    for (const m of mappings) {
+      result = result.replace(m.ms, m.en);
+    }
+    return result;
   };
 
   const defaultCards = [
@@ -279,9 +311,9 @@ export default function CustomPage() {
           {/* CONTACT US TEMPLATE */}
           {(() => {
             const contact = page.contactConfig || {};
-            const bannerTitle = contact.bannerTitle || (lang === 'en' ? 'Contact Us' : 'Hubungi');
+            const bannerTitle = translateText(contact.bannerTitle || (lang === 'en' ? 'Contact Us' : 'Hubungi'));
             const bannerImg = contact.bannerImage || 'https://images.unsplash.com/photo-1540747737956-37872f747802?q=80&w=1200&auto=format&fit=crop';
-            const description = contact.description || (lang === 'en' ? 'For any inquiries or feedback, contact us via email:' : 'Sebarang pertanyaan atau maklumbalas, hubungi kami menerusi email :');
+            const description = translateText(contact.description || (lang === 'en' ? 'For any inquiries or feedback, contact us via email:' : 'Sebarang pertanyaan atau maklumbalas, hubungi kami menerusi email :'));
             const email = contact.email || 'mace@nsc.gov.my';
             const illusImg = contact.imageUrl || '';
 
