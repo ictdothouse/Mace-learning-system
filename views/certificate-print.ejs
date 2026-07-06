@@ -581,7 +581,6 @@
                 if (overlay) overlay.classList.add('hidden');
                 return;
             }
-
             // Save original transform styles and clear them for printing
             const originalTransform = element.style.transform;
             const originalTransformOrigin = element.style.transformOrigin;
@@ -608,26 +607,28 @@
                 }
             };
 
-            // Generate PDF on client-side from original element
-            html2pdf().set(opt).from(element).save().then(() => {
-                element.style.transform = originalTransform;
-                element.style.transformOrigin = originalTransformOrigin;
-                adjustCertificateScale();
-                
-                if (overlay) overlay.classList.add('hidden');
-                button.innerHTML = originalText;
-                button.disabled = false;
-            }).catch(err => {
-                element.style.transform = originalTransform;
-                element.style.transformOrigin = originalTransformOrigin;
-                adjustCertificateScale();
-                
-                if (overlay) overlay.classList.add('hidden');
-                console.error('PDF Generation Error:', err);
-                alert('<%= lang === "en" ? "Failed to generate PDF. Please try again." : "Gagal menjana PDF. Sila cuba lagi." %>');
-                button.innerHTML = originalText;
-                button.disabled = false;
-            });
+            // Wait for browser repaint before capturing to ensure 100% sharpness
+            setTimeout(() => {
+                html2pdf().set(opt).from(element).save().then(() => {
+                    element.style.transform = originalTransform;
+                    element.style.transformOrigin = originalTransformOrigin;
+                    adjustCertificateScale();
+                    
+                    if (overlay) overlay.classList.add('hidden');
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }).catch(err => {
+                    element.style.transform = originalTransform;
+                    element.style.transformOrigin = originalTransformOrigin;
+                    adjustCertificateScale();
+                    
+                    if (overlay) overlay.classList.add('hidden');
+                    console.error('PDF Generation Error:', err);
+                    alert('<%= lang === "en" ? "Failed to generate PDF. Please try again." : "Gagal menjana PDF. Sila cuba lagi." %>');
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                });
+            }, 150);
         }
     </script>
     
