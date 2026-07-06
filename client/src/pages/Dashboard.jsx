@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useApp } from '../context/AppContext';
@@ -10,12 +10,21 @@ export default function Dashboard() {
   const [loadingDashboard, setLoadingDashboard] = useState(true);
   const [data, setData] = useState({ athlete: {}, modules: [], lessons: [], levels: [] });
   const [error, setError] = useState(null);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   const fetchDashboardData = async () => {
     try {
       setLoadingDashboard(true);
       const res = await axios.get('/api/athlete/dashboard');
       setData(res.data);
+      
+      // Welcome Modal Logic
+      if (res.data.athlete && res.data.athlete.currentStage === 1 && res.data.lessons?.length > 0) {
+        const seenKey = 'hasSeenWelcome_' + res.data.athlete._id;
+        if (!localStorage.getItem(seenKey)) {
+          setShowWelcome(true);
+        }
+      }
     } catch (err) {
       console.error('Failed to load athlete dashboard:', err);
       setError(err.response?.data?.error || 'Gagal memuatkan data dashboard.');
@@ -46,11 +55,17 @@ export default function Dashboard() {
     }
   };
 
+  const closeWelcomeModal = () => {
+    const seenKey = 'hasSeenWelcome_' + data.athlete._id;
+    localStorage.setItem(seenKey, 'true');
+    setShowWelcome(false);
+  };
+
   if (loadingDashboard) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white font-sans">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white font-sans">
         <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-400"></div>
           <p className="text-white/60 text-sm font-medium animate-pulse">Memuatkan dashboard...</p>
         </div>
       </div>
@@ -59,7 +74,6 @@ export default function Dashboard() {
 
   const { athlete, modules, lessons, levels } = data;
 
-  // Group lessons by Module Title/ID
   const modulesMap = {};
   const modulesDataMap = {};
   lessons.forEach((lesson, idx) => {
@@ -72,25 +86,26 @@ export default function Dashboard() {
     modulesMap[mName].push({ ...lesson, idx });
   });
 
-  // Calculate completed modules and overall percentage
   const completedModules = [];
   let completedCount = 0;
 
   Object.keys(modulesMap).forEach(mName => {
     const mObj = modulesDataMap[mName];
-    // A module is completed if the athlete's currentStage is greater than all lessons in the module
     const isCompleted = modulesMap[mName].every(item => athlete.currentStage > (item.order || (item.idx + 1)));
     if (isCompleted && mObj) {
       completedCount++;
-      completedModules.push({
-        _id: mObj._id,
-        title: mObj.title,
-        hasCertificate: mObj.hasCertificate
-      });
+      if (mObj.hasCertificate) {
+        completedModules.push({
+          _id: mObj._id,
+          title: mObj.title,
+          hasCertificate: mObj.hasCertificate
+        });
+      }
+    } else if (isCompleted) {
+      completedCount++;
     }
   });
 
-  // Legacy fallback for completed modules
   if (completedModules.length === 0 && athlete.currentStage >= 4) {
     completedModules.push({
       _id: 'legacy',
@@ -102,86 +117,97 @@ export default function Dashboard() {
   const totalModulesCount = Object.keys(modulesMap).length || 1;
   const overallPercent = Math.round((completedCount / totalModulesCount) * 100);
 
-  // Dynamic progress circle calculation
   const circumference = 2 * Math.PI * 38;
   const strokeDash = circumference - (overallPercent / 100) * circumference;
 
   let stageLabel = "";
   if (completedCount > 0) {
-    stageLabel = lang === 'en' ? `🏆 Completed: Module ${completedCount}` : `🏆 Tamat: Modul ${completedCount}`;
+    stageLabel = lang === 'en' ? `?? Completed: Module ${completedCount}` : `?? Tamat: Modul ${completedCount}`;
   } else {
     stageLabel = lang === 'en' ? `Stage ${athlete.currentStage}` : `Peringkat ${athlete.currentStage}`;
   }
   const stageBg = completedCount > 0 ? 'bg-emerald-500/20 border-emerald-400/30 text-emerald-300' : 'bg-indigo-500/20 border-indigo-400/30 text-indigo-300';
 
+  const primaryColor = branding?.primaryColor || '#0f0c29';
+
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-white font-sans selection:bg-indigo-500 selection:text-white pb-12">
-      {/* Top Navbar */}
-      <nav className="sticky top-0 z-50 border-b border-white/10 backdrop-blur-xl bg-black/20 px-6 py-4">
-        <div className="max-w-6xl mx-auto flex justify-between items-center w-full">
-          <div className="flex items-center gap-4">
+    <div 
+      className="min-h-screen flex flex-col text-white font-sans selection:bg-indigo-500 selection:text-white pb-12"
+      style={{ background: `linear-gradient(135deg, ${primaryColor} 0%, #302b63 50%, #24243e 100%)` }}
+    >
+      <style>{`
+        @keyframes shimmer {
+          0% { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+        .shimmer-text {
+          background: linear-gradient(90deg, #a78bfa, #60a5fa, #34d399, #a78bfa);
+          background-size: 200% auto;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          animation: shimmer 3s linear infinite;
+        }
+        .module-card {
+          position: relative;
+          overflow: hidden;
+          transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+        }
+        .module-card::before {
+          content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity 0.3s; pointer-events: none;
+        }
+        .module-card:hover { transform: translateY(-6px); }
+        .module-card:hover::before { opacity: 1; }
+        .module-card.active::before { background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(59,130,246,0.08)); }
+        .module-card.done::before { background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(5,150,105,0.08)); }
+        .module-card.locked::before { background: linear-gradient(135deg, rgba(100,116,139,0.04), rgba(71,85,105,0.04)); }
+      `}</style>
+
+      <nav className="sticky top-0 z-50 border-b border-white/10 backdrop-blur-xl bg-black/20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             {branding.logoUrl ? (
-              <img src={branding.logoUrl} alt="Logo" className="h-8 w-auto object-contain" />
+              <img src={branding.logoUrl} alt="Logo" className="h-7 sm:h-8 w-auto object-contain filter drop-shadow-md shrink-0" />
             ) : (
-              <h1 className="text-lg font-extrabold uppercase tracking-wider">
-                {branding.siteName || 'MACE'}
-              </h1>
+              <>
+                <span className="text-xl sm:text-2xl shrink-0">??</span>
+                <span className="font-bold text-white text-xs sm:text-base truncate">{branding.siteName || 'MACE eLearning'}</span>
+              </>
             )}
           </div>
-
-          <div className="flex items-center gap-4">
-            {/* Language Toggle */}
-            <div className="flex items-center gap-2 bg-white/10 rounded-lg p-1 border border-white/20">
-              <button
-                onClick={() => changeLang('ms')}
-                className={`text-xs px-2 py-1 rounded font-semibold transition-all ${lang === 'ms' ? 'bg-white text-gray-900' : 'text-white/70 hover:text-white'}`}
-              >
-                BM
-              </button>
-              <button
-                onClick={() => changeLang('en')}
-                className={`text-xs px-2 py-1 rounded font-semibold transition-all ${lang === 'en' ? 'bg-white text-gray-900' : 'text-white/70 hover:text-white'}`}
-              >
-                EN
-              </button>
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            <div className="flex gap-0.5 bg-white/10 rounded-lg p-0.5 sm:p-1 shrink-0">
+              <button onClick={() => changeLang('ms')} className={`text-[10px] sm:text-xs px-2 sm:px-2.5 py-0.5 sm:py-1 rounded font-semibold transition-all ${lang === 'ms' ? 'bg-white text-indigo-900' : 'text-white/60 hover:text-white'}`}>BM</button>
+              <button onClick={() => changeLang('en')} className={`text-[10px] sm:text-xs px-2 sm:px-2.5 py-0.5 sm:py-1 rounded font-semibold transition-all ${lang === 'en' ? 'bg-white text-indigo-900' : 'text-white/60 hover:text-white'}`}>EN</button>
             </div>
-
-            {/* Logout Button */}
-            <button
-              onClick={handleLogout}
-              className="text-xs font-semibold px-4 py-2 border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl transition duration-200"
-            >
-              {t('logout', 'Log Keluar')}
+            <button onClick={handleLogout} className="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-white/60 hover:text-red-400 transition-colors font-medium px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-red-500/10 whitespace-nowrap shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 sm:h-4 w-3.5 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+              <span className="whitespace-nowrap">{t('nav_logout', 'Log Keluar')}</span>
             </button>
           </div>
         </div>
       </nav>
 
-      {/* Main Dashboard Space */}
-      <main className="max-w-6xl mx-auto w-full px-6 py-8 md:py-12 flex-grow">
-        
-        {/* Hero Greeting Section */}
-        <div className="mb-10 animate-fade-in-up">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10 flex-grow w-full">
+        <div className="animate-[fadeInUp_0.5s_ease-out_forwards] opacity-0" style={{ animationDelay: '0.1s' }}>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8 sm:mb-10">
             <div>
               <p className="text-white/50 text-sm font-medium mb-1 uppercase tracking-widest">
-                {lang === 'en' ? 'Welcome back' : 'Selamat kembali'} 👋
+                {lang === 'en' ? 'Welcome back' : 'Selamat kembali'} ??
               </p>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-3 tracking-tight">
-                <span className="bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-300 bg-clip-text text-transparent">
-                  {athlete.fullName}
-                </span>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-3">
+                <span className="shimmer-text">{athlete.fullName}</span>
               </h1>
-              <div className="flex flex-wrap items-center gap-2 text-sm mt-3">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-white/80">
-                  📍 {athlete.negeriWakil}
+              <div className="flex flex-wrap items-center gap-2 text-sm">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 border border-white/10 rounded-full text-white/80">
+                  ?? {athlete.negeriWakil}
                 </span>
                 {athlete.sukan && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-white/80">
-                    ⚡ {athlete.sukan}
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 border border-white/10 rounded-full text-white/80">
+                    ? {athlete.sukan}
                   </span>
                 )}
-                <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 border rounded-full font-semibold ${stageBg}`}>
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1 border rounded-full font-semibold ${stageBg}`}>
                   {stageLabel}
                 </span>
               </div>
@@ -205,8 +231,8 @@ export default function Dashboard() {
                   />
                   <defs>
                     <linearGradient id="progressGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#f97316" /> {/* orange-500 */}
-                      <stop offset="100%" stopColor="#facc15" /> {/* yellow-400 */}
+                      <stop offset="0%" stopColor="#818cf8" />
+                      <stop offset="100%" stopColor="#34d399" />
                     </linearGradient>
                   </defs>
                 </svg>
@@ -214,30 +240,121 @@ export default function Dashboard() {
                   <span className="text-2xl font-extrabold text-white">{overallPercent}%</span>
                 </div>
               </div>
-              <p className="text-white/50 text-xs mt-1.5 font-medium text-center">
+              <p className="text-white/50 text-xs mt-1 font-medium text-center">
                 {lang === 'en' ? 'Overall Progress' : 'Kemajuan Keseluruhan'}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Dynamic Congratulations Certificate Banner */}
+        <h2 className="animate-[fadeInUp_0.5s_ease-out_forwards] opacity-0 text-white/60 text-xs uppercase tracking-widest font-semibold mb-4" style={{ animationDelay: '0.2s' }}>
+          {t('dashboard_modules', 'LEARNING MODULES')}
+        </h2>
+
+        {Object.keys(modulesMap).map((mName, idx) => {
+          const mObj = modulesDataMap[mName];
+          return (
+            <div key={mName} className="mb-8">
+              <h3 className="text-white font-bold text-lg mb-4 flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-6 bg-emerald-400 rounded-full"></span>
+                  {mName}
+                </div>
+                {mObj && mObj.hasCertificate && (
+                  <>
+                    {modulesMap[mName].every(item => athlete.currentStage > (item.order || (item.idx + 1))) ? (
+                      <a href={`/certificate/module/${mObj._id}`} target="_blank" rel="noopener noreferrer" className="text-xs bg-yellow-500 hover:bg-yellow-400 text-blue-900 font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors shadow-sm">
+                        ?? {lang === 'en' ? 'Print Certificate' : 'Cetak Sijil'}
+                      </a>
+                    ) : (
+                      <span className="text-xs text-white/40 border border-white/10 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+                        ?? {lang === 'en' ? 'Certificate Locked' : 'Sijil Dikunci'}
+                      </span>
+                    )}
+                  </>
+                )}
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+                {modulesMap[mName].map((lesson, lIdx) => {
+                  const i = lesson.order || (lesson.idx + 1);
+                  const isLocked = athlete.currentStage < i;
+                  const isCompleted = athlete.currentStage > i;
+                  const quizScore = athlete.quizScores && athlete.quizScores['quiz' + i] ? athlete.quizScores['quiz' + i] : 0;
+                  
+                  const cardClass = isLocked ? 'locked' : (isCompleted ? 'done' : 'active');
+                  const borderGrad = isLocked ? 'border-white/5' : (isCompleted ? 'border-emerald-500/30' : 'border-indigo-500/40');
+                  const bgGrad = isLocked ? 'bg-white/5' : (isCompleted ? 'bg-emerald-950/40' : 'bg-indigo-950/50');
+                  const delayNum = Math.min(lIdx + 2, 5) * 0.1;
+                  
+                  return (
+                    <div key={lesson._id} className={`module-card ${cardClass} rounded-2xl p-5 sm:p-6 border ${borderGrad} ${bgGrad} animate-[fadeInUp_0.5s_ease-out_forwards] opacity-0`} style={{ animationDelay: `${delayNum}s` }}>
+                      <div className="flex items-start justify-between mb-4">
+                        <div>
+                          <p className={`text-xs font-semibold uppercase tracking-widest mb-1 ${isLocked ? 'text-white/30' : (isCompleted ? 'text-emerald-400' : 'text-indigo-400')}`}>
+                            {lang === 'en' ? 'Lesson' : 'Pelajaran'} {i}
+                          </p>
+                          <h3 className={`font-bold text-base leading-snug ${isLocked ? 'text-white/40' : 'text-white'}`}>
+                            {lesson.title}
+                          </h3>
+                        </div>
+                        <div className="text-3xl flex-shrink-0 ml-2">
+                          {isLocked ? '??' : (isCompleted ? '?' : '??')}
+                        </div>
+                      </div>
+
+                      {!isLocked && (
+                        <div className="mb-4">
+                          <div className="flex justify-between text-xs font-medium mb-1.5">
+                            <span className={isCompleted ? 'text-emerald-400' : 'text-white/60'}>
+                              {isCompleted ? t('progress_completed', 'Selesai') : t('progress_in_progress', 'Dalam Proses')}
+                            </span>
+                            <span className={isCompleted ? 'text-emerald-300 font-bold' : 'text-white/60'}>
+                              {isCompleted ? quizScore + '%' : '—'}
+                            </span>
+                          </div>
+                          <div className="h-2 rounded-full overflow-hidden bg-white/10">
+                            <div className={`h-full rounded-full transition-all duration-1000 ${isCompleted ? 'bg-gradient-to-r from-emerald-500 to-teal-400' : 'bg-gradient-to-r from-indigo-500 to-blue-400'}`} style={{ width: isCompleted ? `${quizScore}%` : '0%' }}></div>
+                          </div>
+                        </div>
+                      )}
+
+                      <p className={`text-xs mb-4 ${isLocked ? 'text-white/25' : (isCompleted ? 'text-emerald-400/80' : 'text-white/50')}`}>
+                        {isLocked ? `?? ${t('dashboard_locked_hint', 'Selesaikan pelajaran sebelum ini')}` : isCompleted ? `?? ${lang === 'en' ? 'Score: ' + quizScore + '%' : 'Skor: ' + quizScore + '%'}` : `? ${t('dashboard_active_hint', 'Sedia untuk dimulakan')}`}
+                      </p>
+
+                      {!isLocked ? (
+                        <button onClick={() => navigate(`/lesson/${i}`)} className={`w-full relative z-10 block text-center py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${isCompleted ? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 hover:border-emerald-400' : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-900/50 hover:shadow-indigo-800/50'}`}>
+                          {isCompleted ? t('dashboard_btn_review', 'ULANG KAJI') : t('dashboard_btn_start', 'MULA BELAJAR')}
+                        </button>
+                      ) : (
+                        <button disabled className="w-full relative z-10 block text-center py-2.5 rounded-xl text-sm font-bold bg-white/5 text-white/20 cursor-not-allowed border border-white/10">
+                          {t('dashboard_btn_locked', 'DIKUNCI')}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+
         {completedModules.length > 0 && (
-          <div className="space-y-6 mb-10">
+          <div className="space-y-6 mb-8">
             {completedModules.map((m) => {
               const certUrl = m._id === 'legacy' ? `/certificate/${athlete._id}` : `/certificate/module/${m._id}`;
               return (
-                <div key={m._id} className="relative overflow-hidden rounded-3xl p-6 sm:p-10 text-center bg-slate-900/60 border border-amber-500/20 shadow-2xl">
+                <div key={m._id} className="animate-[fadeInUp_0.5s_ease-out_forwards] opacity-0 relative overflow-hidden rounded-3xl p-6 sm:p-10 text-center bg-slate-900/60 backdrop-blur-xl border border-amber-500/20 shadow-[0_8px_30px_rgba(245,158,11,0.05)]" style={{ animationDelay: '0.5s' }}>
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-amber-500/5 rounded-full blur-[100px] pointer-events-none"></div>
                   
                   <div className="relative z-10">
                     <svg className="w-16 h-16 mx-auto mb-4 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M32 4C24.268 4 18 10.268 18 18C18 24.363 22.242 29.743 28 31.4V48L32 52L36 48V31.4C41.758 29.743 46 24.363 46 18C46 10.268 39.732 4 32 4Z" fill="url(#goldGrad)" />
+                      <path d="M32 4C24.268 4 18 10.268 18 18C18 24.363 22.242 29.743 28 31.4V48L32 52L36 48V31.4C41.758 29.743 46 24.363 46 18C46 10.268 39.732 4 32 4Z" fill="url(#goldGradDash)" />
                       <circle cx="32" cy="18" r="8" fill="#FFF" fillOpacity="0.2" />
-                      <path d="M26 18L30 22L38 14" stroke="#FFF" stroke-width="3" strokeLinecap="round" strokeLinejoin="round" />
-                      <path d="M22 50L14 58H50L42 50" stroke="url(#goldGrad)" stroke-width="2" strokeLinecap="round" />
+                      <path d="M26 18L30 22L38 14" stroke="#FFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M22 50L14 58H50L42 50" stroke="url(#goldGradDash)" strokeWidth="2" strokeLinecap="round" />
                       <defs>
-                        <linearGradient id="goldGrad" x1="18" y1="4" x2="46" y2="48" gradientUnits="userSpaceOnUse">
+                        <linearGradient id="goldGradDash" x1="18" y1="4" x2="46" y2="48" gradientUnits="userSpaceOnUse">
                           <stop offset="0%" stopColor="#FBBF24" />
                           <stop offset="50%" stopColor="#F59E0B" />
                           <stop offset="100%" stopColor="#D97706" />
@@ -250,25 +367,13 @@ export default function Dashboard() {
                     </h2>
                     
                     <p className="text-white/80 text-sm sm:text-base max-w-xl mx-auto mb-6 leading-relaxed">
-                      {lang === 'en'
-                        ? `You have successfully completed all requirements for `
-                        : `Anda telah berjaya menyelesaikan semua pembelajaran bagi `}
-                      <strong>{m.title}</strong>.{' '}
-                      {lang === 'en'
-                        ? 'Your official certificate of achievement is now ready.'
-                        : 'Sijil pencapaian rasmi anda kini sedia untuk dimuat turun.'}
+                      {lang === 'en' ? 'You have successfully completed all requirements for ' : 'Anda telah berjaya menyelesaikan semua pembelajaran bagi '}
+                      <strong>{m.title}</strong>. {lang === 'en' ? 'Your official certificate of achievement is now ready.' : 'Sijil pencapaian rasmi anda kini sedia untuk dimuat turun.'}
                     </p>
                     
                     <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                      <a
-                        href={certUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-slate-900 font-extrabold px-8 py-3.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(245,158,11,0.25)] hover:shadow-[0_4px_25px_rgba(245,158,11,0.45)] transform hover:-translate-y-0.5"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
+                      <a href={certUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-slate-900 font-extrabold px-8 py-3.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(245,158,11,0.25)] hover:shadow-[0_4px_25px_rgba(245,158,11,0.45)] transform hover:-translate-y-0.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                         {lang === 'en' ? 'Download Certificate' : 'Muat Turun Sijil'}
                       </a>
                     </div>
@@ -279,152 +384,57 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Modules Accordions Grid */}
-        <h2 className="text-white/60 text-xs uppercase tracking-widest font-semibold mb-4">
-          {t('dashboard_modules', 'MODUL PEMBELAJARAN')}
-        </h2>
-
-        {Object.keys(modulesMap).map((mName) => {
-          const mObj = modulesDataMap[mName];
-          return (
-            <div key={mName} className="mb-10">
-              <h3 className="text-white font-bold text-lg mb-4 flex items-center justify-between gap-2 flex-wrap border-b border-white/5 pb-2">
-                <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-6 bg-orange-500 rounded-full"></span>
-                  {mName}
-                </div>
-                {mObj && mObj.hasCertificate && (
-                  <>
-                    {modulesMap[mName].every(item => athlete.currentStage > (item.order || (item.idx + 1))) ? (
-                      <a
-                        href={`/certificate/module/${mObj._id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs bg-yellow-500 hover:bg-yellow-400 text-blue-900 font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors shadow-sm"
-                      >
-                        🎓 {lang === 'en' ? 'Print Certificate' : 'Cetak Sijil'}
-                      </a>
-                    ) : (
-                      <span className="text-xs text-white/40 border border-white/10 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
-                        🔒 {lang === 'en' ? 'Certificate Locked' : 'Sijil Dikunci'}
-                      </span>
-                    )}
-                  </>
-                )}
-              </h3>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {modulesMap[mName].map((lesson) => {
-                  const i = lesson.order || (lesson.idx + 1);
-                  const isLocked = athlete.currentStage < i;
-                  const isCompleted = athlete.currentStage > i;
-                  const quizScore = athlete.quizScores && athlete.quizScores['quiz' + i] ? athlete.quizScores['quiz' + i] : 0;
-                  
-                  const borderGrad = isLocked ? 'border-white/5' : (isCompleted ? 'border-emerald-500/30' : 'border-indigo-500/40');
-                  const bgGrad = isLocked ? 'bg-white/3' : (isCompleted ? 'bg-emerald-950/40' : 'bg-indigo-950/50');
-                  
-                  return (
-                    <div key={lesson._id} className={`rounded-2xl p-5 sm:p-6 border ${borderGrad} ${bgGrad} flex flex-col justify-between h-full`}>
-                      <div>
-                        {/* Card Header */}
-                        <div className="flex items-start justify-between mb-4">
-                          <div>
-                            <p className={`text-xs font-semibold uppercase tracking-widest mb-1 ${isLocked ? 'text-white/30' : (isCompleted ? 'text-emerald-400' : 'text-indigo-400')}`}>
-                              {lang === 'en' ? 'Lesson' : 'Pelajaran'} {i}
-                            </p>
-                            <h4 className={`font-bold text-base leading-snug ${isLocked ? 'text-white/40' : 'text-white'}`}>
-                              {lesson.title}
-                            </h4>
-                          </div>
-                          <div className="text-2xl flex-shrink-0 ml-2">
-                            {isLocked ? '🔒' : (isCompleted ? '✅' : '📖')}
-                          </div>
-                        </div>
-
-                        {/* Progress Bar */}
-                        {!isLocked && (
-                          <div className="mb-4">
-                            <div className="flex justify-between text-xs font-medium mb-1.5">
-                              <span className={isCompleted ? 'text-emerald-400' : 'text-white/60'}>
-                                {isCompleted ? t('progress_completed', 'Selesai') : t('progress_in_progress', 'Dalam Proses')}
-                              </span>
-                              <span className={isCompleted ? 'text-emerald-300 font-bold' : 'text-white/60'}>
-                                {isCompleted ? quizScore + '%' : '—'}
-                              </span>
-                            </div>
-                            <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                              <div
-                                className={`h-full rounded-full ${isCompleted ? 'bg-gradient-to-r from-emerald-500 to-teal-400' : 'bg-gradient-to-r from-indigo-500 to-blue-400'}`}
-                                style={{ width: isCompleted ? `${quizScore}%` : '0%' }}
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="mt-4">
-                        <p className={`text-xs mb-4 ${isLocked ? 'text-white/25' : (isCompleted ? 'text-emerald-400/80' : 'text-white/50')}`}>
-                          {isLocked ? (
-                            `🔐 ${t('dashboard_locked_hint', 'Selesaikan pelajaran sebelum ini')}`
-                          ) : isCompleted ? (
-                            `🎯 ${lang === 'en' ? 'Score: ' + quizScore + '%' : 'Skor: ' + quizScore + '%'}`
-                          ) : (
-                            `▶ ${t('dashboard_active_hint', 'Sedia untuk dimulakan')}`
-                          )}
-                        </p>
-
-                        {!isLocked ? (
-                          <button
-                            onClick={() => navigate(`/lesson/${i}`)}
-                            className={`w-full block text-center py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${isCompleted ? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 hover:border-emerald-400' : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-900/50 hover:shadow-indigo-800/50'}`}
-                          >
-                            {isCompleted ? t('dashboard_btn_review', 'ULANG KAJI') : t('dashboard_btn_start', 'MULA BELAJAR')}
-                          </button>
-                        ) : (
-                          <button disabled className="w-full block text-center py-2.5 rounded-xl text-sm font-bold bg-white/3 text-white/20 cursor-not-allowed border border-white/5">
-                            {t('dashboard_btn_locked', 'DIKUNCI')}
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+        <div className="animate-[fadeInUp_0.5s_ease-out_forwards] opacity-0" style={{ animationDelay: '0.5s' }}>
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5 sm:p-6">
+            <h3 className="font-bold text-white/80 mb-4 flex items-center gap-2 text-sm uppercase tracking-widest">
+              ?? {lang === 'en' ? 'How It Works' : 'Cara Pembelajaran'}
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 shrink-0 rounded-full flex items-center justify-center font-extrabold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">1</div>
+                <p className="text-white/60 pt-1.5 leading-relaxed">{lang === 'en' ? 'Watch the full video lessons to activate the module evaluation' : 'Tonton video pelajaran secara keseluruhan untuk mengaktifkan sesi penilaian'}</p>
               </div>
-            </div>
-          );
-        })}
-
-        {/* Dynamic Learning Guide */}
-        <div className="rounded-3xl p-6 sm:p-8 bg-slate-900/40 border border-white/5 shadow-inner mt-8">
-          <h3 className="font-bold text-white/80 mb-6 flex items-center gap-2 text-sm uppercase tracking-widest">
-            💡 {lang === 'en' ? 'How It Works' : 'Cara Pembelajaran'}
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
-            <div className="flex items-start gap-4">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 font-bold shrink-0">1</div>
-              <div>
-                <h4 className="font-bold mb-1 text-white">{lang === 'en' ? 'Watch Learning Videos' : 'Tonton Video Pembelajaran'}</h4>
-                <p className="text-white/60 leading-relaxed text-xs">{lang === 'en' ? 'Understand all lessons and slides provided in each module.' : 'Fahami setiap isi kandungan dan slaid pembelajaran yang dipaparkan dalam video.'}</p>
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 shrink-0 rounded-full flex items-center justify-center font-extrabold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">2</div>
+                <p className="text-white/60 pt-1.5 leading-relaxed">{lang === 'en' ? 'Complete the evaluation quiz with a minimum score of 80% to pass' : 'Jawab kuiz dengan mencapai markah minimum 80% untuk kelayakan lulus'}</p>
               </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 font-bold shrink-0">2</div>
-              <div>
-                <h4 className="font-bold mb-1 text-white">{lang === 'en' ? 'Answer Module Quiz' : 'Jawab Kuiz Modul'}</h4>
-                <p className="text-white/60 leading-relaxed text-xs">{lang === 'en' ? 'Earn a minimum score of 80% to pass the module successfully.' : 'Selesaikan kuiz di akhir modul dengan memperoleh markah lulus sekurang-kurangnya 80%.'}</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 font-bold shrink-0">3</div>
-              <div>
-                <h4 className="font-bold mb-1 text-white">{lang === 'en' ? 'Download Certificate' : 'Muat Turun Sijil'}</h4>
-                <p className="text-white/60 leading-relaxed text-xs">{lang === 'en' ? 'Obtain a Certificate of Participation after passing the module.' : 'Sijil Penyertaan rasmi akan dijana secara automatik selepas anda menyelesaikan modul pembelajaran.'}</p>
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 shrink-0 rounded-full flex items-center justify-center font-extrabold bg-amber-500/20 text-amber-400 border border-amber-500/30">3</div>
+                <p className="text-white/60 pt-1.5 leading-relaxed">{lang === 'en' ? 'Complete all lessons within the module to be awarded your certificate of achievement' : 'Sempurnakan semua pembelajaran dalam modul untuk dianugerahkan sijil pencapaian'}</p>
               </div>
             </div>
           </div>
         </div>
-
       </main>
+
+      {/* Welcome Modal for First Timers */}
+      {showWelcome && lessons[0] && lessons[0].moduleId && (
+        <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl relative max-h-[85vh] md:max-h-[90vh] flex flex-col scale-100">
+            <div className="overflow-y-auto flex-1">
+              {lessons[0].moduleId.thumbnail ? (
+                <img src={lessons[0].moduleId.thumbnail} alt="Cover" className="w-full h-48 sm:h-64 object-cover" />
+              ) : (
+                <div className="w-full h-48 bg-gradient-to-r from-blue-600 to-indigo-700"></div>
+              )}
+              <div className="p-6 sm:p-8 text-gray-900">
+                <h2 className="text-xl sm:text-2xl font-black mb-4 uppercase text-gray-900 leading-tight">
+                  {lessons[0].moduleId.title || lessons[0].title || ''}
+                </h2>
+                <div 
+                  className="prose max-w-none text-gray-700 leading-relaxed text-sm sm:text-base"
+                  dangerouslySetInnerHTML={{ __html: lessons[0].moduleId.description || (lang === 'en' ? 'Please start your learning...' : 'Sila mulakan pembelajaran anda...') }}
+                />
+              </div>
+            </div>
+            <div className="p-4 sm:p-6 border-t border-gray-100 bg-gray-50 flex justify-end">
+              <button onClick={closeWelcomeModal} className="w-full sm:w-auto px-10 py-3 bg-[#e87a14] hover:bg-[#d66c11] text-white text-base sm:text-lg font-bold rounded-xl transition-all shadow-md active:scale-95">
+                {lang === 'en' ? 'Start Module' : 'Mulakan Modul'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
