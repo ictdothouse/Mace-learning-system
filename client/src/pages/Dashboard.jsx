@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useApp } from '../context/AppContext';
@@ -74,9 +74,17 @@ export default function Dashboard() {
 
   const { athlete, modules, lessons, levels } = data;
 
+  const lessonList = (lessons && lessons.length > 0)
+    ? lessons
+    : [
+        { title: 'Jom kuasai asas dulu sebelum jadi pro!', order: 1, moduleId: { title: 'MODUL 1 : PLAY SAFE WIN STRONG', _id: 'legacy', hasCertificate: true } }, 
+        { title: 'Kenali kesalahan, elak jadi pelaku!', order: 2, moduleId: { title: 'MODUL 1 : PLAY SAFE WIN STRONG', _id: 'legacy', hasCertificate: true } }, 
+        { title: 'Ambil tindakan yang betul, laporkan tanpa ragu!', order: 3, moduleId: { title: 'MODUL 1 : PLAY SAFE WIN STRONG', _id: 'legacy', hasCertificate: true } }
+      ];
+
   const modulesMap = {};
   const modulesDataMap = {};
-  lessons.forEach((lesson, idx) => {
+  lessonList.forEach((lesson, idx) => {
     const m = lesson.moduleId;
     const mName = m && m.title ? m.title : 'MODUL 1 : PLAY SAFE WIN STRONG';
     if (!modulesMap[mName]) {
@@ -136,6 +144,14 @@ export default function Dashboard() {
       style={{ background: `linear-gradient(135deg, ${primaryColor} 0%, #302b63 50%, #24243e 100%)` }}
     >
       <style>{`
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(24px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
         @keyframes shimmer {
           0% { background-position: -200% center; }
           100% { background-position: 200% center; }
