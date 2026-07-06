@@ -18,6 +18,7 @@ const authRoutes = require('./routes/auth');
 const teacherRoutes = require('./routes/teacher');
 const levelRoutes = require('./routes/levels');
 const progressRoutes = require('./routes/progress');
+const apiRoutes = require('./routes/api');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -254,6 +255,7 @@ function startServer() {
     app.use('/teacher', teacherRoutes);
     app.use('/api/levels', levelRoutes);
     app.use('/api/progress', progressRoutes);
+    app.use('/api', apiRoutes);
 
     // 9. Handle 404
     app.use((req, res) => {
