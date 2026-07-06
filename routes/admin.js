@@ -1135,7 +1135,8 @@ router.get('/download', async (req, res) => {
             const userId = athleteUserMap[a._id.toString()];
             const hasNewProgress = userId && userCompletedCount[userId.toString()];
             
-            const rowData = [name, a.icNumber, a.jantina, a.umur, a.negeriWakil, sukan];
+            const icNumber = a.icNumber ? `="${a.icNumber.trim()}"` : '""';
+            const rowData = [name, icNumber, a.jantina, a.umur, a.negeriWakil, sukan];
             
             allModules.forEach((m, i) => {
                 let percent = 0;
