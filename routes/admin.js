@@ -1198,7 +1198,7 @@ router.post('/templates/create', upload.single('backgroundImage'), async (req, r
         } = req.body;
         
         // Parse elements JSON or use defaults
-        let elements = {};
+        let elements = req.body.elements || {};
         if (req.body.elementsJson) {
             try { elements = JSON.parse(req.body.elementsJson); } catch(e) {}
         }
@@ -1274,7 +1274,7 @@ router.post('/templates/update/:id', upload.single('backgroundImage'), async (re
         } = req.body;
         
         // Parse elements JSON or use defaults
-        let elements = {};
+        let elements = req.body.elements || {};
         if (req.body.elementsJson) {
             try { elements = JSON.parse(req.body.elementsJson); } catch(e) {}
         }
