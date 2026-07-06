@@ -160,6 +160,42 @@
 
                     <!-- MODUL 2 TO 5 (COMING SOON / CUSTOMIZABLE) -->
                     <% 
+                        // Auto-translate status text from BM to EN on the live page
+                        const translateStatus = (text, language) => {
+                            if (!text) return '';
+                            if (language !== 'en') return text;
+                            
+                            const lowerText = text.trim().toLowerCase();
+                            const mapping = {
+                                'akan datang': 'Coming Soon',
+                                'belum mula': 'Not Started',
+                                'sedang berjalan': 'In Progress',
+                                'tamat': 'Completed',
+                                'mula': 'Start',
+                                'selesai': 'Completed'
+                            };
+                            
+                            if (mapping[lowerText]) {
+                                return mapping[lowerText];
+                            }
+                            
+                            // Check case-insensitive partial match
+                            if (lowerText.includes('akan datang')) {
+                                return text.replace(/akan datang/gi, 'Coming Soon');
+                            }
+                            if (lowerText.includes('belum mula')) {
+                                return text.replace(/belum mula/gi, 'Not Started');
+                            }
+                            if (lowerText.includes('sedang berjalan')) {
+                                return text.replace(/sedang berjalan/gi, 'In Progress');
+                            }
+                            if (lowerText.includes('tamat')) {
+                                return text.replace(/tamat/gi, 'Completed');
+                            }
+                            
+                            return text;
+                        };
+
                         // Default cards if modulesConfig is empty
                         const defaultCards = [
                             {
@@ -189,7 +225,7 @@
                             page.modulesConfig.forEach((card, idx) => {
                                 if (idx < cards.length) {
                                     if (card.title) cards[idx].title = card.title;
-                                    if (card.statusText) cards[idx].statusText = card.statusText;
+                                    if (card.statusText) cards[idx].statusText = translateStatus(card.statusText, lang);
                                     if (card.imageUrl) cards[idx].imageUrl = card.imageUrl;
                                 }
                             });
