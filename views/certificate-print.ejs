@@ -579,7 +579,7 @@
             
             const opt = {
                 margin:       0,
-                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] },
+                pagebreak:    { mode: 'css' },
                 filename:     'Sijil_<%= athlete.fullName.trim().replace(/[^a-zA-Z0-9]/g, "_") %>.pdf',
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { 
