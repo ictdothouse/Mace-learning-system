@@ -34,7 +34,37 @@ export default function Login() {
       .then(res => setSports(res.data))
       .catch(err => console.error('Failed to load sports:', err));
   }, []);
+  useEffect(() => {
+    // Only apply for 'new' tab pendaftaran
+    if (tab !== 'new') return;
 
+    // Clean IC number to digit-only and limit length to 12
+    const digits = icNumber.replace(/[^0-9]/g, '').slice(0, 12);
+    if (digits !== icNumber) {
+      setIcNumber(digits);
+      return;
+    }
+
+    // Auto calculate age if at least 2 digits
+    if (digits.length >= 2) {
+      const yy = parseInt(digits.substring(0, 2), 10);
+      const currentYear = new Date().getFullYear();
+      // Cutoff year 30 (e.g. 35 -> 1935, 05 -> 2005)
+      const birthYear = yy > 30 ? 1900 + yy : 2000 + yy;
+      const calculatedAge = currentYear - birthYear;
+      setUmur(calculatedAge.toString());
+    } else {
+      setUmur('');
+    }
+
+    // Auto select gender if 12 digits
+    if (digits.length === 12) {
+      const lastDigit = parseInt(digits.substring(11, 12), 10);
+      setJantina(lastDigit % 2 === 0 ? 'Perempuan' : 'Lelaki');
+    } else {
+      setJantina('');
+    }
+  }, [icNumber, tab]);
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -302,7 +332,8 @@ export default function Login() {
                               required
                               value={jantina}
                               onChange={(e) => setJantina(e.target.value)}
-                              className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all text-sm text-slate-800 font-medium bg-white"
+                              disabled={icNumber.length === 12}
+                              className={`w-full px-4 py-3 border border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all text-sm text-slate-800 font-medium bg-white ${icNumber.length === 12 ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                             >
                               <option value="">{t('entry_field_gender_select', 'Pilih Jantina')}</option>
                               <option value="Lelaki">{t('entry_field_gender_male', 'Lelaki')}</option>
@@ -320,7 +351,8 @@ export default function Login() {
                               max="60"
                               value={umur}
                               onChange={(e) => setUmur(e.target.value)}
-                              className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all text-sm text-slate-800 placeholder-slate-400 font-medium"
+                              readOnly={icNumber.length >= 2}
+                              className={`w-full px-4 py-3 border border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all text-sm text-slate-800 placeholder-slate-400 font-medium ${icNumber.length >= 2 ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                               placeholder={t('entry_field_age_placeholder', 'UMUR')}
                             />
                           </div>
