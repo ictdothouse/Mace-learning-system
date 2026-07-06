@@ -292,11 +292,10 @@ export default function LessonPlayer() {
               <video 
                 ref={videoRef}
                 controls 
-                controlsList="nodownload" 
+                controlsList="nodownload"
                 onContextMenu={(e) => e.preventDefault()} 
                 onTimeUpdate={handleVideoTimeUpdate}
                 onEnded={handleVideoTimeUpdate}
-                poster={lesson.moduleId?.thumbnail || ''}
                 className="absolute top-0 left-0 w-full h-full object-contain"
                 playsInline
               >

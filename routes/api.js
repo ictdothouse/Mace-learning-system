@@ -67,6 +67,65 @@ const getLessonsWithQuiz = async () => {
     return lessonsCache;
 };
 
+const translateText = (text, lang) => {
+    if (!text || lang !== 'en') return text;
+    let result = text;
+    const mappings = [
+        {
+            ms: /Jom kuasai asas dulu sebelum jadi pro!/gi,
+            en: "Let's master the basics first before becoming a pro!"
+        },
+        {
+            ms: /Topik pembelajaran ini mengenai Peraturan Asas. Tonton topik ini dan uji kefahaman anda melalui Kuiz!/gi,
+            en: "This learning topic is about Basic Rules. Watch this topic and test your understanding through the Quiz!"
+        },
+        {
+            ms: /Jenis-Jenis Salah Laku: Kenali kesalahan, elak jadi pelaku!/gi,
+            en: "Types of Misconduct: Recognize mistakes, avoid being a perpetrator!"
+        },
+        {
+            ms: /Kenali kesalahan, elak jadi pelaku!/gi,
+            en: "Recognize mistakes, avoid being a perpetrator!"
+        },
+        {
+            ms: /Tonton topik ini dan uji kefahaman anda melalui Kuiz!/gi,
+            en: "Watch this topic and test your understanding through the Quiz!"
+        },
+        {
+            ms: /Ambil tindakan yang betul, laporkan tanpa ragu!/gi,
+            en: "Take the right action, report it without hesitation!"
+        },
+        {
+            ms: /MODUL 1\s*:\s*PLAY SAFE WIN STRONG/gi,
+            en: "MODULE 1: PLAY SAFE WIN STRONG"
+        },
+        {
+            ms: /Di akhir modul ini anda akan dapat memahami peraturan asas, jenis\s*(&ndash;|-)\s*jenis salah laku serta tindakan yang anda perlu lakukan sekiranya sesuatu perkara yang tidak diingini berlaku terhadap anda atau orang sekeliling anda\./gi,
+            en: "At the end of this module you will be able to understand basic rules, types of misconduct, and the actions you need to take if something undesirable happens to you or those around you."
+        },
+        {
+            ms: /Ini penting bagi melindungi anda dan mewujudkan persekitaran sukan selamat dan berintegriti\./gi,
+            en: "This is important to protect you and create a safe and integrated sports environment."
+        },
+        {
+            ms: /Sebarang pertanyaan atau maklumbalas, hubungi kami menerusi email\s*:/gi,
+            en: "For any inquiries or feedback, contact us via email:"
+        },
+        {
+            ms: /^Hubungi$/gi,
+            en: "Contact Us"
+        },
+        {
+            ms: /Hubungi Kami/gi,
+            en: "Contact Us"
+        }
+    ];
+    for (const m of mappings) {
+        result = result.replace(m.ms, m.en);
+    }
+    return result;
+};
+
 // ==========================================
 // MIDDLEWARES
 // ==========================================
@@ -249,10 +308,31 @@ router.get('/athlete/dashboard', async (req, res) => {
         const activeLessons = allLessons.filter(l => l.isActive !== false);
         const levels = await Level.find().sort({ order: 1 }).lean();
 
+        const lang = req.cookies && req.cookies.lang || 'ms';
+        const translatedLessons = activeLessons.map(l => {
+            const cloned = { ...l };
+            cloned.title = translateText(l.title, lang);
+            cloned.contentHtml = translateText(l.contentHtml, lang);
+            if (cloned.moduleId) {
+                cloned.moduleId = {
+                    ...cloned.moduleId,
+                    title: translateText(cloned.moduleId.title, lang),
+                    description: translateText(cloned.moduleId.description, lang)
+                };
+            }
+            return cloned;
+        });
+
+        const translatedModules = modules.map(m => ({
+            ...m,
+            title: translateText(m.title, lang),
+            description: translateText(m.description, lang)
+        }));
+
         res.json({
             athlete,
-            modules,
-            lessons: activeLessons,
+            modules: translatedModules,
+            lessons: translatedLessons,
             levels
         });
     } catch (err) {
@@ -271,7 +351,22 @@ router.get('/athlete/lesson/:id', async (req, res) => {
         }
 
         const lessons = await getLessonsWithQuiz();
-        const lesson = lessons[moduleId - 1];
+        const lang = req.cookies && req.cookies.lang || 'ms';
+        const translatedLessons = lessons.map(l => {
+            const cloned = { ...l };
+            cloned.title = translateText(l.title, lang);
+            cloned.contentHtml = translateText(l.contentHtml, lang);
+            if (cloned.moduleId) {
+                cloned.moduleId = {
+                    ...cloned.moduleId,
+                    title: translateText(cloned.moduleId.title, lang),
+                    description: translateText(cloned.moduleId.description, lang)
+                };
+            }
+            return cloned;
+        });
+
+        const lesson = translatedLessons[moduleId - 1];
         if (!lesson) return res.status(404).json({ error: 'Modul pembelajaran tidak dijumpai.' });
 
         let secureVideoUrl = null;
@@ -281,7 +376,7 @@ router.get('/athlete/lesson/:id', async (req, res) => {
             athlete,
             lesson,
             secureVideoUrl,
-            allLessons: lessons
+            allLessons: translatedLessons
         });
     } catch (err) {
         console.error('API Lesson Fetch Error:', err);
