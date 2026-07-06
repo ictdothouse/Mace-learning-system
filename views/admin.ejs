@@ -3283,8 +3283,29 @@
             const setActive = form.querySelector('[name="setAsActive"]');
             if (setActive) setActive.checked = data.isActive === true;
             
+            // Reset elements position to default first to avoid cross-contamination
+            templateData.elements = {
+                title: { positionX: 50, positionY: 15, fontSize: 32, align: 'center', color: '#004aad' },
+                subtitle: { positionX: 50, positionY: 25, fontSize: 18, align: 'center', color: '#333333' },
+                description: { positionX: 50, positionY: 35, fontSize: 14, align: 'center', color: '#333333' },
+                athleteName: { positionX: 50, positionY: 45, fontSize: 36, align: 'center', color: '#004aad' },
+                icNumber: { positionX: 50, positionY: 53, fontSize: 14, align: 'center', color: '#333333' },
+                negeri: { positionX: 50, positionY: 60, fontSize: 16, align: 'center', color: '#fbbf24' },
+                sukan: { positionX: 50, positionY: 65, fontSize: 16, align: 'center', color: '#fbbf24' },
+                courseName: { positionX: 50, positionY: 72, fontSize: 20, align: 'center', color: '#004aad' },
+                date: { positionX: 20, positionY: 85, fontSize: 12, align: 'left', color: '#333333' },
+                signatory: { positionX: 80, positionY: 85, fontSize: 14, align: 'right', color: '#333333' },
+                signatoryTitle: { positionX: 20, positionY: 85, fontSize: 12, color: '#666666', align: 'left', lineHeight: 1.3, letterSpacing: 0 }
+            };
+
             // Load saved positions
-            if (data.elementsJson) {
+            if (data.elements) {
+                for (const key in templateData.elements) {
+                    if (data.elements[key]) {
+                        templateData.elements[key] = { ...templateData.elements[key], ...data.elements[key] };
+                    }
+                }
+            } else if (data.elementsJson) {
                 try {
                     const savedElements = JSON.parse(data.elementsJson);
                     for (const key in templateData.elements) {
