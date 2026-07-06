@@ -28,6 +28,9 @@ const levelRoutes = require('./routes/levels');
 const progressRoutes = require('./routes/progress');
 const apiRoutes = require('./routes/api');
 
+// ⚡ Queue Control Middleware (tanpa Redis — in-memory)
+const { concurrencyGuard, concurrencyGuardApi, queueStatusHandler } = require('./middleware/concurrency');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -272,6 +275,10 @@ function startServer() {
         });
     } else {
         // Fallback to legacy EJS views if client/dist is not built
+        // ⚡ concurrencyGuard: kawal akses concurrent ke dashboard/lesson
+        // Halaman entry (/ms, /en, /access) tidak dihadkan — hanya selepas login
+        app.use('/dashboard', concurrencyGuard, athleteRoutes);
+        app.use('/lesson', concurrencyGuard, athleteRoutes);
         app.use('/', athleteRoutes);
     }
 
@@ -279,7 +286,13 @@ function startServer() {
     app.use('/auth', authRoutes);
     app.use('/teacher', teacherRoutes);
     app.use('/api/levels', levelRoutes);
-    app.use('/api/progress', progressRoutes);
+
+    // ⚡ Queue Status Endpoint — dipanggil oleh waiting-room.ejs setiap 15 saat
+    // Ringan: tiada DB query, hanya semak in-memory counter
+    app.get('/api/queue-status', queueStatusHandler);
+
+    // ⚡ Progress API dilindungi oleh concurrencyGuardApi
+    app.use('/api/progress', concurrencyGuardApi, progressRoutes);
     app.use('/api', apiRoutes);
 
     // 9. Handle 404

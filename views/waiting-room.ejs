@@ -3,70 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= lang === 'en' ? 'Preparing Your Profile - Please Wait' : 'Menyediakan Profil - Sila Tunggu' %> - MACE</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <title><%= lang === 'en' ? 'Almost There! - Please Wait' : 'Hampir Sampai! - Sila Tunggu' %> - MACE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            display: flex; align-items: center; justify-content: center; padding: 24px;
+        }
+        .card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 40px 36px;
+            max-width: 440px; width: 100%;
+            text-align: center;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+        }
+        .badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(234,179,8,0.15); color: #fbbf24;
+            border: 1px solid rgba(234,179,8,0.3);
+            font-size: 11px; font-weight: 700; letter-spacing: 0.05em;
+            padding: 6px 14px; border-radius: 999px; margin-bottom: 24px;
+        }
+        .dot { width: 7px; height: 7px; border-radius: 50%; background: #fbbf24; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.5; transform:scale(.8); } }
+        .icon-wrap {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 24px; position: relative;
+        }
+        .icon-wrap::before {
+            content: ''; position: absolute; inset: -4px; border-radius: 50%;
+            border: 2px solid transparent;
+            background: linear-gradient(135deg, #3b82f6, #6366f1) border-box;
+            -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: destination-out;
+            animation: spin 2s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        h1 { font-size: 22px; font-weight: 800; color: #f1f5f9; margin-bottom: 8px; line-height: 1.3; }
+        .subtitle { font-size: 14px; color: #94a3b8; line-height: 1.6; margin-bottom: 28px; }
+
+        /* Queue info box */
+        .queue-box {
+            background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2);
+            border-radius: 16px; padding: 20px; margin-bottom: 20px;
+        }
+        .queue-number {
+            font-size: 48px; font-weight: 800; color: #60a5fa; line-height: 1;
+            margin-bottom: 4px; font-variant-numeric: tabular-nums;
+        }
+        .queue-label { font-size: 12px; color: #64748b; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; }
+        .queue-meta { display: flex; justify-content: space-between; margin-top: 16px; gap: 12px; }
+        .queue-meta-item { flex: 1; background: rgba(255,255,255,0.05); border-radius: 10px; padding: 10px; }
+        .queue-meta-value { font-size: 18px; font-weight: 700; color: #e2e8f0; }
+        .queue-meta-key { font-size: 11px; color: #64748b; margin-top: 2px; }
+
+        /* Progress bar */
+        .progress-wrap { margin-bottom: 24px; }
+        .progress-bar-bg { height: 6px; background: rgba(255,255,255,0.1); border-radius: 999px; overflow: hidden; }
+        .progress-bar-fill {
+            height: 100%; background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            border-radius: 999px; width: 0%;
+            transition: width 1s ease;
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { filter: brightness(1); }
+            50% { filter: brightness(1.3); }
+            100% { filter: brightness(1); }
+        }
+        .progress-text { font-size: 12px; color: #64748b; margin-top: 8px; display: flex; justify-content: space-between; }
+
+        /* Status messages */
+        .status-msg { font-size: 13px; color: #94a3b8; margin-bottom: 20px; min-height: 20px; }
+        .status-msg.success { color: #34d399; font-weight: 600; }
+
+        /* Tips */
+        .tips { text-align: left; }
+        .tips-title { font-size: 11px; color: #475569; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+        .tip { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: #64748b; margin-bottom: 8px; line-height: 1.5; }
+        .tip-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+        .footer-note { font-size: 11px; color: #334155; margin-top: 24px; }
+
+        /* Hidden form */
+        #retryForm { display: none; }
+
+        /* Entry animation */
+        @keyframes fadeIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+        .card { animation: fadeIn .5s ease both; }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex items-center justify-center p-6">
-    <div class="max-w-md w-full bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.08)] p-8 text-center">
-        <!-- Loader Spinner (Beautiful Emerald Green Spinner) -->
-        <div class="flex justify-center mb-6">
-            <svg class="animate-spin h-16 w-16 text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+<body>
+    <div class="card">
+        <div class="badge">
+            <span class="dot"></span>
+            <%= lang === 'en' ? 'You are in the Queue' : 'Anda dalam Barisan' %>
+        </div>
+
+        <div class="icon-wrap">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                <path d="M12 6v6l4 2" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="9" stroke="white" stroke-width="2.5"/>
             </svg>
         </div>
 
-        <!-- Waiting Room Badge -->
-        <div class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-full mb-4 border border-emerald-100">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <%= lang === 'en' ? 'You are in the Waiting Room' : 'Anda berada di Ruang Menunggu' %>
-        </div>
-
-        <h1 class="text-2xl font-extrabold text-gray-900 mb-3 uppercase tracking-tight">
-            <%= lang === 'en' ? 'Preparing Your Profile' : 'Profil Anda Sedang Disediakan' %>
-        </h1>
-        <p class="text-gray-600 mb-6 text-sm leading-relaxed">
-            <%= lang === 'en' ? 'Please wait a moment while we set up your athlete profile. This is to ensure a smooth and seamless learning experience.' : 'Sila tunggu sebentar sementara sistem kami menyediakan profil pembelajaran anda. Ini bagi memastikan kelancaran sesi pembelajaran anda.' %>
+        <h1><%= lang === 'en' ? "Almost There! You're in the Queue" : "Hampir Sampai! Anda dalam Barisan" %></h1>
+        <p class="subtitle">
+            <%= lang === 'en'
+                ? 'Our system is managing access to ensure a smooth and stable experience for all athletes. You will be admitted automatically when a slot opens.'
+                : 'Sistem kami sedang mengurus akses untuk memastikan pengalaman yang lancar dan stabil untuk semua atlet. Anda akan dimasukkan secara automatik apabila slot tersedia.' %>
         </p>
 
-        <!-- Countdown in Emerald Soft Green Theme -->
-        <div class="bg-emerald-50 rounded-xl p-4 mb-6 border border-emerald-100">
-            <p class="text-sm font-semibold text-emerald-800">
-                <%= lang === 'en' ? 'Launching portal in' : 'Melancarkan portal dalam masa' %> <span id="countdown" class="text-lg font-bold">8</span> <%= lang === 'en' ? 'seconds...' : 'saat...' %>
-            </p>
+        <% if (locals.queuePosition && queuePosition > 0) { %>
+        <div class="queue-box">
+            <div class="queue-number" id="queuePos"><%= queuePosition %></div>
+            <div class="queue-label"><%= lang === 'en' ? 'Your position in queue' : 'Kedudukan anda dalam barisan' %></div>
+            <div class="queue-meta">
+                <div class="queue-meta-item">
+                    <div class="queue-meta-value" id="waitSecs"><%= Math.ceil((locals.estimatedWaitSeconds || 30) / 60) %> min</div>
+                    <div class="queue-meta-key"><%= lang === 'en' ? 'Est. wait' : 'Anggaran tunggu' %></div>
+                </div>
+                <div class="queue-meta-item">
+                    <div class="queue-meta-value"><%= locals.activeCount || '~' %>/<%= locals.maxCount || 200 %></div>
+                    <div class="queue-meta-key"><%= lang === 'en' ? 'Active users' : 'Pengguna aktif' %></div>
+                </div>
+            </div>
+        </div>
+        <% } else { %>
+        <div class="queue-box">
+            <div class="queue-number">...</div>
+            <div class="queue-label"><%= lang === 'en' ? 'Checking your queue position' : 'Menyemak kedudukan anda' %></div>
+        </div>
+        <% } %>
+
+        <div class="progress-wrap">
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+            <div class="progress-text">
+                <span id="statusMsg" class="status-msg">
+                    <%= lang === 'en' ? 'Checking for available slots...' : 'Menyemak slot yang tersedia...' %>
+                </span>
+                <span id="timerLabel" style="color:#475569; font-size:12px;"></span>
+            </div>
         </div>
 
-        <!-- Hidden Form to preserve inputs -->
-        <form id="retryForm" action="/access" method="POST" class="hidden">
-            <% if (locals.formData) { %>
-                <% Object.keys(formData).forEach(key => { %>
-                    <input type="hidden" name="<%= key %>" value="<%= formData[key] %>">
-                <% }) %>
-            <% } %>
-        </form>
+        <div class="tips">
+            <div class="tips-title"><%= lang === 'en' ? 'While you wait...' : 'Semasa menunggu...' %></div>
+            <div class="tip"><span class="tip-icon">✅</span><span><%= lang === 'en' ? 'Your data and progress are safe. No need to re-register.' : 'Data dan kemajuan anda selamat. Tidak perlu daftar semula.' %></span></div>
+            <div class="tip"><span class="tip-icon">🔄</span><span><%= lang === 'en' ? 'The system will automatically redirect you when your turn comes.' : 'Sistem akan mengarahkan anda secara automatik apabila giliran tiba.' %></span></div>
+            <div class="tip"><span class="tip-icon">📵</span><span><%= lang === 'en' ? 'Please do not close or refresh this page.' : 'Sila jangan tutup atau muat semula halaman ini.' %></span></div>
+        </div>
 
-        <p class="text-[11px] text-gray-400">
-            <%= lang === 'en' ? 'Your data is safe. Please do not close this page.' : 'Data anda selamat disimpan. Sila jangan tutup halaman ini.' %>
-        </p>
+        <p class="footer-note"><%= lang === 'en' ? 'This page checks for your slot every 15 seconds automatically.' : 'Halaman ini menyemak slot anda setiap 15 saat secara automatik.' %></p>
     </div>
 
-    <script>
-        let timeLeft = 8;
-        const countdownEl = document.getElementById('countdown');
-        const retryForm = document.getElementById('retryForm');
+    <!-- Hidden form untuk registration retry -->
+    <form id="retryForm" action="/access" method="POST">
+        <% if (locals.formData) { %>
+            <% Object.keys(formData).forEach(key => { %>
+                <input type="hidden" name="<%= key %>" value="<%= formData[key] %>">
+            <% }) %>
+        <% } %>
+    </form>
 
-        const interval = setInterval(() => {
-            timeLeft--;
-            countdownEl.innerText = timeLeft;
-            if (timeLeft <= 0) {
-                clearInterval(interval);
-                retryForm.submit();
+    <script>
+        const lang = '<%= lang %>';
+        const hasFormData = <%= locals.formData ? 'true' : 'false' %>;
+        const POLL_INTERVAL = 15000; // Check every 15 seconds
+        let pollTimer = null;
+        let countdown = 15;
+        let tickTimer = null;
+        const progressBar = document.getElementById('progressBar');
+        const statusMsg = document.getElementById('statusMsg');
+        const timerLabel = document.getElementById('timerLabel');
+        const queuePosEl = document.getElementById('queuePos');
+        const waitSecsEl = document.getElementById('waitSecs');
+
+        function updateProgress(pct) {
+            progressBar.style.width = pct + '%';
+        }
+
+        function startCountdown() {
+            countdown = 15;
+            updateProgress(0);
+            if (tickTimer) clearInterval(tickTimer);
+            tickTimer = setInterval(() => {
+                countdown--;
+                const pct = Math.round(((15 - countdown) / 15) * 100);
+                updateProgress(pct);
+                timerLabel.textContent = (lang === 'en' ? 'Checking in ' : 'Semak dalam ') + countdown + 's';
+                if (countdown <= 0) {
+                    clearInterval(tickTimer);
+                    checkQueue();
+                }
+            }, 1000);
+        }
+
+        async function checkQueue() {
+            try {
+                statusMsg.textContent = lang === 'en' ? 'Checking for available slots...' : 'Menyemak slot yang tersedia...';
+                const res = await fetch('/api/queue-status');
+                const data = await res.json();
+
+                if (data.canEnter) {
+                    statusMsg.textContent = lang === 'en' ? '✅ Slot available! Redirecting you now...' : '✅ Slot tersedia! Mengalihkan anda sekarang...';
+                    statusMsg.classList.add('success');
+                    updateProgress(100);
+                    timerLabel.textContent = '';
+
+                    setTimeout(() => {
+                        if (hasFormData) {
+                            document.getElementById('retryForm').submit();
+                        } else {
+                            window.location.href = '/';
+                        }
+                    }, 1500);
+                } else {
+                    // Update queue position display
+                    if (queuePosEl && data.queuePosition) {
+                        queuePosEl.textContent = data.queuePosition;
+                    }
+                    if (waitSecsEl && data.estimatedWaitSeconds) {
+                        const mins = Math.ceil(data.estimatedWaitSeconds / 60);
+                        waitSecsEl.textContent = mins < 1 ? '< 1 min' : mins + ' min';
+                    }
+                    statusMsg.textContent = lang === 'en' ? 'Still waiting for a slot...' : 'Masih menunggu slot...';
+                    startCountdown();
+                }
+            } catch (err) {
+                statusMsg.textContent = lang === 'en' ? 'Connection error, retrying...' : 'Ralat sambungan, cuba semula...';
+                startCountdown();
             }
-        }, 1000);
+        }
+
+        // Start
+        startCountdown();
     </script>
 </body>
 </html>
