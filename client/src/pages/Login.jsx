@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useApp } from '../context/AppContext';
@@ -21,17 +21,6 @@ export default function Login() {
   const [negeri, setNegeri] = useState('');
   const [sukan, setSukan] = useState('');
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0f0c29] text-white font-sans">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
-          <p className="text-white/60 text-sm font-medium animate-pulse">Memuatkan penjenamaan...</p>
-        </div>
-      </div>
-    );
-  }
-
   useEffect(() => {
     // If already logged in, redirect to dashboard
     if (auth.authenticated && auth.role === 'student') {
@@ -44,6 +33,17 @@ export default function Login() {
       .then(res => setSports(res.data))
       .catch(err => console.error('Failed to load sports:', err));
   }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0f0c29] text-white font-sans">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+          <p className="text-white/60 text-sm font-medium animate-pulse">Memuatkan penjenamaan...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
