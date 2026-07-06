@@ -130,7 +130,7 @@ export default function Dashboard() {
 
   let stageLabel = "";
   if (completedCount > 0) {
-    stageLabel = lang === 'en' ? `?? Completed: Module ${completedCount}` : `?? Tamat: Modul ${completedCount}`;
+    stageLabel = lang === 'en' ? `🏆 Completed: Module ${completedCount}` : `🏆 Tamat: Modul ${completedCount}`;
   } else {
     stageLabel = lang === 'en' ? `Stage ${athlete.currentStage}` : `Peringkat ${athlete.currentStage}`;
   }
@@ -186,7 +186,7 @@ export default function Dashboard() {
               <img src={branding.logoUrl} alt="Logo" className="h-7 sm:h-8 w-auto object-contain filter drop-shadow-md shrink-0" />
             ) : (
               <>
-                <span className="text-xl sm:text-2xl shrink-0">??</span>
+                <span className="text-xl sm:text-2xl shrink-0">🏅</span>
                 <span className="font-bold text-white text-xs sm:text-base truncate">{branding.siteName || 'MACE eLearning'}</span>
               </>
             )}
@@ -209,18 +209,18 @@ export default function Dashboard() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8 sm:mb-10">
             <div>
               <p className="text-white/50 text-sm font-medium mb-1 uppercase tracking-widest">
-                {lang === 'en' ? 'Welcome back' : 'Selamat kembali'} ??
+                {lang === 'en' ? 'Welcome back' : 'Selamat kembali'} 👋
               </p>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-3">
                 <span className="shimmer-text">{athlete.fullName}</span>
               </h1>
               <div className="flex flex-wrap items-center gap-2 text-sm">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 border border-white/10 rounded-full text-white/80">
-                  ?? {athlete.negeriWakil}
+                  📍 {athlete.negeriWakil}
                 </span>
                 {athlete.sukan && (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 border border-white/10 rounded-full text-white/80">
-                    ? {athlete.sukan}
+                    ⚡ {athlete.sukan}
                   </span>
                 )}
                 <span className={`inline-flex items-center gap-1.5 px-3 py-1 border rounded-full font-semibold ${stageBg}`}>
@@ -280,11 +280,11 @@ export default function Dashboard() {
                   <>
                     {modulesMap[mName].every(item => athlete.currentStage > (item.order || (item.idx + 1))) ? (
                       <a href={`/certificate/module/${mObj._id}`} target="_blank" rel="noopener noreferrer" className="text-xs bg-yellow-500 hover:bg-yellow-400 text-blue-900 font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors shadow-sm">
-                        ?? {lang === 'en' ? 'Print Certificate' : 'Cetak Sijil'}
+                        🎓 {lang === 'en' ? 'Print Certificate' : 'Cetak Sijil'}
                       </a>
                     ) : (
                       <span className="text-xs text-white/40 border border-white/10 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
-                        ?? {lang === 'en' ? 'Certificate Locked' : 'Sijil Dikunci'}
+                        🔒 {lang === 'en' ? 'Certificate Locked' : 'Sijil Dikunci'}
                       </span>
                     )}
                   </>
@@ -314,7 +314,7 @@ export default function Dashboard() {
                           </h3>
                         </div>
                         <div className="text-3xl flex-shrink-0 ml-2">
-                          {isLocked ? '??' : (isCompleted ? '?' : '??')}
+                          {isLocked ? '🔒' : (isCompleted ? '✅' : '📖')}
                         </div>
                       </div>
 
@@ -335,7 +335,7 @@ export default function Dashboard() {
                       )}
 
                       <p className={`text-xs mb-4 ${isLocked ? 'text-white/25' : (isCompleted ? 'text-emerald-400/80' : 'text-white/50')}`}>
-                        {isLocked ? `?? ${t('dashboard_locked_hint', 'Selesaikan pelajaran sebelum ini')}` : isCompleted ? `?? ${lang === 'en' ? 'Score: ' + quizScore + '%' : 'Skor: ' + quizScore + '%'}` : `? ${t('dashboard_active_hint', 'Sedia untuk dimulakan')}`}
+                        {isLocked ? `🔐 ${t('dashboard_locked_hint', 'Selesaikan pelajaran sebelum ini')}` : isCompleted ? `🎯 ${lang === 'en' ? 'Score: ' + quizScore + '%' : 'Skor: ' + quizScore + '%'}` : `▶ ${t('dashboard_active_hint', 'Sedia untuk dimulakan')}`}
                       </p>
 
                       {!isLocked ? (
@@ -403,7 +403,7 @@ export default function Dashboard() {
         <div className="animate-[fadeInUp_0.5s_ease-out_forwards] opacity-0" style={{ animationDelay: '0.5s' }}>
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5 sm:p-6">
             <h3 className="font-bold text-white/80 mb-4 flex items-center gap-2 text-sm uppercase tracking-widest">
-              ?? {lang === 'en' ? 'How It Works' : 'Cara Pembelajaran'}
+              💡 {lang === 'en' ? 'How It Works' : 'Cara Pembelajaran'}
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
               <div className="flex items-start gap-3">

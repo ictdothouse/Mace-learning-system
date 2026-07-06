@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useApp } from '../context/AppContext';
@@ -426,7 +426,7 @@ export default function LessonPlayer() {
                               )}
                               {quizResult && (
                                 <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded ml-2 ${isCorrect ? 'text-green-700 bg-green-50' : 'text-red-700 bg-red-50'}`}>
-                                  {isCorrect ? `? ${t('lesson_correct', 'Betul')}` : `? ${t('lesson_wrong', 'Salah')}`}
+                                  {isCorrect ? `✓ ${t('lesson_correct', 'Betul')}` : `✗ ${t('lesson_wrong', 'Salah')}`}
                                 </span>
                               )}
                             </span>
@@ -491,7 +491,7 @@ export default function LessonPlayer() {
                     })
                   ) : (
                     <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200 text-yellow-800 text-center">
-                      ?? {t('lesson_no_quiz', 'Tiada soalan kuiz tersedia.')}
+                      ⚠️ {t('lesson_no_quiz', 'Tiada soalan kuiz tersedia.')}
                     </div>
                   )}
 
@@ -501,7 +501,7 @@ export default function LessonPlayer() {
                       <>
                         {moduleId === 3 ? (
                           <Link to="/dashboard" className="flex-grow bg-yellow-600 text-white px-6 py-3.5 rounded-lg font-bold hover:bg-yellow-700 transition shadow-md flex items-center justify-center gap-2 text-center">
-                            {t('lesson_go_dashboard', 'Pergi Ke Dashboard')} ??
+                            {t('lesson_go_dashboard', 'Pergi Ke Dashboard')} 🎓
                           </Link>
                         ) : (
                           <button 
@@ -509,7 +509,7 @@ export default function LessonPlayer() {
                             onClick={() => navigate(`/lesson/${moduleId + 1}`)}
                             className="flex-grow bg-green-600 text-white px-6 py-3.5 rounded-lg font-bold hover:bg-green-700 transition shadow-md flex items-center justify-center gap-2 text-center"
                           >
-                            {t('lesson_next_module', 'Pelajaran Seterusnya ?')}
+                            {t('lesson_next_module', 'Pelajaran Seterusnya →')}
                           </button>
                         )}
                         <button 
@@ -526,7 +526,7 @@ export default function LessonPlayer() {
                         onClick={handleQuizReset} 
                         className="flex-grow bg-blue-600 text-white px-6 py-3.5 rounded-lg font-bold hover:bg-blue-700 transition shadow-md flex items-center justify-center gap-2"
                       >
-                        {t('lesson_btn_retry_quiz', 'Jawab Semula Kuiz ?')}
+                        {t('lesson_btn_retry_quiz', 'Jawab Semula Kuiz ↺')}
                       </button>
                     ) : (
                       questions.length > 0 && (
@@ -534,7 +534,7 @@ export default function LessonPlayer() {
                           type="submit" 
                           className="flex-grow bg-blue-600 text-white px-6 py-3.5 rounded-lg font-bold hover:bg-blue-700 transition shadow-md flex items-center justify-center gap-2"
                         >
-                          {t('lesson_btn_submit', 'Hantar Jawapan & Semak Keputusan ?')}
+                          {t('lesson_btn_submit', 'Hantar Jawapan & Semak Keputusan →')}
                         </button>
                       )
                     )}

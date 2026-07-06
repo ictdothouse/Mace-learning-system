@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useApp } from '../context/AppContext';
 
 export default function Login() {
-  const { branding, t, lang, changeLang, setAuth, auth } = useApp();
+  const { branding, t, lang, changeLang, setAuth, auth, loading } = useApp();
   const navigate = useNavigate();
 
   const [tab, setTab] = useState('new'); // 'new' or 'resume'
@@ -12,6 +12,17 @@ export default function Login() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [showNameHint, setShowNameHint] = useState(false);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0f0c29] text-white font-sans">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+          <p className="text-white/60 text-sm font-medium animate-pulse">Memuatkan penjenamaan...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Form states
   const [fullName, setFullName] = useState('');
