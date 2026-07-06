@@ -287,7 +287,9 @@ router.get('/sports', async (req, res) => {
 
 // GET: Dapatkan Tetapan Penjenamaan (Branding)
 router.get('/branding', (req, res) => {
-    res.json(res.locals.branding || {});
+    const branding = { ...(res.locals.branding || {}) };
+    branding.navPages = res.locals.navPages || [];
+    res.json(branding);
 });
 
 // ==========================================

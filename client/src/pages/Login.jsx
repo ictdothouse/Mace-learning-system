@@ -12,6 +12,7 @@ export default function Login() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [showNameHint, setShowNameHint] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Form states
   const [fullName, setFullName] = useState('');
@@ -99,9 +100,46 @@ export default function Login() {
                 </h1>
               )}
             </span>
+
+            {/* Desktop Menu Links */}
+            {!loading && branding.showMenu && (branding.menuLinks?.length > 0 || branding.navPages?.length > 0) && (
+              <div className="hidden md:flex items-center gap-6 ml-8">
+                {branding.menuLinks?.map((link, index) => {
+                  const label = lang === 'en'
+                    ? (link.label_en || (link.label?.toLowerCase() === 'modul' ? 'Modules' : link.label?.toLowerCase() === 'hubungi kami' ? 'Contact Us' : link.label))
+                    : link.label;
+                  return (
+                    <a key={index} href={link.url} className="text-sm font-semibold text-white/80 hover:text-white transition-colors">
+                      {label}
+                    </a>
+                  );
+                })}
+                {branding.navPages?.map((p, index) => (
+                  <a key={index} href={`/page/${p.slug}`} className="text-sm font-semibold text-white/80 hover:text-white transition-colors">
+                    {lang === 'en' ? (p.title_en || p.title) : p.title}
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
- 
+
           <div className="flex items-center gap-4">
+            {/* Mobile Hamburger Button */}
+            {!loading && branding.showMenu && (branding.menuLinks?.length > 0 || branding.navPages?.length > 0) && (
+              <button 
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden text-white/80 hover:text-white focus:outline-none p-1 rounded-lg hover:bg-white/10 transition"
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  {mobileMenuOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                  )}
+                </svg>
+              </button>
+            )}
+
             <div className="flex items-center gap-2 bg-white/10 rounded-lg p-1 border border-white/20">
               <button
                 onClick={() => changeLang('ms')}
@@ -118,6 +156,27 @@ export default function Login() {
             </div>
           </div>
         </div>
+
+        {/* Mobile Menu Drawer */}
+        {!loading && branding.showMenu && mobileMenuOpen && (branding.menuLinks?.length > 0 || branding.navPages?.length > 0) && (
+          <div className="md:hidden bg-[#0f172a] border-t border-white/10 text-white py-3 px-6 space-y-1 transition-all duration-300 absolute left-0 right-0 z-30">
+            {branding.menuLinks?.map((link, index) => {
+              const label = lang === 'en'
+                ? (link.label_en || (link.label?.toLowerCase() === 'modul' ? 'Modules' : link.label?.toLowerCase() === 'hubungi kami' ? 'Contact Us' : link.label))
+                : link.label;
+              return (
+                <a key={index} href={link.url} className="block text-sm font-medium py-2 border-b border-white/5 hover:text-orange-400 transition-colors">
+                  {label}
+                </a>
+              );
+            })}
+            {branding.navPages?.map((p, index) => (
+              <a key={index} href={`/page/${p.slug}`} className="block text-sm font-medium py-2 border-b border-white/5 hover:text-orange-400 transition-colors">
+                {lang === 'en' ? (p.title_en || p.title) : p.title}
+              </a>
+            ))}
+          </div>
+        )}
       </nav>
  
       {/* Hero Banner Section */}

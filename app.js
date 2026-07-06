@@ -267,7 +267,7 @@ function startServer() {
         app.use(express.static(reactDistPath));
         
         // Serve index.html for main athlete routes (client-side routing fallback)
-        const spaPaths = ['/', '/login', '/dashboard', '/lesson/:id', '/p/:slug'];
+        const spaPaths = ['/', '/login', '/dashboard', '/lesson/:id', '/p/:slug', '/page/:slug'];
         spaPaths.forEach(routePath => {
             app.get(routePath, (req, res) => {
                 res.sendFile(path.join(reactDistPath, 'index.html'));

@@ -14,6 +14,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/lesson/:id" element={<LessonPlayer />} />
         <Route path="/p/:slug" element={<CustomPage />} />
+        <Route path="/page/:slug" element={<CustomPage />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>
