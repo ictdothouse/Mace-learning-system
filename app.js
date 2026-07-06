@@ -273,6 +273,9 @@ function startServer() {
                 res.sendFile(path.join(reactDistPath, 'index.html'));
             });
         });
+
+        // ⚡ Register athleteRoutes so backend rendering routes like /certificate/... can be accessed
+        app.use('/', athleteRoutes);
     } else {
         // Fallback to legacy EJS views if client/dist is not built
         // ⚡ concurrencyGuard: kawal akses concurrent ke dashboard/lesson
