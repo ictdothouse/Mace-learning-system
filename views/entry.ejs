@@ -459,6 +459,56 @@
                 this.setSelectionRange(pos, pos);
             });
         }
+
+        // Custom localized validation messages
+        const lang = "<%= lang || 'ms' %>";
+        const messages = {
+            ms: {
+                valueMissing: "Sila isi ruangan ini.",
+                patternMismatch: "Format tidak sah (Sila masukkan 12 digit nombor IC tanpa sempang).",
+                rangeUnderflow: "Nilai minimum mestilah sekurang-kurangnya {min}.",
+                rangeOverflow: "Nilai maksimum mestilah {max} ke bawah.",
+                typeMismatch: "Sila masukkan nilai yang betul."
+            },
+            en: {
+                valueMissing: "Please fill out this field.",
+                patternMismatch: "Invalid format (Please enter 12-digit IC number without dashes).",
+                rangeUnderflow: "Value must be at least {min}.",
+                rangeOverflow: "Value must be less than or equal to {max}.",
+                typeMismatch: "Please enter a valid value."
+            }
+        };
+
+        const currentMsgs = messages[lang] || messages.ms;
+        const allInputs = document.querySelectorAll("input, select, textarea");
+
+        allInputs.forEach(input => {
+            input.addEventListener("invalid", function(e) {
+                let msg = currentMsgs.valueMissing;
+
+                if (input.validity.valueMissing) {
+                    msg = currentMsgs.valueMissing;
+                } else if (input.validity.patternMismatch) {
+                    msg = currentMsgs.patternMismatch;
+                } else if (input.validity.rangeUnderflow) {
+                    msg = currentMsgs.rangeUnderflow.replace("{min}", input.getAttribute("min"));
+                } else if (input.validity.rangeOverflow) {
+                    msg = currentMsgs.rangeOverflow.replace("{max}", input.getAttribute("max"));
+                } else if (input.validity.typeMismatch) {
+                    msg = currentMsgs.typeMismatch;
+                }
+                
+                input.setCustomValidity(msg);
+            });
+
+            input.addEventListener("input", function() {
+                input.setCustomValidity("");
+            });
+
+            input.addEventListener("change", function() {
+                input.setCustomValidity("");
+            });
+        });
     </script>
 </body>
 </html>
