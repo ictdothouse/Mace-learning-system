@@ -287,7 +287,10 @@ router.get('/sports', async (req, res) => {
 
 // GET: Dapatkan Tetapan Penjenamaan (Branding)
 router.get('/branding', (req, res) => {
-    const branding = { ...(res.locals.branding || {}) };
+    const rawBranding = res.locals.branding;
+    const branding = (rawBranding && typeof rawBranding.toObject === 'function') 
+        ? rawBranding.toObject() 
+        : { ...(rawBranding || {}) };
     branding.navPages = res.locals.navPages || [];
     res.json(branding);
 });

@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext';
 
 export default function CustomPage() {
   const { slug } = useParams();
-  const { branding, t, lang, changeLang } = useApp();
+  const { branding, t, lang, changeLang, loading: globalLoading } = useApp();
 
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState({ page: {}, module1: null });
@@ -31,17 +31,17 @@ export default function CustomPage() {
   }, [slug]);
 
   useEffect(() => {
-    if (!loading && data.page) {
+    if (!loading && !globalLoading && data.page) {
       const pageTitle = lang === 'en' 
         ? (data.page.title_en || translateText(data.page.title))
         : data.page.title;
       document.title = `${pageTitle} | ${branding.siteName || 'MACE'}`;
     }
-  }, [loading, data.page, lang, branding.siteName]);
+  }, [loading, globalLoading, data.page, lang, branding.siteName]);
 
-  if (loading) {
+  if (loading || globalLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white font-sans">
+      <div className="min-h-screen flex items-center justify-center bg-[#0f172a] text-white font-sans">
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
           <p className="text-white/60 text-sm font-medium animate-pulse">Memuatkan halaman...</p>
@@ -266,19 +266,19 @@ export default function CustomPage() {
             <div className="max-w-6xl mx-auto">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center">
                 
-                {/* Module 1 (Active) */}
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:-translate-y-1 flex flex-col h-full text-center p-6 animate-fade-in">
+                 {/* Module 1 (Active) */}
+                <div className="group bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden transition-all duration-300 hover:shadow-[0_12px_40px_rgb(0,0,0,0.14)] hover:-translate-y-2 flex flex-col h-full text-center p-6 animate-fade-in">
                   <div className="rounded-xl overflow-hidden aspect-[1.6] mb-6 bg-gray-100 relative">
-                    <img src={module1?.thumbnail || 'https://images.unsplash.com/photo-1519766304817-4f37bda74a27?q=80&w=600&auto=format&fit=crop'} alt="Modul 1" className="w-full h-full object-cover" />
+                    <img src={module1?.thumbnail || 'https://images.unsplash.com/photo-1519766304817-4f37bda74a27?q=80&w=600&auto=format&fit=crop'} alt="Modul 1" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                   </div>
                   <h3 className="text-sm font-extrabold text-gray-500 uppercase tracking-widest mb-2">
                     {lang === 'en' ? 'MODULE 1' : 'MODUL 1'}
                   </h3>
-                  <h4 className="text-xl font-bold text-red-600 uppercase tracking-tight leading-snug mb-6 flex-grow">
+                  <h4 className="text-xl font-bold text-red-600 uppercase tracking-tight leading-snug mb-6 flex-grow transition-colors duration-300 group-hover:text-red-700">
                     {module1 ? module1.title : 'PLAY SAFE, WIN STRONG'}
                   </h4>
                   <div>
-                    <a href={module1 ? `/module/${module1._id}` : '/'} className="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-2.5 rounded-lg transition shadow-md hover:shadow-lg">
+                    <a href={module1 ? `/module/${module1._id}` : '/'} className="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-2.5 rounded-lg transition shadow-md hover:shadow-lg transform active:scale-95 duration-200">
                       {lang === 'en' ? 'Start' : 'Mula'}
                     </a>
                   </div>
@@ -286,14 +286,14 @@ export default function CustomPage() {
 
                 {/* Modules 2 to 5 (Customizable from CMS) */}
                 {cards.map((card, idx) => (
-                  <div key={idx} className="bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] hover:-translate-y-1 flex flex-col h-full text-center p-6 opacity-75 hover:opacity-100">
+                  <div key={idx} className="group bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden transition-all duration-300 hover:shadow-[0_12px_40px_rgb(0,0,0,0.12)] hover:-translate-y-2 flex flex-col h-full text-center p-6 opacity-75 hover:opacity-100">
                     <div className="rounded-xl overflow-hidden aspect-[1.6] mb-6 bg-gray-100">
-                      <img src={card.imageUrl} alt={`Modul ${idx + 2}`} className="w-full h-full object-cover" />
+                      <img src={card.imageUrl} alt={`Modul ${idx + 2}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     </div>
                     <h3 className="text-sm font-extrabold text-gray-400 uppercase tracking-widest mb-2">
                       {lang === 'en' ? 'MODULE' : 'MODUL'} {idx + 2}
                     </h3>
-                    <h4 className="text-xl font-bold text-gray-400 uppercase tracking-tight leading-snug mb-4">
+                    <h4 className="text-xl font-bold text-gray-400 uppercase tracking-tight leading-snug mb-4 transition-colors duration-300 group-hover:text-slate-500">
                       {card.title || (lang === 'en' ? 'Coming Soon' : 'Akan Datang')}
                     </h4>
                     <p className="text-sm italic text-gray-400 font-medium mt-auto">
