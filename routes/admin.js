@@ -1189,7 +1189,7 @@ router.post('/templates/create', upload.single('backgroundImage'), async (req, r
     try {
         const { 
             name, title, showTitle, subtitle, showSubtitle, courseName, showCourseName, 
-            description, showDescription, showAthleteName, showIcNumber, showNegeri, 
+            description, showDescription, showAthleteName, showIcNumber, showNegeri, showSukan,
             showDate, signatoryName, showSignatory, signatoryTitle,
             primaryColor, secondaryColor, accentColor, backgroundColor, fontFamily, athleteNameFont,
             showBorder, showLogo, logoUrl, logoPosition, borderStyle, borderColor, borderWidth,
@@ -1216,6 +1216,7 @@ router.post('/templates/create', upload.single('backgroundImage'), async (req, r
             showAthleteName: showAthleteName === 'on',
             showIcNumber: showIcNumber === 'on',
             showNegeri: showNegeri === 'on',
+            showSukan: showSukan === 'on',
             showDate: showDate === 'on',
             signatoryName,
             showSignatory: showSignatory === 'on',
@@ -1264,7 +1265,7 @@ router.post('/templates/update/:id', upload.single('backgroundImage'), async (re
     try {
         const { 
             name, title, showTitle, subtitle, showSubtitle, courseName, showCourseName,
-            description, showDescription, showAthleteName, showIcNumber, showNegeri,
+            description, showDescription, showAthleteName, showIcNumber, showNegeri, showSukan,
             showDate, signatoryName, showSignatory, signatoryTitle,
             primaryColor, secondaryColor, accentColor, backgroundColor, fontFamily, athleteNameFont,
             showBorder, showLogo, logoUrl, logoPosition, borderStyle, borderColor, borderWidth,
@@ -1291,6 +1292,7 @@ router.post('/templates/update/:id', upload.single('backgroundImage'), async (re
             showAthleteName: showAthleteName === 'on',
             showIcNumber: showIcNumber === 'on',
             showNegeri: showNegeri === 'on',
+            showSukan: showSukan === 'on',
             showDate: showDate === 'on',
             signatoryName,
             showSignatory: showSignatory === 'on',
