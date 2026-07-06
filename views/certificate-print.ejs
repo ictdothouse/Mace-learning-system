@@ -525,27 +525,26 @@
             const targetWidth = isPortrait ? 794 : 1123;
             const targetHeight = isPortrait ? 1123 : 794;
 
-            // Get the actual width of the parent container on screen
-            const parentWidth = wrapper.getBoundingClientRect().width;
+            // Get available width and height (accounting for header/padding)
+            const availableWidth = wrapper.getBoundingClientRect().width;
+            const availableHeight = window.innerHeight - 100; // Leave space for header
             
-            if (parentWidth < targetWidth) {
-                // Calculate the scale factor needed to fit
-                const scale = parentWidth / targetWidth;
-                
-                // Apply CSS transform scale
-                container.style.transform = `scale(${scale})`;
-                container.style.transformOrigin = 'center top';
-                
-                // Adjust parent container height to match the visually scaled height
-                wrapper.style.height = `${targetHeight * scale}px`;
-                wrapper.style.minHeight = 'auto';
-            } else {
-                // Reset scaling if screen is wide enough
-                container.style.transform = 'none';
-                container.style.transformOrigin = 'center center';
-                wrapper.style.height = 'auto';
-                wrapper.style.minHeight = `${targetHeight}px`;
+            // Calculate scale to fit either width or height, whichever is smaller
+            const scaleWidth = availableWidth / targetWidth;
+            const scaleHeight = availableHeight / targetHeight;
+            
+            // Limit max scale to 1 to avoid blurry upscaling
+            let scale = Math.min(scaleWidth, scaleHeight, 1);
+            
+            // On mobile, if height is too restrictive (e.g. landscape keyboard), prioritize width fitting
+            if (window.innerWidth < 768) {
+                scale = Math.min(scaleWidth, 1);
             }
+
+            container.style.transform = `scale(${scale})`;
+            container.style.transformOrigin = 'center top';
+            wrapper.style.height = `${targetHeight * scale}px`;
+            wrapper.style.minHeight = 'auto';
         }
 
         // Run scale adjustment on load and resize
@@ -577,12 +576,12 @@
                     useCORS: true, 
                     allowTaint: false,
                     logging: false,
-                    scrollX: 0,
-                    scrollY: 0
+                    windowWidth: <%= width %>,
+                    windowHeight: <%= height %>
                 },
                 jsPDF:        { 
-                    unit: 'mm', 
-                    format: 'a4', 
+                    unit: 'px', 
+                    format: [<%= width %>, <%= height %>], 
                     orientation: '<%= isPortrait ? "portrait" : "landscape" %>' 
                 }
             };
