@@ -7,6 +7,7 @@ const Module = require('../models/Module');
 const Level = require('../models/Level');
 const Sport = require('../models/Sport');
 const Page = require('../models/Page');
+const { concurrencyGuardApi } = require('../middleware/concurrency');
 
 // ==========================================
 // R2 CLOUDFLARE SIGNED URL SETUP
@@ -124,13 +125,21 @@ router.post('/auth/access', async (req, res) => {
             req.session.athleteId = newAthlete._id;
             return res.json({ success: true, role: 'student', athlete: newAthlete });
         } else if (action === 'resume') {
-            const athlete = await Athlete.findOne({ 
-                icNumber, 
-                fullName: { $regex: new RegExp('^' + fullName.trim() + '$', 'i') } 
-            });
+            const athlete = await Athlete.findOne({ icNumber });
+            
             if (!athlete) {
-                return res.status(404).json({ error: 'Rekod tidak dijumpai. Sila semak Nama & No. IC.' });
+                return res.status(404).json({ error: 'No. IC tidak dijumpai dalam sistem.' });
             }
+
+            // Loose name matching: remove all spaces and special chars, convert to lowercase
+            const cleanDbName = athlete.fullName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+            const cleanInputName = fullName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+
+            // Allow login if names match loosely, or if input is at least part of the DB name
+            if (cleanDbName !== cleanInputName && !cleanDbName.includes(cleanInputName)) {
+                return res.status(400).json({ error: 'Nama penuh tidak sepadan dengan rekod No. IC ini.' });
+            }
+
             req.session.athleteId = athlete._id;
             return res.json({ success: true, role: 'student', athlete });
         } else {
@@ -226,8 +235,11 @@ router.get('/branding', (req, res) => {
 // 3. ATHLETE DASHBOARD & LESSONS API
 // ==========================================
 
+// ⚡ Lindungi semua laluan /athlete dengan sistem giliran
+router.use('/athlete', checkAthleteSession, concurrencyGuardApi);
+
 // GET: Data Dashboard Atlet (Modul, Levels & Lessons)
-router.get('/athlete/dashboard', checkAthleteSession, async (req, res) => {
+router.get('/athlete/dashboard', async (req, res) => {
     try {
         const athlete = await Athlete.findById(req.session.athleteId).lean();
         if (!athlete) return res.status(404).json({ error: 'Data atlet tidak dijumpai.' });
@@ -249,8 +261,8 @@ router.get('/athlete/dashboard', checkAthleteSession, async (req, res) => {
     }
 });
 
-// GET: Pembelajaran Khusus (Lesson) & R2 Signed Video Link
-router.get('/athlete/lesson/:id', checkAthleteSession, async (req, res) => {
+// GET: Data Lesson Spesifik
+router.get('/athlete/lesson/:id', async (req, res) => {
     try {
         const athlete = await Athlete.findById(req.session.athleteId).lean();
         const moduleId = parseInt(req.params.id);
@@ -276,8 +288,8 @@ router.get('/athlete/lesson/:id', checkAthleteSession, async (req, res) => {
     }
 });
 
-// POST: Tanda Video Tontonan Atlet Selesai
-router.post('/athlete/mark-watched/:id', checkAthleteSession, async (req, res) => {
+// POST: Tandakan Lesson sebagai Selesai (Tonton Habis)
+router.post('/athlete/mark-watched/:id', async (req, res) => {
     try {
         const athlete = await Athlete.findById(req.session.athleteId);
         const moduleId = parseInt(req.params.id);
@@ -293,8 +305,8 @@ router.post('/athlete/mark-watched/:id', checkAthleteSession, async (req, res) =
     }
 });
 
-// POST: Hantar & Proses Jawapan Kuiz Atlet
-router.post('/athlete/submit-quiz/:id', checkAthleteSession, async (req, res) => {
+// POST: Hantar Jawapan Kuiz & Kira Markah
+router.post('/athlete/submit-quiz/:id', async (req, res) => {
     try {
         const athlete = await Athlete.findById(req.session.athleteId);
         const moduleId = parseInt(req.params.id);
@@ -377,6 +389,18 @@ router.get('/pages/:slug', async (req, res) => {
         res.json({ page, module1 });
     } catch (err) {
         res.status(500).json({ error: 'Gagal memuatkan kandungan halaman.' });
+    }
+});
+
+// GET: Dapatkan Kamus Terjemahan Halaman
+router.get('/locales/:lang', (req, res) => {
+    try {
+        const lang = req.params.lang === 'en' ? 'en' : 'ms';
+        const translations = require(`../locales/${lang}.json`);
+        res.json(translations);
+    } catch (err) {
+        console.error('API Locales Error:', err);
+        res.status(500).json({ error: 'Gagal memuatkan kamus terjemahan.' });
     }
 });
 
