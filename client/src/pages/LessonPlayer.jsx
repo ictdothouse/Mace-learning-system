@@ -171,6 +171,8 @@ export default function LessonPlayer() {
     lesson.moduleId && l.moduleId && (l.moduleId._id === lesson.moduleId._id || l.moduleId === lesson.moduleId._id)
   ) || [lesson];
 
+  const questions = lesson.quizQuestions || [];
+
   // Calculate Progress
   let completedCount = 0;
   displayLessons.forEach((l) => {

@@ -300,13 +300,16 @@ router.use('/athlete', checkAthleteSession, concurrencyGuardApi);
 // GET: Data Dashboard Atlet (Modul, Levels & Lessons)
 router.get('/athlete/dashboard', async (req, res) => {
     try {
-        const athlete = await Athlete.findById(req.session.athleteId).lean();
+        const [athlete, modules, allLessons, levels] = await Promise.all([
+            Athlete.findById(req.session.athleteId).lean(),
+            Module.find({ isActive: { $ne: false } }).sort({ order: 1 }).lean(),
+            Lesson.find().populate('moduleId').sort({ order: 1 }).lean(),
+            Level.find().sort({ order: 1 }).lean()
+        ]);
+
         if (!athlete) return res.status(404).json({ error: 'Data atlet tidak dijumpai.' });
 
-        const modules = await Module.find({ isActive: { $ne: false } }).sort({ order: 1 }).lean();
-        const allLessons = await Lesson.find().populate('moduleId').sort({ order: 1 }).lean();
         const activeLessons = allLessons.filter(l => l.isActive !== false);
-        const levels = await Level.find().sort({ order: 1 }).lean();
 
         const lang = req.cookies && req.cookies.lang || 'ms';
         const translatedLessons = activeLessons.map(l => {
@@ -344,13 +347,15 @@ router.get('/athlete/dashboard', async (req, res) => {
 // GET: Data Lesson Spesifik
 router.get('/athlete/lesson/:id', async (req, res) => {
     try {
-        const athlete = await Athlete.findById(req.session.athleteId).lean();
         const moduleId = parseInt(req.params.id);
+        const [athlete, lessons] = await Promise.all([
+            Athlete.findById(req.session.athleteId).lean(),
+            getLessonsWithQuiz()
+        ]);
+
         if (athlete.currentStage < moduleId) {
             return res.status(403).json({ error: 'Akses ditolak. Sila lengkapkan modul terdahulu.' });
         }
-
-        const lessons = await getLessonsWithQuiz();
         const lang = req.cookies && req.cookies.lang || 'ms';
         const translatedLessons = lessons.map(l => {
             const cloned = { ...l };
