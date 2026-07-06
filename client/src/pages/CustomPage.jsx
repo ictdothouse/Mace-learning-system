@@ -182,9 +182,9 @@ export default function CustomPage() {
                     {module1 ? module1.title : 'PLAY SAFE, WIN STRONG'}
                   </h4>
                   <div>
-                    <Link to={module1 ? `/module/${module1._id}` : '/'} className="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-2.5 rounded-lg transition shadow-md hover:shadow-lg">
+                    <a href={module1 ? `/module/${module1._id}` : '/'} className="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-2.5 rounded-lg transition shadow-md hover:shadow-lg">
                       {lang === 'en' ? 'Start' : 'Mula'}
-                    </Link>
+                    </a>
                   </div>
                 </div>
 
