@@ -272,7 +272,7 @@ function startServer() {
         app.use(express.static(reactDistPath));
         
         // Serve index.html for main athlete routes (client-side routing fallback)
-        const spaPaths = ['/', '/login', '/dashboard', '/lesson/:id', '/p/:slug', '/page/:slug'];
+        const spaPaths = ['/', '/login', '/dashboard', '/lesson/:id', '/module/:id', '/p/:slug', '/page/:slug'];
         let cachedIndexHtml = null;
         
         spaPaths.forEach(routePath => {

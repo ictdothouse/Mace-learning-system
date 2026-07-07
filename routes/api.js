@@ -542,4 +542,55 @@ router.get('/locales/:lang', (req, res) => {
     }
 });
 
+// ==========================================
+// MODULE LANDING PAGE API (for React SPA)
+// ==========================================
+router.get('/module/:id', async (req, res) => {
+    try {
+        const module = await Module.findById(req.params.id).lean();
+        if (!module) return res.status(404).json({ error: 'Modul tidak dijumpai.' });
+
+        let levels = await Level.find({ moduleId: module._id }).sort({ order: 1 }).lean();
+
+        // Seed default levels if none exist (mirrors athlete.js logic)
+        if (!levels || levels.length === 0) {
+            const defaultLevels = [
+                { moduleId: module._id, name: 'BRONZE (ASAS)', name_en: 'BRONZE (BASICS)', description: 'Peringkat Asas - Peraturan & Kesedaran Asas', description_en: 'Basic Level - Basic Rules & Awareness', targetAudience: 'Semua atlet', targetAudience_en: 'All athletes', duration: '15 minit', duration_en: '15 mins', order: 1 },
+                { moduleId: module._id, name: 'SILVER (PERTENGAHAN)', name_en: 'SILVER (INTERMEDIATE)', description: 'Peringkat Pertengahan - Jenis Salah Laku', description_en: 'Intermediate Level - Types of Misconduct', targetAudience: 'Atlet aktif', targetAudience_en: 'Active athlete', duration: '15 - 20 minit', duration_en: '15 - 20 mins', order: 2 },
+                { moduleId: module._id, name: 'GOLD (LEVEL 3)', name_en: 'GOLD (LEVEL 3)', description: 'Peringkat Emas - Kesedaran Buli & Gangguan', description_en: 'Gold Level - Bullying & Harassment Awareness', targetAudience: 'Atlet elit', targetAudience_en: 'Elite athlete', duration: '20 - 30 minit', duration_en: '20 - 30 mins', order: 3 },
+                { moduleId: module._id, name: 'PLATINUM (ADVANCED)', name_en: 'PLATINUM (ADVANCED)', description: 'Peringkat Platinum - Pelaporan dan Tindakan', description_en: 'Platinum Level - Reporting and Action', targetAudience: 'Atlet profesional', targetAudience_en: 'Professional athlete', duration: '30 - 45 minit', duration_en: '30 - 45 mins', order: 4 }
+            ];
+            const inserted = await Level.insertMany(defaultLevels);
+            const currentLessons = await Lesson.find({ moduleId: module._id }).sort({ order: 1 });
+            if (currentLessons.length >= 1) await Lesson.findByIdAndUpdate(currentLessons[0]._id, { levelId: inserted[0]._id });
+            if (currentLessons.length >= 2) await Lesson.findByIdAndUpdate(currentLessons[1]._id, { levelId: inserted[1]._id });
+            if (currentLessons.length >= 3) await Lesson.findByIdAndUpdate(currentLessons[2]._id, { levelId: inserted[2]._id });
+            levels = await Level.find({ moduleId: module._id }).sort({ order: 1 }).lean();
+        }
+
+        // Attach firstLessonId to each level
+        const levelsWithLesson = await Promise.all(levels.map(async (l) => {
+            const firstLesson = await Lesson.findOne({ levelId: l._id, isActive: true }).sort({ order: 1 }).lean();
+            return { ...l, firstLessonId: firstLesson ? firstLesson._id : null };
+        }));
+
+        // First lesson of whole module (for no-levels fallback)
+        const firstLesson = await Lesson.findOne({ moduleId: module._id, isActive: true }).sort({ order: 1 }).lean();
+
+        // Check if athlete is logged in
+        const isLoggedIn = !!req.session.athleteId;
+
+        res.json({
+            module,
+            levels: levelsWithLesson,
+            firstLessonId: firstLesson ? firstLesson._id : null,
+            isLoggedIn
+        });
+    } catch (err) {
+        console.error('API Module Error:', err);
+        res.status(500).json({ error: 'Ralat memuatkan modul.' });
+    }
+});
+
 module.exports = router;
+
