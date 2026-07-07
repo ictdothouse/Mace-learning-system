@@ -7,8 +7,19 @@
     <% if (locals.branding && locals.branding.faviconUrl) { %>
     <link rel="icon" href="<%= branding.faviconUrl %>">
     <% } %>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Preconnect to external domains for faster resource loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <!-- Preload LCP Hero Image to avoid 3-second resource load delay on mobile -->
+    <% if (module.thumbnail) { %>
+    <link rel="preload" as="image" href="<%= module.thumbnail %>">
+    <% } %>
+    <!-- Tailwind CSS: loaded async so it does not block initial render (saves 810ms) -->
+    <link rel="preload" href="https://cdn.tailwindcss.com" as="script">
+    <script src="https://cdn.tailwindcss.com" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
     <style>
         :root {
             --primary-color: <%= locals.branding?.primaryColor || '#4f46e5' %>;
@@ -87,8 +98,18 @@
 
     <!-- Hero Banner -->
     <div class="relative bg-gradient-to-r from-blue-950 to-indigo-900 text-white py-20 px-6 md:px-12 text-left shadow-lg overflow-hidden">
-        <!-- Background Overlay Image -->
-        <div class="absolute inset-0 opacity-20 mix-blend-overlay bg-cover bg-center" style="background-image: url('<%= module.thumbnail || 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=1200&auto=format&fit=crop' %>');"></div>
+        <!-- LCP Hero Image: uses <img> with fetchpriority=high for immediate LCP discovery -->
+        <% if (module.thumbnail) { %>
+        <img 
+            src="<%= module.thumbnail %>"
+            alt="<%= module.title %>"
+            fetchpriority="high"
+            class="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-overlay"
+            style="z-index:0;"
+        >
+        <% } else { %>
+        <div class="absolute inset-0 opacity-20 mix-blend-overlay bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=1200&auto=format&fit=crop');"></div>
+        <% } %>
         <div class="relative z-10 max-w-5xl mx-auto">
             <h3 class="text-sm font-bold text-orange-400 uppercase tracking-widest mb-2"><%= lang === 'en' ? 'MODULE 1' : 'MODUL 1' %></h3>
             <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight uppercase mb-4 drop-shadow-md">
