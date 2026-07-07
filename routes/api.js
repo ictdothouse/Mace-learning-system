@@ -171,7 +171,8 @@ router.post('/auth/access', async (req, res) => {
         
         let targetGroup = null;
         if (enrollmentKey && enrollmentKey.trim() !== '') {
-            targetGroup = await Group.findOne({ enrollmentKey: enrollmentKey.trim() });
+            const cleanKey = enrollmentKey.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+            targetGroup = await Group.findOne({ enrollmentKey: { $regex: new RegExp('^' + cleanKey + '$', 'i') } });
             if (!targetGroup) {
                 return res.status(400).json({ error: 'Enrollment Key tidak sah. Sila semak semula.' });
             }

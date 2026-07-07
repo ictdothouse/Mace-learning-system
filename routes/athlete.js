@@ -310,7 +310,8 @@ router.post('/api/join-group', checkSession, async (req, res) => {
             return res.status(400).json({ error: 'Enrollment Key diperlukan' });
         }
 
-        const group = await Group.findOne({ enrollmentKey: enrollmentKey.trim() });
+        const cleanKey = enrollmentKey.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        const group = await Group.findOne({ enrollmentKey: { $regex: new RegExp('^' + cleanKey + '$', 'i') } });
         if (!group) {
             return res.status(404).json({ error: 'Enrollment Key tidak sah. Sila semak semula.' });
         }
