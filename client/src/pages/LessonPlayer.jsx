@@ -16,6 +16,7 @@ export default function LessonPlayer() {
   const [videoWatched, setVideoWatched] = useState(false);
   const [error, setError] = useState(null);
   const [submitError, setSubmitError] = useState(null);
+  const [isPracticeMode, setIsPracticeMode] = useState(false);
   
   const videoRef = useRef(null);
 
@@ -29,6 +30,7 @@ export default function LessonPlayer() {
       setQuizResult(null);
       setUserAnswers({});
       setIsQuizOpen(false);
+      setIsPracticeMode(false);
 
       const res = await axios.get(`/api/athlete/lesson/${id}`);
       setData(res.data);
@@ -124,9 +126,13 @@ export default function LessonPlayer() {
       const res = await axios.post(`/api/athlete/submit-quiz/${id}`, { answers: userAnswers });
       setQuizResult(res.data);
       
-      // Refresh local athlete state in AppContext
-      const meRes = await axios.get('/api/auth/me');
-      setAuth(meRes.data);
+      const scoreKey = `quiz${moduleId}`;
+      const previousScore = auth.athlete?.quizScores?.[scoreKey] || 0;
+      if (res.data.score > previousScore) {
+        // Refresh local athlete state in AppContext
+        const meRes = await axios.get('/api/auth/me');
+        setAuth(meRes.data);
+      }
     } catch (err) {
       setSubmitError(err.response?.data?.error || 'Gagal menghantar kuiz.');
     }
@@ -136,6 +142,12 @@ export default function LessonPlayer() {
     setQuizResult(null);
     setUserAnswers({});
     setSubmitError(null);
+    
+    const scoreKey = `quiz${moduleId}`;
+    const hasPassed = auth.athlete?.quizScores?.[scoreKey] >= 80;
+    if (hasPassed) {
+      setIsPracticeMode(true);
+    }
   };
 
   if (loading) {
@@ -367,37 +379,109 @@ export default function LessonPlayer() {
             <div className={`transition-all duration-500 overflow-hidden ${isQuizOpen && videoWatched ? 'max-h-[5000px] opacity-100' : 'max-h-0 opacity-0 pointer-events-none'}`}>
               <div className="p-6 md:p-8 border-t border-blue-100 min-h-[300px]">
                 
-                {quizResult && (
-                  <div className={`${quizResult.passed ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'} border p-4 rounded-lg mb-6 flex flex-col gap-3`}>
-                    <div className="flex items-start gap-3">
-                      {quizResult.passed ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      )}
-                      <div>
-                        <p className="font-bold text-lg">
-                          {quizResult.passed ? t('lesson_passed_title', 'Tahniah! Anda Telah Berjaya!') : t('lesson_failed_title', 'Maaf! Anda tidak mencapai markah lulus.')}
-                        </p>
-                        <p className="text-sm">
-                          {t('lesson_score_label', 'Markah anda:')} <span className="font-bold">{quizResult.score}%</span>. 
-                          {!quizResult.passed && ` Kelayakan lulus minimum adalah ${lesson.passMark || 80}%.`}
-                        </p>
-                      </div>
-                    </div>
-                    {lesson.showPoints !== false && (
-                      <div className="text-xs font-semibold border-t border-current/10 pt-2 opacity-90">
-                        {lang === 'en' 
-                          ? `Correct: ${quizResult.earnedPoints}, Wrong: ${quizResult.totalPoints - quizResult.earnedPoints}, Grade: ${quizResult.score}%`
-                          : `Betul: ${quizResult.earnedPoints || 0}, Salah: ${(quizResult.totalPoints - quizResult.earnedPoints) || 0}, Keputusan: ${quizResult.score}%`}
-                      </div>
-                    )}
-                  </div>
-                )}
+                 {/* Practice Mode Active (answering) Alert */}
+                 {isPracticeMode && !quizResult && (
+                   <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg mb-6 flex items-start gap-3 text-blue-800 text-sm">
+                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 shrink-0 text-blue-500 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                     </svg>
+                     <div className="flex-grow">
+                       <strong>{lang === 'en' ? 'Practice Mode Active' : 'Sesi Latihan / Ulang Kaji Aktif'}</strong>
+                       <p className="mt-1 text-xs opacity-90">
+                         {lang === 'en'
+                           ? `You are re-taking this quiz for practice. Your official score (${auth.athlete?.quizScores?.['quiz' + moduleId] || 0}%) will not be affected unless you achieve a higher score.`
+                           : `Anda sedang menjawab semula kuiz ini untuk latihan. Markah rasmi tertinggi anda (${auth.athlete?.quizScores?.['quiz' + moduleId] || 0}%) tidak akan terjejas jika cubaan ini lebih rendah.`}
+                       </p>
+                     </div>
+                     <button 
+                       type="button" 
+                       onClick={() => fetchLessonData()} 
+                       className="text-xs font-bold text-blue-700 hover:text-blue-900 underline shrink-0"
+                     >
+                       {lang === 'en' ? 'Cancel' : 'Batal'}
+                     </button>
+                   </div>
+                 )}
+
+                 {/* Practice Mode Submitted Alert */}
+                 {isPracticeMode && quizResult && !quizResult.isHistorical && (
+                   <div className="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg mb-6 flex flex-col gap-2">
+                     <div className="flex items-start gap-3">
+                       <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                       </svg>
+                       <div>
+                         <p className="font-bold text-lg">
+                           {lang === 'en' ? 'Practice Attempt Completed' : 'Sesi Latihan (Ulang Kaji) Selesai'}
+                         </p>
+                         <p className="text-sm font-medium mt-1">
+                           {lang === 'en' 
+                             ? `You scored ${quizResult.score}% in this practice attempt.` 
+                             : `Anda mendapat markah ${quizResult.score}% dalam percubaan latihan ini.`}
+                         </p>
+                         <p className="text-xs opacity-90 mt-1">
+                           {lang === 'en'
+                             ? `Your official highest score is preserved at ${auth.athlete?.quizScores?.['quiz' + moduleId] || 0}%.`
+                             : `Markah rasmi tertinggi anda dikekalkan pada ${auth.athlete?.quizScores?.['quiz' + moduleId] || 0}%.`}
+                         </p>
+                       </div>
+                     </div>
+                     <div className="text-xs font-semibold border-t border-blue-200 pt-2 flex justify-between items-center">
+                       <span>
+                         {lang === 'en' 
+                           ? `Correct: ${quizResult.earnedPoints}, Wrong: ${quizResult.totalPoints - quizResult.earnedPoints}`
+                           : `Betul: ${quizResult.earnedPoints}, Salah: ${quizResult.totalPoints - quizResult.earnedPoints}`}
+                       </span>
+                       <button 
+                         type="button" 
+                         onClick={() => fetchLessonData()} 
+                         className="text-blue-700 hover:text-blue-900 underline font-bold"
+                       >
+                         {lang === 'en' ? '← Back to Official Score' : '← Kembali ke Markah Asal'}
+                       </button>
+                     </div>
+                   </div>
+                 )}
+
+                 {/* Official Score / Historical Passed Alert */}
+                 {quizResult && (!isPracticeMode || quizResult.isHistorical) && (
+                   <div className={`${quizResult.passed ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'} border p-4 rounded-lg mb-6 flex flex-col gap-3`}>
+                     <div className="flex items-start gap-3">
+                       {quizResult.passed ? (
+                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                         </svg>
+                       ) : (
+                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                         </svg>
+                       )}
+                       <div>
+                         <p className="font-bold text-lg">
+                           {quizResult.passed ? t('lesson_passed_title', 'Tahniah! Anda Telah Berjaya!') : t('lesson_failed_title', 'Maaf! Anda tidak mencapai markah lulus.')}
+                         </p>
+                         <p className="text-sm">
+                           {t('lesson_score_label', 'Markah anda:')} <span className="font-bold">{quizResult.score}%</span>. 
+                           {!quizResult.passed && ` Kelayakan lulus minimum adalah ${lesson.passMark || 80}%.`}
+                         </p>
+                       </div>
+                     </div>
+                     {lesson.showPoints !== false && (
+                       <div className="text-xs font-semibold border-t border-current/10 pt-2 opacity-90">
+                         {lang === 'en' 
+                           ? `Correct: ${quizResult.earnedPoints}, Wrong: ${quizResult.totalPoints - quizResult.earnedPoints}, Grade: ${quizResult.score}%`
+                           : `Betul: ${quizResult.earnedPoints || 0}, Salah: ${(quizResult.totalPoints - quizResult.earnedPoints) || 0}, Keputusan: ${quizResult.score}%`}
+                       </div>
+                     )}
+                     {quizResult.isHistorical && (
+                       <p className="text-xs opacity-90 border-t border-green-200/50 pt-2">
+                         {lang === 'en'
+                           ? 'Correct answers are highlighted below for your review. To test yourself again, click Jawab Semula.'
+                           : 'Jawapan betul ditandakan di bawah untuk rujukan anda. Sila klik Jawab Semula jika ingin mencuba semula kuiz ini.'}
+                       </p>
+                     )}
+                   </div>
+                 )}
 
                 <p className="text-gray-600 mb-6 text-sm">
                   {t('lesson_quiz_intro', 'Sila selesaikan penilaian kuiz ini untuk meneruskan tahap berikutnya.')}
@@ -511,7 +595,37 @@ export default function LessonPlayer() {
 
                   {/* Submission Buttons */}
                   <div className="pt-6 mt-6 flex flex-col sm:flex-row gap-3">
-                    {quizResult && quizResult.passed ? (
+                    {isPracticeMode && quizResult && !quizResult.isHistorical ? (
+                      <>
+                        <button 
+                          type="button"
+                          onClick={() => fetchLessonData()}
+                          className="flex-grow bg-gray-600 text-white px-6 py-3.5 rounded-lg font-bold hover:bg-gray-700 transition shadow-md flex items-center justify-center gap-2"
+                        >
+                          {lang === 'en' ? '← Back to Official Score' : '← Kembali ke Markah Asal'}
+                        </button>
+                        <button 
+                          type="button" 
+                          onClick={handleQuizReset} 
+                          className="flex-grow bg-blue-600 text-white px-6 py-3.5 rounded-lg font-bold hover:bg-blue-700 transition shadow-md flex items-center justify-center gap-2"
+                        >
+                          {t('lesson_btn_retry_quiz', 'Jawab Semula Kuiz ↺')}
+                        </button>
+                        {moduleId !== 3 ? (
+                          <button 
+                            type="button"
+                            onClick={() => navigate(`/lesson/${moduleId + 1}`)}
+                            className="flex-grow bg-green-600 text-white px-6 py-3.5 rounded-lg font-bold hover:bg-green-700 transition shadow-md flex items-center justify-center gap-2"
+                          >
+                            {t('lesson_next_module', 'Pelajaran Seterusnya →')}
+                          </button>
+                        ) : (
+                          <Link to="/dashboard" className="flex-grow bg-yellow-600 text-white px-6 py-3.5 rounded-lg font-bold hover:bg-yellow-700 transition shadow-md flex items-center justify-center gap-2 text-center">
+                            {t('lesson_go_dashboard', 'Pergi Ke Dashboard')} 🎓
+                          </Link>
+                        )}
+                      </>
+                    ) : quizResult && quizResult.passed ? (
                       <>
                         {moduleId === 3 ? (
                           <Link to="/dashboard" className="flex-grow bg-yellow-600 text-white px-6 py-3.5 rounded-lg font-bold hover:bg-yellow-700 transition shadow-md flex items-center justify-center gap-2 text-center">
