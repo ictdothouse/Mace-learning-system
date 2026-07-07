@@ -48,6 +48,8 @@ export default function Login() {
   const [umur, setUmur] = useState('');
   const [negeri, setNegeri] = useState('');
   const [sukan, setSukan] = useState('');
+  const [enrollmentKey, setEnrollmentKey] = useState('');
+  const [showEnrollmentKey, setShowEnrollmentKey] = useState(false);
 
   useEffect(() => {
     // If already logged in, redirect to dashboard
@@ -110,7 +112,8 @@ export default function Login() {
         jantina,
         umur: parseInt(umur),
         negeri,
-        sukan: sukan.toUpperCase().trim()
+        sukan: sukan.toUpperCase().trim(),
+        enrollmentKey: showEnrollmentKey ? enrollmentKey.trim() : ''
       };
 
       const res = await axios.post('/api/auth/access', payload);
@@ -488,6 +491,42 @@ export default function Login() {
                         </div>
                       </>
                     )}
+
+                    {/* Enrollment Key Section */}
+                    <div className="pt-2">
+                      <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700 uppercase tracking-wide">
+                        <input
+                          type="checkbox"
+                          checked={showEnrollmentKey}
+                          onChange={(e) => {
+                            setShowEnrollmentKey(e.target.checked);
+                            if (!e.target.checked) setEnrollmentKey('');
+                          }}
+                          className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
+                        />
+                        <span>{t('entry_have_enrollment_key', 'Saya mempunyai Enrollment Key')}</span>
+                      </label>
+
+                      {showEnrollmentKey && (
+                        <div className="mt-3 animate-fadeIn">
+                          <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
+                            {t('entry_field_enrollment_key', 'Enrollment Key')} *
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={enrollmentKey}
+                            onChange={(e) => setEnrollmentKey(e.target.value)}
+                            className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all text-sm text-slate-800 placeholder-slate-400 font-semibold"
+                            placeholder="CONTOH: GRP-ABCD1234"
+                            autoComplete="off"
+                          />
+                          <p className="text-[10px] text-slate-500 mt-1">
+                            {t('entry_field_enrollment_key_hint', 'Masukkan kod kumpulan yang diberikan oleh penyelaras sukan/guru anda (jika ada).')}
+                          </p>
+                        </div>
+                      )}
+                    </div>
 
                     <button
                       type="submit"

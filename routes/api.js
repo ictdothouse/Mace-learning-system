@@ -7,6 +7,7 @@ const Module = require('../models/Module');
 const Level = require('../models/Level');
 const Sport = require('../models/Sport');
 const Page = require('../models/Page');
+const Group = require('../models/Group');
 const { concurrencyGuardApi } = require('../middleware/concurrency');
 
 // ==========================================
@@ -162,12 +163,20 @@ router.get('/auth/me', async (req, res) => {
 
 // POST: Pendaftaran / Semakan Masuk Atlet
 router.post('/auth/access', async (req, res) => {
-    const { action, fullName, icNumber, jantina, umur, negeri, sukan } = req.body;
+    const { action, fullName, icNumber, jantina, umur, negeri, sukan, enrollmentKey } = req.body;
     try {
         if (!fullName || !icNumber) {
             return res.status(400).json({ error: 'Nama penuh dan No. IC wajib diisi.' });
         }
         
+        let targetGroup = null;
+        if (enrollmentKey && enrollmentKey.trim() !== '') {
+            targetGroup = await Group.findOne({ enrollmentKey: enrollmentKey.trim() });
+            if (!targetGroup) {
+                return res.status(400).json({ error: 'Enrollment Key tidak sah. Sila semak semula.' });
+            }
+        }
+
         if (action === 'new') {
             const existing = await Athlete.findOne({ icNumber });
             if (existing) {
@@ -179,7 +188,8 @@ router.post('/auth/access', async (req, res) => {
                 jantina, 
                 umur, 
                 negeriWakil: negeri, 
-                sukan 
+                sukan,
+                enrolledGroups: targetGroup ? [targetGroup._id] : []
             });
             req.session.athleteId = newAthlete._id;
             return res.json({ success: true, role: 'student', athlete: newAthlete });
@@ -197,6 +207,16 @@ router.post('/auth/access', async (req, res) => {
             // Allow login if names match loosely, or if input is at least part of the DB name
             if (cleanDbName !== cleanInputName && !cleanDbName.includes(cleanInputName)) {
                 return res.status(400).json({ error: 'Nama penuh tidak sepadan dengan rekod No. IC ini.' });
+            }
+
+            if (targetGroup) {
+                await Athlete.findByIdAndUpdate(athlete._id, {
+                    $addToSet: { enrolledGroups: targetGroup._id }
+                });
+                if (!athlete.enrolledGroups) athlete.enrolledGroups = [];
+                if (!athlete.enrolledGroups.includes(targetGroup._id.toString())) {
+                    athlete.enrolledGroups.push(targetGroup._id);
+                }
             }
 
             req.session.athleteId = athlete._id;
