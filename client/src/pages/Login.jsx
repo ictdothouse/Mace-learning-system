@@ -141,6 +141,17 @@ export default function Login() {
     ? (branding.homeLeftColumnHtml_en || `<p>This learning module is prepared starting from the basic learning stage, covering various aspects of athlete well-being topics to strengthen the high-performance sports ecosystem.</p><br><p>Upon completing the quiz at the end of each module, you can print or download the Certificate of Participation.</p>`)
     : (branding.homeLeftColumnHtml || `<p>Modul pembelajaran ini disediakan dari peringkat pembelajaran asas yang merangkumi pelbagai aspek topik kesejahteraan atlet dalam mengukuhkan ekosistem sukan berprestasi tinggi.</p><br><p>Setelah melengkapkan kuiz di akhir setiap modul, anda boleh mencetak atau memuat turun Sijil Penyertaan.</p>`);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0f172a] text-white font-sans">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+          <p className="text-white/60 text-sm font-medium animate-pulse">Memuatkan sistem...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 font-sans" style={bodyBgStyle}>
       {branding.homeBgImage && (
@@ -152,9 +163,7 @@ export default function Login() {
         <div className="max-w-6xl mx-auto flex justify-between items-center w-full">
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-3">
-              {loading ? (
-                <div className="h-6 w-24 bg-white/20 rounded animate-pulse" />
-              ) : branding.logoUrl ? (
+              {branding.logoUrl ? (
                 <img src={branding.logoUrl} alt="Logo" width="160" height="40" className="h-8 md:h-10 w-auto object-contain" />
               ) : (
                 <h1 className="text-lg md:text-xl font-extrabold uppercase tracking-wider">
@@ -164,7 +173,7 @@ export default function Login() {
             </span>
 
             {/* Desktop Menu Links */}
-            {!loading && ((branding.showMenu && branding.menuLinks?.length > 0) || branding.navPages?.length > 0) && (
+            {((branding.showMenu && branding.menuLinks?.length > 0) || branding.navPages?.length > 0) && (
               <div className="hidden md:flex items-center gap-6 ml-8">
                 {branding.showMenu && branding.menuLinks?.map((link, index) => {
                   const label = lang === 'en'
@@ -187,7 +196,7 @@ export default function Login() {
 
           <div className="flex items-center gap-4">
             {/* Mobile Hamburger Button */}
-            {!loading && ((branding.showMenu && branding.menuLinks?.length > 0) || branding.navPages?.length > 0) && (
+            {((branding.showMenu && branding.menuLinks?.length > 0) || branding.navPages?.length > 0) && (
               <button 
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="md:hidden text-white/80 hover:text-white focus:outline-none p-1 rounded-lg hover:bg-white/10 transition"
@@ -293,13 +302,9 @@ export default function Login() {
         <div className="absolute inset-0 bg-red-900/40 mix-blend-multiply z-0"></div>
         <div className="relative z-10 max-w-6xl mx-auto w-full">
           {branding.showBannerTitle !== false && (
-            loading ? (
-              <div className="h-10 w-48 bg-white/20 rounded-lg animate-pulse" />
-            ) : (
-              <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-md">
-                {lang === 'en' ? (branding.homeBannerTitle_en || 'Modules') : (branding.homeBannerTitle || 'Modul')}
-              </h1>
-            )
+            <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-md">
+              {lang === 'en' ? (branding.homeBannerTitle_en || 'Modules') : (branding.homeBannerTitle || 'Modul')}
+            </h1>
           )}
         </div>
       </header>
@@ -315,11 +320,7 @@ export default function Login() {
                 <div>
                   <div className="bg-gradient-to-br from-slate-900 to-slate-800 px-6 py-6 text-center text-white relative">
                     <p className="text-xs text-slate-300 font-medium">
-                      {loading ? (
-                        <span className="inline-block h-3 w-48 bg-white/20 rounded animate-pulse" />
-                      ) : (
-                        lang === 'en' ? (branding.homeFormSubtitle_en || 'Register or resume your athlete learning path') : (branding.homeFormSubtitle || 'Daftar atau sambung modul latihan atlet anda')
-                      )}
+                      {lang === 'en' ? (branding.homeFormSubtitle_en || 'Register or resume your athlete learning path') : (branding.homeFormSubtitle || 'Daftar atau sambung modul latihan atlet anda')}
                     </p>
                   </div>
 
