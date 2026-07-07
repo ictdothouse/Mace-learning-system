@@ -65,10 +65,39 @@ export default function ModuleLanding() {
 
   if (loading || globalLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0f172a] text-white">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
-          <p className="text-white/60 text-sm font-medium animate-pulse">Memuatkan modul...</p>
+      <div className="min-h-screen flex flex-col bg-gray-50 animate-pulse">
+        {/* Navbar Skeleton */}
+        <nav className="bg-[#0f172a] h-16 flex items-center justify-between px-6 md:px-12 border-b border-white/10 shadow-md">
+          <div className="w-36 h-8 bg-white/10 rounded-lg"></div>
+          <div className="flex gap-4">
+            <div className="w-16 h-7 bg-white/10 rounded-lg"></div>
+            <div className="w-20 h-7 bg-white/10 rounded-lg"></div>
+          </div>
+        </nav>
+
+        {/* Hero Banner Skeleton */}
+        <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white py-20 px-6 md:px-12 shadow-lg">
+          <div className="max-w-5xl mx-auto space-y-4">
+            <div className="w-24 h-4 bg-white/10 rounded"></div>
+            <div className="w-2/3 h-12 bg-white/20 rounded-xl"></div>
+          </div>
+        </div>
+
+        {/* Main Content Area Skeleton */}
+        <div className="flex-grow py-12 px-6 md:px-12 bg-white">
+          <div className="max-w-4xl mx-auto space-y-6">
+            <div className="border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-200 shadow-sm">
+              {[1, 2].map((i) => (
+                <div key={i} className="bg-white p-6 flex justify-between items-center">
+                  <div className="flex items-center gap-3">
+                    <div className="w-5 h-5 bg-gray-200 rounded-full"></div>
+                    <div className="w-48 h-5 bg-gray-200 rounded"></div>
+                  </div>
+                  <div className="w-5 h-5 bg-gray-200 rounded-full"></div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     );

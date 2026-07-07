@@ -69,12 +69,62 @@ export default function Dashboard() {
   };
 
   if (loadingDashboard) {
+    const primaryColor = branding?.primaryColor || '#0f0c29';
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white font-sans">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-400"></div>
-          <p className="text-white/60 text-sm font-medium animate-pulse">Memuatkan dashboard...</p>
-        </div>
+      <div 
+        className="min-h-screen flex flex-col text-white font-sans pb-12 animate-pulse"
+        style={{ background: `linear-gradient(135deg, ${primaryColor} 0%, #302b63 50%, #24243e 100%)` }}
+      >
+        {/* Navbar Skeleton */}
+        <nav className="sticky top-0 z-50 border-b border-white/10 backdrop-blur-xl bg-black/20">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-white/10 rounded-full"></div>
+              <div className="w-32 h-5 bg-white/10 rounded-md"></div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-16 h-7 bg-white/10 rounded-lg"></div>
+              <div className="w-20 h-7 bg-white/10 rounded-lg"></div>
+            </div>
+          </div>
+        </nav>
+
+        {/* Main Content Skeleton */}
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10 flex-grow w-full">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8 sm:mb-10">
+            <div className="space-y-3 flex-grow">
+              <div className="w-24 h-4 bg-white/10 rounded"></div>
+              <div className="w-64 sm:w-96 h-10 bg-white/20 rounded-xl"></div>
+              <div className="flex gap-2">
+                <div className="w-24 h-6 bg-white/10 rounded-full"></div>
+                <div className="w-24 h-6 bg-white/10 rounded-full"></div>
+                <div className="w-20 h-6 bg-white/10 rounded-full"></div>
+              </div>
+            </div>
+            <div className="w-28 h-28 bg-white/10 rounded-full flex items-center justify-center shrink-0">
+              <div className="w-20 h-20 bg-white/5 rounded-full"></div>
+            </div>
+          </div>
+
+          {/* Cards/Modules Skeleton */}
+          <div className="space-y-6">
+            <div className="w-48 h-6 bg-white/20 rounded"></div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-white/5 border border-white/10 rounded-3xl p-6 space-y-4">
+                  <div className="w-12 h-12 bg-white/10 rounded-2xl"></div>
+                  <div className="space-y-2">
+                    <div className="w-3/4 h-5 bg-white/10 rounded"></div>
+                    <div className="w-1/2 h-3 bg-white/5 rounded"></div>
+                  </div>
+                  <div className="pt-2">
+                    <div className="w-full h-8 bg-white/10 rounded-xl"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </main>
       </div>
     );
   }

@@ -41,10 +41,35 @@ export default function CustomPage() {
 
   if (loading || globalLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0f172a] text-white font-sans">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
-          <p className="text-white/60 text-sm font-medium animate-pulse">Memuatkan halaman...</p>
+      <div className="min-h-screen flex flex-col bg-gray-50 animate-pulse font-sans">
+        {/* Navbar Skeleton */}
+        <nav className="bg-[#0f172a] h-16 flex items-center justify-between px-6 md:px-12 border-b border-white/10 shadow-md">
+          <div className="w-36 h-8 bg-white/10 rounded-lg"></div>
+          <div className="flex gap-4">
+            <div className="w-16 h-7 bg-white/10 rounded-lg"></div>
+            <div className="w-20 h-7 bg-white/10 rounded-lg"></div>
+          </div>
+        </nav>
+
+        {/* Banner Skeleton */}
+        <div className="bg-[#0f172a]/90 py-16 sm:py-20 px-6 md:px-12">
+          <div className="max-w-6xl mx-auto w-full">
+            <div className="w-64 h-10 bg-white/20 rounded-xl"></div>
+          </div>
+        </div>
+
+        {/* Content Section Skeleton */}
+        <div className="flex-grow py-16 px-6 md:px-12 flex items-center justify-center">
+          <div className="max-w-6xl mx-auto w-full grid grid-cols-1 md:grid-cols-2 gap-12 items-center bg-white p-8 md:p-12 rounded-3xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+            <div className="space-y-6">
+              <div className="w-full h-4 bg-gray-200 rounded"></div>
+              <div className="w-4/5 h-4 bg-gray-200 rounded"></div>
+              <div className="w-2/3 h-10 bg-gray-200 rounded-xl pt-2"></div>
+            </div>
+            <div className="flex justify-center md:justify-end">
+              <div className="w-full max-w-[280px] aspect-square bg-gray-100 rounded-2xl"></div>
+            </div>
+          </div>
         </div>
       </div>
     );

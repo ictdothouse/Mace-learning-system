@@ -152,10 +152,52 @@ export default function LessonPlayer() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white text-gray-800 font-sans">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
-          <p className="text-gray-500 text-sm font-medium animate-pulse">Memuatkan modul pembelajaran...</p>
+      <div className="min-h-screen flex flex-col bg-gray-50 animate-pulse">
+        {/* Navbar Skeleton */}
+        <nav className="bg-[#0f172a] h-16 flex items-center justify-between px-6 md:px-12 border-b border-white/10 shadow-md">
+          <div className="w-36 h-8 bg-white/10 rounded-lg"></div>
+          <div className="flex gap-4">
+            <div className="w-16 h-7 bg-white/10 rounded-lg"></div>
+            <div className="w-20 h-7 bg-white/10 rounded-lg"></div>
+          </div>
+        </nav>
+
+        {/* 2-Column Content Skeleton */}
+        <div className="flex-grow flex flex-col md:flex-row max-w-6xl mx-auto w-full px-4 md:px-8 py-6 gap-6">
+          {/* Sidebar Skeleton (hidden on mobile, width ~320px on desktop) */}
+          <div className="hidden md:block w-80 space-y-4 shrink-0">
+            <div className="w-32 h-4 bg-gray-200 rounded"></div>
+            <div className="space-y-2">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-white border border-gray-100 rounded-xl p-4 flex items-center gap-3">
+                  <div className="w-5 h-5 bg-gray-200 rounded-full shrink-0"></div>
+                  <div className="flex-grow space-y-1.5">
+                    <div className="w-3/4 h-4 bg-gray-200 rounded"></div>
+                    <div className="w-1/4 h-2 bg-gray-100 rounded"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Main Video & Content Area Skeleton */}
+          <div className="flex-grow bg-white border border-gray-100 rounded-3xl p-6 md:p-8 space-y-6">
+            <div className="w-2/3 h-8 bg-gray-300 rounded-xl"></div>
+            <div className="aspect-video w-full bg-gray-200 rounded-2xl"></div>
+            <div className="space-y-2">
+              <div className="w-full h-4 bg-gray-200 rounded"></div>
+              <div className="w-full h-4 bg-gray-200 rounded"></div>
+              <div className="w-4/5 h-4 bg-gray-200 rounded"></div>
+            </div>
+            {/* Quiz accordion skeleton */}
+            <div className="bg-gray-100 h-14 rounded-xl flex items-center justify-between px-6">
+              <div className="flex items-center gap-3">
+                <div className="w-5 h-5 bg-gray-300 rounded-full"></div>
+                <div className="w-32 h-4 bg-gray-300 rounded"></div>
+              </div>
+              <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
+            </div>
+          </div>
         </div>
       </div>
     );
