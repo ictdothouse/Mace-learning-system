@@ -169,10 +169,12 @@ export default function CustomPage() {
                 </h1>
               )}
             </Link>
+          </div>
 
+          <div className="flex items-center gap-6">
             {/* Desktop Menu Links */}
             {((branding.showMenu && branding.menuLinks?.length > 0) || branding.navPages?.length > 0) && (
-              <div className="hidden md:flex items-center gap-6 ml-8">
+              <div className="hidden md:flex items-center gap-6">
                 {branding.showMenu && branding.menuLinks?.map((link, index) => {
                   const label = lang === 'en'
                     ? (link.label_en || (link.label?.toLowerCase() === 'modul' ? 'Modules' : link.label?.toLowerCase() === 'hubungi kami' ? 'Contact Us' : link.label))
@@ -190,9 +192,7 @@ export default function CustomPage() {
                 ))}
               </div>
             )}
-          </div>
 
-          <div className="flex items-center gap-4">
             {/* Mobile Hamburger Button */}
             {((branding.showMenu && branding.menuLinks?.length > 0) || branding.navPages?.length > 0) && (
               <button 
