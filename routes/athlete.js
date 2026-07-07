@@ -107,7 +107,7 @@ const checkSession = (req, res, next) => req.session.athleteId ? next() : res.re
 
 const translateText = (text, lang) => {
     if (!text || lang !== 'en') return text;
-    let result = text;
+    let result = text.replace(/[\s\u00a0]+/g, ' ').trim();
     const mappings = [
         {
             ms: /Jom kuasai asas dulu sebelum jadi pro!/gi,
