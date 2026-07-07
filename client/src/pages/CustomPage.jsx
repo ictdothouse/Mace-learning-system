@@ -292,7 +292,14 @@ export default function CustomPage() {
         <>
           {/* BANNER SECTION FOR MODULES */}
           <div className="relative bg-gradient-to-r from-blue-900 to-indigo-950 text-white py-16 px-6 md:px-12 text-center shadow-lg overflow-hidden">
-            <div className="absolute inset-0 opacity-15 mix-blend-overlay bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=1200&auto=format&fit=crop')" }}></div>
+            <img 
+              src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=1200&auto=format&fit=crop" 
+              alt="Banner Background" 
+              width="1200" 
+              height="300"
+              fetchpriority="high"
+              className="absolute inset-0 w-full h-full object-cover opacity-15 mix-blend-overlay z-0" 
+            />
             <div className="relative z-10 max-w-4xl mx-auto">
               <h1 className="text-3xl md:text-5xl font-extrabold tracking-wider uppercase drop-shadow-md">
                 {lang === 'en' ? 'MY ATHLETE MODULE' : 'MODUL MY ATHLETE'}
@@ -364,6 +371,8 @@ export default function CustomPage() {
                     <img 
                       src={bannerImg} 
                       alt="Banner Background" 
+                      width="1200"
+                      height="300"
                       fetchpriority="high"
                       className="absolute inset-0 w-full h-full object-cover z-0" 
                     />
