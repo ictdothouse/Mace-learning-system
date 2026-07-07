@@ -394,7 +394,7 @@ export default function CustomPage() {
                       <p className="text-lg md:text-xl text-gray-600 font-medium leading-relaxed">
                         {description}
                       </p>
-                      <a href={`mailto:${email}`} className="block text-lg sm:text-2xl md:text-4xl lg:text-5xl font-black text-gray-900 hover:text-orange-500 transition-colors tracking-tight whitespace-nowrap overflow-x-auto">
+                      <a href={`mailto:${email}`} className="block text-xl sm:text-2xl md:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl font-black text-gray-900 hover:text-orange-500 transition-colors tracking-tight whitespace-nowrap overflow-x-auto w-full">
                         {email}
                       </a>
                     </div>
