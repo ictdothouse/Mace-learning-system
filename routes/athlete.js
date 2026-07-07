@@ -176,6 +176,18 @@ router.get('/', (req, res) => {
     }
 });
 
+router.get('/test-waiting-room', (req, res) => {
+    const lang = req.query.lang || 'ms';
+    res.render('waiting-room', {
+        lang,
+        queuePosition: 5,
+        estimatedWaitSeconds: 120,
+        activeCount: 201,
+        maxCount: 200,
+        formData: {}
+    });
+});
+
 router.get('/ms', checkSports, (req, res) => {
     res.cookie('lang', 'ms', { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: false });
     res.locals.lang = 'ms';

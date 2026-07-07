@@ -45,25 +45,18 @@ export default function LessonPlayer() {
       if (hasPassed) {
         setIsQuizOpen(true);
         
-        // Pre-fill correct answers so the UI renders green checkmarks
-        const correctAnswers = {};
-        lesson.quizQuestions?.forEach((q, qIdx) => {
-          if (q.type === 'multiple-choice' || q.type === 'true-false') {
-            correctAnswers[qIdx] = q.correctIndex !== undefined ? q.correctIndex.toString() : '0';
-          } else if (q.type === 'short-answer') {
-            correctAnswers[qIdx] = q.correctAnswerText || '';
-          }
-        });
+        // Calculate correct earnedPoints and totalPoints based on the actual score
+        const score = athlete.quizScores[scoreKey];
+        const totalPoints = lesson.quizQuestions?.length || 0;
+        const earnedPoints = Math.round((score / 100) * totalPoints);
 
-        setUserAnswers(correctAnswers);
-
-        // Pre-fill quizResult to show completed status
+        // Pre-fill quizResult to show completed status with correct score and points
         setQuizResult({
           passed: true,
-          score: athlete.quizScores[scoreKey],
-          earnedPoints: lesson.quizQuestions?.length || 0, 
-          totalPoints: lesson.quizQuestions?.length || 0,
-          userAnswers: correctAnswers
+          score: score,
+          earnedPoints: earnedPoints, 
+          totalPoints: totalPoints,
+          isHistorical: true
         });
       }
     } catch (err) {
@@ -445,7 +438,7 @@ export default function LessonPlayer() {
                                   ({points} {t('lesson_points', 'mata')})
                                 </span>
                               )}
-                              {quizResult && (
+                              {quizResult && userAns !== undefined && (
                                 <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded ml-2 ${isCorrect ? 'text-green-700 bg-green-50' : 'text-red-700 bg-red-50'}`}>
                                   {isCorrect ? `✓ ${t('lesson_correct', 'Betul')}` : `✗ ${t('lesson_wrong', 'Salah')}`}
                                 </span>
