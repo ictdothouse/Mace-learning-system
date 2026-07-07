@@ -77,7 +77,7 @@ export default function LessonPlayer() {
     } else {
       fetchLessonData();
     }
-  }, [auth, id, navigate]);
+  }, [auth.authenticated, auth.role, id, navigate]);
 
   useEffect(() => {
     if (branding.siteName && data?.lesson) {
