@@ -95,6 +95,11 @@
   "lesson_correct": "Betul",
   "lesson_wrong": "Salah",
   "lesson_correct_answer": "Jawapan betul",
+  "lesson_next_module": "Pelajaran Seterusnya →",
+  "lesson_btn_retry": "Jawab Semula",
+  "lesson_btn_retry_quiz": "Jawab Semula Kuiz ↺",
+  "lesson_btn_submit": "Hantar Jawapan & Semak Keputusan →",
+  "lesson_go_dashboard": "Pergi Ke Dashboard",
 
   "table_name": "Nama",
   "table_ic": "No. IC",

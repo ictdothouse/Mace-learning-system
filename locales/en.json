@@ -95,6 +95,11 @@
   "lesson_correct": "Correct",
   "lesson_wrong": "Wrong",
   "lesson_correct_answer": "Correct answer",
+  "lesson_next_module": "Next Lesson →",
+  "lesson_btn_retry": "Retry",
+  "lesson_btn_retry_quiz": "Retry Quiz ↺",
+  "lesson_btn_submit": "Submit Answers & Check Results →",
+  "lesson_go_dashboard": "Go To Dashboard",
 
   "table_name": "Name",
   "table_ic": "IC No.",
