@@ -162,7 +162,7 @@ export default function CustomPage() {
           <div className="flex items-center gap-4">
             <Link to="/" className="flex items-center gap-3">
               {branding.logoUrl ? (
-                <img src={branding.logoUrl} alt="Logo" className="h-8 md:h-10 w-auto object-contain" />
+                <img src={branding.logoUrl} alt="Logo" width="160" height="40" className="h-8 md:h-10 w-auto object-contain" />
               ) : (
                 <h1 className="text-lg md:text-xl font-extrabold uppercase tracking-wider">
                   {branding.siteName || 'MACE'}

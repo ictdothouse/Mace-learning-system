@@ -155,7 +155,7 @@ export default function Login() {
               {loading ? (
                 <div className="h-6 w-24 bg-white/20 rounded animate-pulse" />
               ) : branding.logoUrl ? (
-                <img src={branding.logoUrl} alt="Logo" className="h-8 md:h-10 w-auto object-contain" />
+                <img src={branding.logoUrl} alt="Logo" width="160" height="40" className="h-8 md:h-10 w-auto object-contain" />
               ) : (
                 <h1 className="text-lg md:text-xl font-extrabold uppercase tracking-wider">
                   {branding.siteName || 'MACE'}

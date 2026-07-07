@@ -190,7 +190,7 @@ export default function Dashboard() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             {branding.logoUrl ? (
-              <img src={branding.logoUrl} alt="Logo" className="h-7 sm:h-8 w-auto object-contain filter drop-shadow-md shrink-0" />
+              <img src={branding.logoUrl} alt="Logo" width="128" height="32" className="h-7 sm:h-8 w-auto object-contain filter drop-shadow-md shrink-0" />
             ) : (
               <>
                 <span className="text-xl sm:text-2xl shrink-0">🏅</span>
