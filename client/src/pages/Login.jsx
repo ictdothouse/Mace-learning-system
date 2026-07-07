@@ -8,7 +8,34 @@ export default function Login() {
   const navigate = useNavigate();
 
   const [tab, setTab] = useState('new'); // 'new' or 'resume'
-  const [sports, setSports] = useState([]);
+  const [sports, setSports] = useState([
+    { _id: '1', name: 'Bola Sepak (Football)' },
+    { _id: '2', name: 'Badminton' },
+    { _id: '3', name: 'Akuatik (Aquatics)' },
+    { _id: '4', name: 'Olahraga (Athletics)' },
+    { _id: '5', name: 'Basikal (Cycling)' },
+    { _id: '6', name: 'Gimnastik (Gymnastics)' },
+    { _id: '7', name: 'Hoki (Hockey)' },
+    { _id: '8', name: 'Karate' },
+    { _id: '9', name: 'Lawn Bowls' },
+    { _id: '10', name: 'Memanah (Archery)' },
+    { _id: '11', name: 'Menembak (Shooting)' },
+    { _id: '12', name: 'Silat (Pencak Silat)' },
+    { _id: '13', name: 'Angkat Berat (Weightlifting)' },
+    { _id: '14', name: 'Wushu' },
+    { _id: '15', name: 'Bola Jaring (Netball)' },
+    { _id: '16', name: 'Ragbi (Rugby)' },
+    { _id: '17', name: 'Bola Tampar (Volleyball)' },
+    { _id: '18', name: 'Sepak Takraw' },
+    { _id: '19', name: 'E-Sukan (Esports)' },
+    { _id: '20', name: 'Catur (Chess)' },
+    { _id: '21', name: 'Petanque' },
+    { _id: '22', name: 'Kabaddi' },
+    { _id: '23', name: 'Silambam' },
+    { _id: '24', name: 'Muay Thai' },
+    { _id: '25', name: 'Kriket (Cricket)' },
+    { _id: '26', name: 'Memanah Tradisional' }
+  ]);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [showNameHint, setShowNameHint] = useState(false);
@@ -30,9 +57,14 @@ export default function Login() {
   }, [auth, navigate]);
 
   useEffect(() => {
+    // Optionally fetch in the background to update the list, but not blocking
     axios.get('/api/sports')
-      .then(res => setSports(res.data))
-      .catch(err => console.error('Failed to load sports:', err));
+      .then(res => {
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          setSports(res.data);
+        }
+      })
+      .catch(err => console.error('Failed to load sports list update:', err));
   }, []);
   useEffect(() => {
     // Only apply for 'new' tab pendaftaran
@@ -210,7 +242,15 @@ export default function Login() {
       </nav>
  
       {/* Hero Banner Section */}
-      <header className="bg-slate-900 pt-12 pb-24 md:pb-32 px-6 md:px-12 relative shadow-inner flex items-center min-h-[180px] z-10" style={headerStyle}>
+      <header className="bg-slate-900 pt-12 pb-24 md:pb-32 px-6 md:px-12 relative shadow-inner flex items-center min-h-[180px] z-10 overflow-hidden">
+        {bannerImg && (
+          <img 
+            src={bannerImg} 
+            alt="Hero Banner" 
+            fetchpriority="high"
+            className="absolute inset-0 w-full h-full object-cover z-0" 
+          />
+        )}
         <div className="absolute inset-0 bg-red-900/40 mix-blend-multiply z-0"></div>
         <div className="relative z-10 max-w-6xl mx-auto w-full">
           {branding.showBannerTitle !== false && (

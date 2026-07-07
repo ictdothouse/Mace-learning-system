@@ -319,9 +319,16 @@ export default function CustomPage() {
 
             return (
               <>
-                {/* Hero Banner Section */}
+                 {/* Hero Banner Section */}
                 <div className="relative bg-[#0f172a] text-white py-16 sm:py-20 px-6 md:px-12 shadow-lg overflow-hidden">
-                  <div className="absolute inset-0 bg-cover bg-center z-0" style={{ backgroundImage: `url('${bannerImg}')` }}></div>
+                  {bannerImg && (
+                    <img 
+                      src={bannerImg} 
+                      alt="Banner Background" 
+                      fetchpriority="high"
+                      className="absolute inset-0 w-full h-full object-cover z-0" 
+                    />
+                  )}
                   <div className="absolute inset-0 bg-[#0f172a]/85 z-10"></div>
                   
                   <div className="relative z-20 max-w-6xl mx-auto w-full text-left">
