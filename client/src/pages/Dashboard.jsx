@@ -43,7 +43,7 @@ export default function Dashboard() {
     } else {
       fetchDashboardData();
     }
-  }, [auth, navigate]);
+  }, [auth, navigate, lang]);
 
   useEffect(() => {
     if (branding.siteName) {
