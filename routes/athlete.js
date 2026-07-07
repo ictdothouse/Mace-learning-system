@@ -189,13 +189,13 @@ router.get('/test-waiting-room', (req, res) => {
 });
 
 router.get('/ms', checkSports, (req, res) => {
-    res.cookie('lang', 'ms', { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: false });
+    res.cookie('lang', 'ms', { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: false, path: '/' });
     res.locals.lang = 'ms';
     res.render('entry', { error: null, sports: req.sports });
 });
 
 router.get('/en', checkSports, (req, res) => {
-    res.cookie('lang', 'en', { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: false });
+    res.cookie('lang', 'en', { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: false, path: '/' });
     res.locals.lang = 'en';
     res.render('entry', { error: null, sports: req.sports });
 });
@@ -274,11 +274,19 @@ router.get('/lesson/:id', checkSession, async (req, res) => {
 
         // ⚡ Menterjemah tajuk & deskripsi lesson jika bahasa english dipilih
         const lang = res.locals.lang || 'ms';
-        const translatedLessons = lessons.map(l => ({
-            ...l,
-            title: translateText(l.title, lang),
-            contentHtml: translateText(l.contentHtml, lang)
-        }));
+        const translatedLessons = lessons.map(l => {
+            const cloned = { ...l };
+            cloned.title = translateText(l.title, lang);
+            cloned.contentHtml = translateText(l.contentHtml, lang);
+            if (cloned.moduleId) {
+                cloned.moduleId = {
+                    ...cloned.moduleId,
+                    title: translateText(cloned.moduleId.title, lang),
+                    description: translateText(cloned.moduleId.description, lang)
+                };
+            }
+            return cloned;
+        });
 
         const lesson = translatedLessons[moduleId - 1];
         if (!lesson) return res.status(404).send('Modul tidak dijumpai');

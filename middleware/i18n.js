@@ -26,7 +26,7 @@ module.exports = function i18nMiddleware(req, res, next) {
         lang = DEFAULT_LANG;
     } else if (req.query.lang && SUPPORTED_LANGS.includes(req.query.lang)) {
         // Jika tukar menerusi query parameter, set cookie secara automatik
-        res.cookie('lang', lang, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: false });
+        res.cookie('lang', lang, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: false, path: '/' });
     }
 
     const translations = locales[lang] || locales[DEFAULT_LANG];

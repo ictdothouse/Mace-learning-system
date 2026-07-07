@@ -67,7 +67,7 @@ app.post('/set-language', (req, res) => {
     const supported = ['ms', 'en'];
     const selected = supported.includes(lang) ? lang : 'ms';
     // Simpan dalam cookie selama 30 hari
-    res.cookie('lang', selected, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: false });
+    res.cookie('lang', selected, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: false, path: '/' });
     // Redirect kembali ke halaman asal
     const referer = req.headers.referer || '/';
     res.redirect(referer);
