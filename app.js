@@ -270,6 +270,8 @@ function startServer() {
         const spaPaths = ['/', '/login', '/dashboard', '/lesson/:id', '/p/:slug', '/page/:slug'];
         spaPaths.forEach(routePath => {
             app.get(routePath, (req, res) => {
+                // Set Cache-Control header for static index.html to allow Cloudflare Edge caching (ultra-fast TTFB)
+                res.setHeader('Cache-Control', 'public, max-age=600, s-maxage=3600'); // Browser: 10 mins, CDN/Cloudflare Edge: 1 hour
                 res.sendFile(path.join(reactDistPath, 'index.html'));
             });
         });
