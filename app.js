@@ -73,12 +73,12 @@ app.post('/set-language', (req, res) => {
     res.redirect(referer);
 });
 
-// 5. Static Files with 30-day Browser & CDN Caching
+// 5. Static Files with 1-Year Browser & CDN Caching (Lighthouse Optimization)
 app.use(express.static(path.join(__dirname, 'public'), {
-    maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days in milliseconds
+    maxAge: 365 * 24 * 60 * 60 * 1000 // 365 days in milliseconds
 }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
-    maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days in milliseconds
+    maxAge: 365 * 24 * 60 * 60 * 1000 // 365 days in milliseconds
 }));
 
 // 6. Rate Limiting — Dinaikkan untuk handle 8K atlit blast serentak
@@ -264,6 +264,11 @@ function startServer() {
     // Serve React SPA client/dist if it has been compiled/exists
     const reactDistPath = path.join(__dirname, 'client', 'dist');
     if (fs.existsSync(reactDistPath)) {
+        // Serve React chunk assets (JS/CSS) with 1-year immutable caching
+        app.use('/assets', express.static(path.join(reactDistPath, 'assets'), {
+            maxAge: 365 * 24 * 60 * 60 * 1000,
+            immutable: true
+        }));
         app.use(express.static(reactDistPath));
         
         // Serve index.html for main athlete routes (client-side routing fallback)
