@@ -1,6 +1,6 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 
 export default function ModuleLanding() {
@@ -11,6 +11,7 @@ export default function ModuleLanding() {
   const [error, setError] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openAccordion, setOpenAccordion] = useState(0);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   useEffect(() => {
     const fetchModule = async () => {
@@ -93,14 +94,14 @@ export default function ModuleLanding() {
 
   const StartButton = ({ lessonId, size }) => {
     const px = size === "large" ? "px-8" : "px-6";
-    const cls = `inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold ${px} py-3 rounded-lg transition shadow-md hover:shadow-lg`;
-    const label = lang === "en" ? "Start Module" : "Mula Modul";
+    const cls = `inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold ${px} py-3 rounded-lg transition shadow-md hover:shadow-lg cursor-pointer`;
+    const label = lang === "en" ? "Enter Module" : "Masuk Modul";
     if (!lessonId) return null;
     if (isLoggedIn) return <a href={`/lesson/${lessonId}`} className={cls}><GearIcon />{label}</a>;
     return (
-      <a href="/" onClick={e => { e.preventDefault(); alert(lang === "en" ? "Please register or check your account to start the module." : "Sila daftar atau semak akaun untuk memulakan modul."); }} className={cls}>
+      <button onClick={() => setShowLoginModal(true)} className={cls}>
         <GearIcon />{label}
-      </a>
+      </button>
     );
   };
 
@@ -108,56 +109,135 @@ export default function ModuleLanding() {
     <div className="min-h-screen flex flex-col bg-gray-50" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
 
       {/* Navbar */}
-      <nav className="bg-[#0f172a] text-white py-4 px-6 md:px-12 z-20 relative shadow-md">
+      <nav className="bg-[#0f172a] text-white py-4 px-6 md:px-12 z-50 relative shadow-md">
         <div className="max-w-6xl mx-auto flex justify-between items-center w-full">
           <div className="flex items-center gap-4">
-            <a href="/" className="flex items-center gap-3">
-              {branding.logoUrl
-                ? <img src={branding.logoUrl} alt="Logo" className="h-8 md:h-10 w-auto object-contain" />
-                : <span className="text-lg md:text-xl font-extrabold uppercase tracking-wider">{branding.siteName || "MACE"}</span>
-              }
-            </a>
+            <Link to="/" className="flex items-center gap-3">
+              {branding.logoUrl ? (
+                <img src={branding.logoUrl} alt="Logo" width="160" height="40" className="h-8 md:h-10 w-auto object-contain" />
+              ) : (
+                <h1 className="text-lg md:text-xl font-extrabold uppercase tracking-wider">
+                  {branding.siteName || "MACE"}
+                </h1>
+              )}
+            </Link>
           </div>
-          <div className="flex items-center gap-4 md:gap-6">
-            <div className="hidden md:flex items-center gap-6">
-              <a href="/" className="text-sm font-medium hover:text-gray-300 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline -mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                </svg>
-              </a>
-              {branding.showMenu && branding.menuLinks?.map((link, i) => (
-                <a key={i} href={link.url} className="text-sm font-medium hover:text-gray-300 transition-colors">{translateMenuLabel(link)}</a>
-              ))}
-              {branding.navPages?.map((p, i) => (
-                <a key={i} href={`/page/${p.slug}`} className="text-sm font-medium hover:text-gray-300 transition-colors pb-1">
-                  {lang === "en" ? (p.title_en || p.title) : p.title}
-                </a>
-              ))}
-            </div>
-            <div className="flex items-center gap-2 bg-white/10 rounded-lg p-1 border border-white/20">
-              <button onClick={() => changeLang("ms")} className={`text-xs px-2 py-1 rounded font-semibold transition-all ${lang === "ms" ? "bg-white text-gray-900" : "text-white/70 hover:text-white"}`}>BM</button>
-              <button onClick={() => changeLang("en")} className={`text-xs px-2 py-1 rounded font-semibold transition-all ${lang === "en" ? "bg-white text-gray-900" : "text-white/70 hover:text-white"}`}>EN</button>
-            </div>
-            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden text-white hover:text-gray-300 p-1 rounded-lg hover:bg-white/10 transition">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </nav>
 
-      {/* Mobile Drawer */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-[#0f172a] border-t border-white/10 text-white py-3 px-6 space-y-1 z-10">
-          <a href="/" className="block text-sm font-medium py-2 border-b border-white/5 hover:text-orange-400 transition-colors">{lang === "en" ? "Home" : "Laman Utama"}</a>
-          {branding.showMenu && branding.menuLinks?.map((link, i) => (
-            <a key={i} href={link.url} className="block text-sm font-medium py-2 border-b border-white/5 hover:text-orange-400 transition-colors">
-              {lang === "en" ? (link.label_en || link.label) : link.label}
-            </a>
-          ))}
+          <div className="flex items-center gap-6">
+            {/* Desktop Menu Links */}
+            {((branding.showMenu && branding.menuLinks?.length > 0) || branding.navPages?.length > 0) && (
+              <div className="hidden md:flex items-center gap-6">
+                {branding.showMenu && branding.menuLinks?.map((link, index) => {
+                  const label = lang === "en"
+                    ? (link.label_en || (link.label?.toLowerCase() === "modul" ? "Modules" : link.label?.toLowerCase() === "hubungi kami" ? "Contact Us" : link.label))
+                    : link.label;
+                  return (
+                    <a key={index} href={link.url} className="text-sm font-semibold text-white/80 hover:text-white transition-colors">
+                      {label}
+                    </a>
+                  );
+                })}
+                {branding.navPages?.map((p, index) => (
+                  <a key={index} href={`/page/${p.slug}`} className="text-sm font-semibold text-white/80 hover:text-white transition-colors">
+                    {lang === "en" ? (p.title_en || p.title) : p.title}
+                  </a>
+                ))}
+              </div>
+            )}
+
+            {/* Mobile Hamburger Button */}
+            {((branding.showMenu && branding.menuLinks?.length > 0) || branding.navPages?.length > 0) && (
+              <button 
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden text-white/80 hover:text-white focus:outline-none p-1 rounded-lg hover:bg-white/10 transition"
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  {mobileMenuOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                  )}
+                </svg>
+              </button>
+            )}
+
+            <div className="flex items-center gap-2 bg-white/10 rounded-lg p-1 border border-white/20">
+              <button
+                onClick={() => changeLang("ms")}
+                className={`text-xs px-2 py-1 rounded font-semibold transition-all ${lang === "ms" ? "bg-white text-gray-900" : "text-white/70 hover:text-white"}`}
+              >
+                BM
+              </button>
+              <button
+                onClick={() => changeLang("en")}
+                className={`text-xs px-2 py-1 rounded font-semibold transition-all ${lang === "en" ? "bg-white text-gray-900" : "text-white/70 hover:text-white"}`}
+              >
+                EN
+              </button>
+            </div>
+          </div>
         </div>
-      )}
+
+        {/* Mobile Menu Drawer (Right-aligned popover with blur & icons) */}
+        {mobileMenuOpen && ((branding.showMenu && branding.menuLinks?.length > 0) || branding.navPages?.length > 0) && (
+          <div className="md:hidden absolute right-6 top-full mt-2 w-56 bg-slate-900/95 backdrop-blur-md border border-white/10 rounded-2xl shadow-xl py-3 px-4 z-50 flex flex-col gap-1.5 animate-fade-in">
+            {branding.showMenu && branding.menuLinks?.map((link, index) => {
+              const label = lang === "en"
+                ? (link.label_en || (link.label?.toLowerCase() === "modul" ? "Modules" : link.label?.toLowerCase() === "hubungi kami" ? "Contact Us" : link.label))
+                : link.label;
+              const isContact = label.toLowerCase().includes("hubung") || label.toLowerCase().includes("contact");
+              const isModule = label.toLowerCase().includes("modul") || label.toLowerCase().includes("module");
+              
+              return (
+                <a key={index} href={link.url} className="flex items-center gap-3 text-sm font-medium py-2 px-3 rounded-xl hover:bg-white/10 hover:text-orange-400 transition-all text-white">
+                  {isModule && (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                  )}
+                  {isContact && (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  )}
+                  {!isModule && !isContact && (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  )}
+                  <span>{label}</span>
+                </a>
+              );
+            })}
+            {branding.navPages?.map((p, index) => {
+              const isContact = p.customTemplate === "contact" || p.title.toLowerCase().includes("hubung") || p.title.toLowerCase().includes("contact");
+              const isModule = p.customTemplate === "modules" || p.title.toLowerCase().includes("modul") || p.title.toLowerCase().includes("module");
+              const title = lang === "en" ? (p.title_en || p.title) : p.title;
+              
+              return (
+                <a key={index} href={`/page/${p.slug}`} className="flex items-center gap-3 text-sm font-medium py-2 px-3 rounded-xl hover:bg-white/10 hover:text-orange-400 transition-all text-white">
+                  {isModule && (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                  )}
+                  {isContact && (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  )}
+                  {!isModule && !isContact && (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  )}
+                  <span>{title}</span>
+                </a>
+              );
+            })}
+          </div>
+        )}
+      </nav>
 
       {/* Hero Banner */}
       <div className="relative bg-gradient-to-r from-blue-950 to-indigo-900 text-white py-20 px-6 md:px-12 text-left shadow-lg overflow-hidden">
@@ -242,6 +322,40 @@ export default function ModuleLanding() {
           )}
         </div>
       </footer>
+      {/* Login Modal Overlay */}
+      {showLoginModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-6">
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 text-center border border-slate-100">
+            <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-6 h-6 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 mb-2">
+              {lang === "en" ? "Account Verification" : "Daftar / Semak Akaun"}
+            </h3>
+            <p className="text-sm text-slate-500 mb-6 font-medium leading-relaxed">
+              {lang === "en" 
+                ? "Please register or check your account first to access this module." 
+                : "Sila daftar atau semak akaun anda terlebih dahulu untuk memasuki modul ini."}
+            </p>
+            <div className="flex flex-col gap-2">
+              <button 
+                onClick={() => window.location.href = "/login"}
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 px-4 rounded-xl transition shadow-md cursor-pointer"
+              >
+                {lang === "en" ? "Go to Login Page" : "Log Masuk"}
+              </button>
+              <button 
+                onClick={() => setShowLoginModal(false)}
+                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 px-4 rounded-xl transition cursor-pointer"
+              >
+                {lang === "en" ? "Cancel" : "Batal"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
