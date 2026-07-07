@@ -706,11 +706,24 @@ router.get('/page/:slug', checkSports, async (req, res) => {
         console.error('Error loading custom page:', err);
         res.redirect('/');
     }
+});router.get('/debug-translation', async (req, res) => {
+    try {
+        const lessons = await getLessonsWithQuiz();
+        const lang = req.query.lang || 'ms';
+        const data = lessons.map(l => {
+            const translated = translateText(l.title, lang);
+            return {
+                original: l.title,
+                originalHex: Buffer.from(l.title).toString('hex'),
+                lang,
+                translated
+            };
+        });
+        res.json(data);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
-
-
-
-
 // ✅ EXPORT OBJEK YANG BETUL
 module.exports = { 
     router, 
