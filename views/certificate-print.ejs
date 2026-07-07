@@ -509,6 +509,18 @@
                 if (overlay) overlay.classList.add('hidden');
                 return;
             }
+            // Save original body layout and force target width for mobile capture
+            const originalBodyWidth = document.body.style.width;
+            const originalBodyOverflow = document.body.style.overflow;
+            
+            const isPortrait = <%= isPortrait %>;
+            const targetWidth = isPortrait ? 793 : 1122;
+            
+            if (window.innerWidth < targetWidth) {
+                document.body.style.width = `${targetWidth}px`;
+                document.body.style.overflow = 'visible';
+            }
+
             // Save original transform styles and clear them for printing
             const originalTransform = element.style.transform;
             const originalTransformOrigin = element.style.transformOrigin;
@@ -531,13 +543,15 @@
                 jsPDF:        { 
                     unit: 'mm', 
                     format: 'a4', 
-                    orientation: '<%= isPortrait ? "portrait" : "landscape" %>' 
+                    orientation: isPortrait ? 'portrait' : 'landscape' 
                 }
             };
 
             // Wait for browser repaint before capturing to ensure 100% sharpness
             setTimeout(() => {
                 html2pdf().set(opt).from(element).save().then(() => {
+                    document.body.style.width = originalBodyWidth;
+                    document.body.style.overflow = originalBodyOverflow;
                     element.style.transform = originalTransform;
                     element.style.transformOrigin = originalTransformOrigin;
                     adjustCertificateScale();
@@ -546,6 +560,8 @@
                     button.innerHTML = originalText;
                     button.disabled = false;
                 }).catch(err => {
+                    document.body.style.width = originalBodyWidth;
+                    document.body.style.overflow = originalBodyOverflow;
                     element.style.transform = originalTransform;
                     element.style.transformOrigin = originalTransformOrigin;
                     adjustCertificateScale();
