@@ -522,7 +522,7 @@ export default function Login() {
                             autoComplete="off"
                           />
                           <p className="text-[10px] text-slate-500 mt-1">
-                            {t('entry_field_enrollment_key_hint', 'Masukkan kod kumpulan yang diberikan oleh penyelaras sukan/guru anda (jika ada).')}
+                            {t('entry_field_enrollment_key_hint', 'Masukkan kod kumpulan yang diberikan oleh penyelaras sukan/instruktor anda (jika ada).')}
                           </p>
                         </div>
                       )}
