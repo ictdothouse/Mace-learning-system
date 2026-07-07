@@ -146,11 +146,70 @@ export default function Login() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0f172a] text-white font-sans">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
-          <p className="text-white/60 text-sm font-medium animate-pulse">Memuatkan sistem...</p>
-        </div>
+      <div className="min-h-screen flex flex-col bg-gray-50 animate-pulse font-sans">
+        {/* Navbar Skeleton */}
+        <nav className="bg-[#0f172a] h-16 flex items-center justify-between px-6 md:px-12 border-b border-white/10 shadow-md">
+          <div className="w-36 h-8 bg-white/10 rounded-lg"></div>
+          <div className="flex gap-4">
+            <div className="w-16 h-7 bg-white/10 rounded-lg"></div>
+            <div className="w-20 h-7 bg-white/10 rounded-lg"></div>
+          </div>
+        </nav>
+
+        {/* Hero Banner Section Skeleton */}
+        <header className="bg-slate-900 pt-12 pb-24 md:pb-32 px-6 md:px-12 relative shadow-inner min-h-[180px]">
+          <div className="max-w-6xl mx-auto w-full">
+            <div className="w-48 h-10 bg-white/10 rounded-xl"></div>
+          </div>
+        </header>
+
+        {/* Main Content Form Skeleton */}
+        <main className="flex-1 relative py-8 px-4 sm:px-6 z-10">
+          <div className="max-w-6xl mx-auto -mt-20 md:-mt-28 bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100/80">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 items-stretch">
+              {/* Left Form Column Skeleton */}
+              <div className="lg:col-span-5 bg-white border-r border-slate-100 p-6 space-y-6">
+                <div className="w-full h-8 bg-gray-200 rounded-xl"></div>
+                <div className="flex gap-2 p-1 bg-gray-100 rounded-xl">
+                  <div className="flex-grow h-8 bg-gray-200 rounded-lg"></div>
+                  <div className="flex-grow h-8 bg-gray-200 rounded-lg"></div>
+                </div>
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="space-y-2">
+                      <div className="w-24 h-4 bg-gray-200 rounded"></div>
+                      <div className="w-full h-10 bg-gray-100 rounded-xl"></div>
+                    </div>
+                  ))}
+                </div>
+                <div className="w-full h-12 bg-gray-200 rounded-xl"></div>
+              </div>
+
+              {/* Right Intro Column Skeleton */}
+              <div className="lg:col-span-7 bg-slate-50/50 p-8 md:p-12 space-y-6 flex flex-col justify-between">
+                <div className="space-y-4">
+                  <div className="w-48 h-6 bg-gray-200 rounded-lg"></div>
+                  <div className="space-y-2">
+                    <div className="w-full h-4 bg-gray-200 rounded"></div>
+                    <div className="w-full h-4 bg-gray-200 rounded"></div>
+                    <div className="w-5/6 h-4 bg-gray-200 rounded"></div>
+                  </div>
+                  <div className="space-y-2 pt-4">
+                    <div className="w-full h-4 bg-gray-200 rounded"></div>
+                    <div className="w-4/5 h-4 bg-gray-200 rounded"></div>
+                  </div>
+                </div>
+                <div className="pt-6 border-t border-gray-100 flex gap-4">
+                  <div className="w-10 h-10 bg-gray-200 rounded-xl"></div>
+                  <div className="space-y-2 flex-grow">
+                    <div className="w-32 h-4 bg-gray-200 rounded"></div>
+                    <div className="w-24 h-3 bg-gray-200 rounded"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
     );
   }
