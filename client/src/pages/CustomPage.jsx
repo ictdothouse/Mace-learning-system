@@ -157,7 +157,7 @@ export default function CustomPage() {
     <div className="min-h-screen flex flex-col bg-gray-50 font-sans">
       
       {/* Top Navbar */}
-      <nav className="bg-[#0f172a] text-white py-4 px-6 md:px-12 z-20 relative shadow-md">
+      <nav className="bg-[#0f172a] text-white py-4 px-6 md:px-12 z-50 relative shadow-md">
         <div className="max-w-6xl mx-auto flex justify-between items-center w-full">
           <div className="flex items-center gap-4">
             <Link to="/" className="flex items-center gap-3">
@@ -226,24 +226,63 @@ export default function CustomPage() {
           </div>
         </div>
 
-        {/* Mobile Menu Drawer */}
+        {/* Mobile Menu Drawer (Right-aligned popover with blur & icons) */}
         {mobileMenuOpen && ((branding.showMenu && branding.menuLinks?.length > 0) || branding.navPages?.length > 0) && (
-          <div className="md:hidden bg-[#0f172a] border-t border-white/10 text-white py-3 px-6 space-y-1 transition-all duration-300 absolute left-0 right-0 z-30">
+          <div className="md:hidden absolute right-6 top-full mt-2 w-56 bg-slate-900/95 backdrop-blur-md border border-white/10 rounded-2xl shadow-xl py-3 px-4 z-50 flex flex-col gap-1.5 animate-fade-in">
             {branding.showMenu && branding.menuLinks?.map((link, index) => {
               const label = lang === 'en'
                 ? (link.label_en || (link.label?.toLowerCase() === 'modul' ? 'Modules' : link.label?.toLowerCase() === 'hubungi kami' ? 'Contact Us' : link.label))
                 : link.label;
+              const isContact = label.toLowerCase().includes('hubung') || label.toLowerCase().includes('contact');
+              const isModule = label.toLowerCase().includes('modul') || label.toLowerCase().includes('module');
+              
               return (
-                <a key={index} href={link.url} className="block text-sm font-medium py-2 border-b border-white/5 hover:text-orange-400 transition-colors">
-                  {label}
+                <a key={index} href={link.url} className="flex items-center gap-3 text-sm font-medium py-2 px-3 rounded-xl hover:bg-white/10 hover:text-orange-400 transition-all text-white">
+                  {isModule && (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                  )}
+                  {isContact && (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  )}
+                  {!isModule && !isContact && (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  )}
+                  <span>{label}</span>
                 </a>
               );
             })}
-            {branding.navPages?.map((p, index) => (
-              <a key={index} href={`/page/${p.slug}`} className="block text-sm font-medium py-2 border-b border-white/5 hover:text-orange-400 transition-colors">
-                {lang === 'en' ? (p.title_en || p.title) : p.title}
-              </a>
-            ))}
+            {branding.navPages?.map((p, index) => {
+              const isContact = p.customTemplate === 'contact' || p.title.toLowerCase().includes('hubung') || p.title.toLowerCase().includes('contact');
+              const isModule = p.customTemplate === 'modules' || p.title.toLowerCase().includes('modul') || p.title.toLowerCase().includes('module');
+              const title = lang === 'en' ? (p.title_en || p.title) : p.title;
+              
+              return (
+                <a key={index} href={`/page/${p.slug}`} className="flex items-center gap-3 text-sm font-medium py-2 px-3 rounded-xl hover:bg-white/10 hover:text-orange-400 transition-all text-white">
+                  {isModule && (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                  )}
+                  {isContact && (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  )}
+                  {!isModule && !isContact && (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  )}
+                  <span>{title}</span>
+                </a>
+              );
+            })}
           </div>
         )}
       </nav>
