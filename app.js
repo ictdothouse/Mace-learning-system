@@ -273,10 +273,37 @@ function startServer() {
         
         // Serve index.html for main athlete routes (client-side routing fallback)
         const spaPaths = ['/', '/login', '/dashboard', '/lesson/:id', '/p/:slug', '/page/:slug'];
+        let cachedIndexHtml = null;
+        
         spaPaths.forEach(routePath => {
             app.get(routePath, (req, res) => {
                 // Set Cache-Control header for static index.html to allow Cloudflare Edge caching (ultra-fast TTFB)
                 res.setHeader('Cache-Control', 'public, max-age=600, s-maxage=3600'); // Browser: 10 mins, CDN/Cloudflare Edge: 1 hour
+                
+                try {
+                    if (!cachedIndexHtml) {
+                        const indexHtmlPath = path.join(reactDistPath, 'index.html');
+                        if (fs.existsSync(indexHtmlPath)) {
+                            cachedIndexHtml = fs.readFileSync(indexHtmlPath, 'utf8');
+                        }
+                    }
+                    
+                    if (cachedIndexHtml) {
+                        const branding = res.locals.branding || {};
+                        const bannerImg = branding.homeBannerImage || 'https://images.unsplash.com/photo-1540747737956-37872f747802?q=80&w=1200&auto=format&fit=crop';
+                        
+                        let html = cachedIndexHtml;
+                        if (bannerImg) {
+                            // Inject preload tag at the top of <head> so browser downloads hero image immediately (removes LCP delay)
+                            const preloadTag = `<link rel="preload" as="image" href="${bannerImg}">`;
+                            html = html.replace('<head>', `<head>\n    ${preloadTag}`);
+                        }
+                        return res.send(html);
+                    }
+                } catch (err) {
+                    console.error('SPA serve error, falling back to static:', err.message);
+                }
+                
                 res.sendFile(path.join(reactDistPath, 'index.html'));
             });
         });
