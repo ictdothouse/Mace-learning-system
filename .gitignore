@@ -448,3 +448,8 @@ __pycache__/
 
 # Original rules preserved
 *.log
+
+# Exception: React build folder MUST be tracked in git
+# so that Hostinger has the compiled assets after git pull
+!client/dist
+!client/dist/**
