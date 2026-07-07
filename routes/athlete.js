@@ -407,11 +407,22 @@ router.post('/submit-quiz/:id', checkSession, async (req, res) => {
         // Simpan keputusan hanya jika lulus atau markah lebih tinggi
         if (passed) {
             const updateData = {};
-            if (moduleId === 1) { updateData['quizScores.quiz1'] = score; if (athlete.currentStage < 2) updateData.currentStage = 2; }
-            else if (moduleId === 2) { updateData['quizScores.quiz2'] = score; if (athlete.currentStage < 3) updateData.currentStage = 3; }
-            else if (moduleId === 3) { updateData['quizScores.quiz3'] = score; if (athlete.currentStage < 4) { updateData.currentStage = 4; updateData.completedAt = new Date(); } }
+            if (moduleId === 1) { 
+                if (score > (athlete.quizScores?.quiz1 || 0)) updateData['quizScores.quiz1'] = score;
+                if (athlete.currentStage < 2) updateData.currentStage = 2; 
+            }
+            else if (moduleId === 2) { 
+                if (score > (athlete.quizScores?.quiz2 || 0)) updateData['quizScores.quiz2'] = score;
+                if (athlete.currentStage < 3) updateData.currentStage = 3; 
+            }
+            else if (moduleId === 3) { 
+                if (score > (athlete.quizScores?.quiz3 || 0)) updateData['quizScores.quiz3'] = score;
+                if (athlete.currentStage < 4) { updateData.currentStage = 4; updateData.completedAt = new Date(); } 
+            }
             
-            await Athlete.findByIdAndUpdate(athlete._id, updateData);
+            if (Object.keys(updateData).length > 0) {
+                await Athlete.findByIdAndUpdate(athlete._id, updateData);
+            }
         }
 
         req.session.quizResult = { passed, score, userAnswers, totalPoints, earnedPoints };
