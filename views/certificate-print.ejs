@@ -202,6 +202,31 @@
                 margin: 0 !important;
             }
         }
+        /* ── Image Protection ─────────────────────────────────────────────── */
+        /* Prevent right-click, drag, and selection on all images */
+        img {
+            -webkit-user-drag: none !important;
+            -khtml-user-drag: none !important;
+            -moz-user-drag: none !important;
+            -o-user-drag: none !important;
+            user-drag: none !important;
+            pointer-events: none !important;
+            -webkit-user-select: none !important;
+            user-select: none !important;
+        }
+        /* Transparent overlay on certificate to block image clicks */
+        .cert-protect-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 999;
+            background: transparent;
+            cursor: default;
+        }
+        /* Prevent any text selection inside certificate */
+        .certificate-container {
+            -webkit-user-select: none !important;
+            user-select: none !important;
+        }
     </style>
 </head>
 <body>
@@ -274,9 +299,15 @@
                         bgUrl = bgUrl + separator + '_cb=' + Date.now();
                     }
                 %>
-                <img src="<%= bgUrl %>" crossorigin="anonymous" style="width: 100%; height: 100%; object-fit: cover; opacity: <%= template.backgroundOpacity || 1 %>; display: block; z-index: 0;">
+                <!-- img needed for html2canvas PDF export; protected via CSS pointer-events:none + JS -->
+                <img src="<%= bgUrl %>" crossorigin="anonymous"
+                    ondragstart="return false"
+                    oncontextmenu="return false"
+                    style="width: 100%; height: 100%; object-fit: cover; opacity: <%= template.backgroundOpacity || 1 %>; display: block; z-index: 0; pointer-events: none; -webkit-user-drag: none; user-select: none;">
             </div>
         <% } %>
+        <!-- Transparent protection overlay: intercepts all mouse events on certificate area -->
+        <div class="cert-protect-overlay" oncontextmenu="return false"></div>
         
         <!-- Border Frames -->
         <% if (template.showBorder) { %>
@@ -576,6 +607,41 @@
                 });
             }, 150);
         }
+    </script>
+
+    <!-- Image Protection Script -->
+    <script>
+        // Block right-click context menu on the entire page
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        // Block keyboard shortcuts that can save/view source/print
+        document.addEventListener('keydown', function(e) {
+            const key = e.key.toLowerCase();
+            // Block Ctrl+S (Save), Ctrl+U (View Source), Ctrl+P (Print), Ctrl+Shift+I (DevTools), F12
+            if (e.ctrlKey && (key === 's' || key === 'u' || key === 'p')) {
+                e.preventDefault(); return false;
+            }
+            if ((e.ctrlKey && e.shiftKey && (key === 'i' || key === 'j' || key === 'c')) ||
+                e.key === 'F12') {
+                e.preventDefault(); return false;
+            }
+            // Block PrintScreen
+            if (e.key === 'PrintScreen') {
+                e.preventDefault();
+                navigator.clipboard?.writeText('');
+                return false;
+            }
+        });
+
+        // Block drag on all images
+        document.addEventListener('dragstart', function(e) {
+            if (e.target.tagName === 'IMG') {
+                e.preventDefault(); return false;
+            }
+        });
     </script>
     
     <!-- Full-screen loading overlay to mask the visual jump during PDF capture -->
