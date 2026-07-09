@@ -48,9 +48,30 @@ app.set('views', path.join(__dirname, 'views'));
 // 4. Middleware Dasar
 app.use(compression());
 app.use(helmet({
-    contentSecurityPolicy: false, // Ditutup supaya tidak menghalang pemuatan video R2/TinyMCE/FontCDN luaran
+    contentSecurityPolicy: false,
     crossOriginEmbedderPolicy: false,
-    frameguard: false // Nyahaktifkan SAMEORIGIN untuk membenarkan frame-ancestors
+    frameguard: false
+}));
+
+// Serve React SPA client/dist static assets (JS/CSS) immediately (Light Speed)
+const reactDistPath = path.join(__dirname, 'client', 'dist');
+if (fs.existsSync(reactDistPath)) {
+    app.use('/assets', express.static(path.join(reactDistPath, 'assets'), {
+        maxAge: 365 * 24 * 60 * 60 * 1000,
+        immutable: true
+    }));
+    app.use(express.static(reactDistPath, {
+        index: false,
+        maxAge: 365 * 24 * 60 * 60 * 1000
+    }));
+}
+
+// 5. Static Files with 1-Year Browser & CDN Caching
+app.use(express.static(path.join(__dirname, 'public'), {
+    maxAge: 365 * 24 * 60 * 60 * 1000
+}));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+    maxAge: 365 * 24 * 60 * 60 * 1000
 }));
 
 // Tambah CSP Frame-Ancestors untuk menyokong embedding di WordPress secara selamat
@@ -84,14 +105,6 @@ app.post('/set-language', (req, res) => {
     const referer = req.headers.referer || '/';
     res.redirect(referer);
 });
-
-// 5. Static Files with 1-Year Browser & CDN Caching (Lighthouse Optimization)
-app.use(express.static(path.join(__dirname, 'public'), {
-    maxAge: 365 * 24 * 60 * 60 * 1000 // 365 days in milliseconds
-}));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
-    maxAge: 365 * 24 * 60 * 60 * 1000 // 365 days in milliseconds
-}));
 
 // 6. Rate Limiting — Dinaikkan untuk handle 8K atlit blast serentak
 const limiter = rateLimit({
@@ -255,17 +268,7 @@ function startServer() {
     // Fast 204 response for favicon to avoid redundant 404 routing overhead
     app.get('/favicon.ico', (req, res) => res.status(204).end());
 
-    // Serve React SPA client/dist static assets (JS/CSS) BEFORE session middleware
-    // This prevents static assets from executing MongoDB session lookups (massive speed boost)
-    const reactDistPath = path.join(__dirname, 'client', 'dist');
-    if (fs.existsSync(reactDistPath)) {
-        app.use('/assets', express.static(path.join(reactDistPath, 'assets'), {
-            maxAge: 365 * 24 * 60 * 60 * 1000,
-            immutable: true
-        }));
-        app.use(express.static(reactDistPath));
-    }
-
+    // Static assets have been moved to the top of the file for extreme performance
     // 7. Konfigurasi Session
     app.use(session({
         secret: process.env.SESSION_SECRET,
