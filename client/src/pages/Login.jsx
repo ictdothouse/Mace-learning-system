@@ -224,6 +224,21 @@ export default function Login() {
     <div className="min-h-screen flex flex-col bg-gray-50 font-sans" style={bodyBgStyle}>
       {branding.homeBgImage && (
         <div className="fixed inset-0 bg-white/60 backdrop-blur-sm z-0 pointer-events-none"></div>
+      )}      {isEmbed && (
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-1.5 bg-white/90 backdrop-blur-sm shadow-md rounded-lg p-1 border border-gray-200/80">
+          <button
+            onClick={() => changeLang('ms')}
+            className={`text-xs px-2.5 py-1 rounded-md font-bold transition-all ${lang === 'ms' ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+          >
+            BM
+          </button>
+          <button
+            onClick={() => changeLang('en')}
+            className={`text-xs px-2.5 py-1 rounded-md font-bold transition-all ${lang === 'en' ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+          >
+            EN
+          </button>
+        </div>
       )}
 
       {/* Top Navbar */}

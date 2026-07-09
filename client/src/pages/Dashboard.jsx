@@ -264,6 +264,23 @@ export default function Dashboard() {
         </nav>
       )}
 
+      {isEmbed && (
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-1 bg-black/40 backdrop-blur-md shadow-lg rounded-lg p-1 border border-white/10">
+          <button
+            onClick={() => changeLang('ms')}
+            className={`text-xs px-2.5 py-1 rounded-md font-bold transition-all ${lang === 'ms' ? 'bg-white text-indigo-900 shadow-sm' : 'text-white/60 hover:text-white'}`}
+          >
+            BM
+          </button>
+          <button
+            onClick={() => changeLang('en')}
+            className={`text-xs px-2.5 py-1 rounded-md font-bold transition-all ${lang === 'en' ? 'bg-white text-indigo-900 shadow-sm' : 'text-white/60 hover:text-white'}`}
+          >
+            EN
+          </button>
+        </div>
+      )}
+
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10 flex-grow w-full">
         <div className="animate-[fadeInUp_0.5s_ease-out_forwards] opacity-0" style={{ animationDelay: '0.1s' }}>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8 sm:mb-10">
