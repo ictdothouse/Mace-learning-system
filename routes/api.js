@@ -329,7 +329,7 @@ router.get('/athlete/dashboard', async (req, res) => {
         const [athlete, modules, allLessons, levels] = await Promise.all([
             Athlete.findById(req.session.athleteId).lean(),
             Module.find({ isActive: { $ne: false } }).sort({ order: 1 }).lean(),
-            Lesson.find().populate('moduleId').sort({ order: 1 }).lean(),
+            getLessonsWithQuiz(),
             Level.find().sort({ order: 1 }).lean()
         ]);
 
