@@ -268,25 +268,7 @@ function startServer() {
     // Fast 204 response for favicon to avoid redundant 404 routing overhead
     app.get('/favicon.ico', (req, res) => res.status(204).end());
 
-    // Static assets have been moved to the top of the file for extreme performance
-    // 7. Konfigurasi Session
-    app.use(session({
-        secret: process.env.SESSION_SECRET,
-        resave: false,
-        saveUninitialized: false,
-        store: MongoStore.create({
-            clientPromise: mongoose.connection.asPromise().then((conn) => conn.getClient()),
-            ttl: 24 * 60 * 60 
-        }),
-        cookie: {
-            secure: true, 
-            httpOnly: true,
-            maxAge: 24 * 60 * 60 * 1000,
-            sameSite: 'none' // Membenarkan kuki dihantar merentas domain dalam iframe (WordPress)
-        }
-    }));
-
-    // 8. AKTIFKAN ROUTES
+    // 7. AKTIFKAN SPA ROUTES SEBELUM SESSION (SUPER FAST HTML DELIVERY)
     if (fs.existsSync(reactDistPath)) {
         // Serve index.html for main athlete routes (client-side routing fallback)
         const spaPaths = ['/', '/login', '/dashboard', '/lesson/:id', '/module/:id', '/p/:slug', '/page/:slug'];
@@ -324,7 +306,36 @@ function startServer() {
                 res.sendFile(path.join(reactDistPath, 'index.html'));
             });
         });
+    }
 
+    // 8. Konfigurasi Session
+    const sessionMiddleware = session({
+        secret: process.env.SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+        store: MongoStore.create({
+            clientPromise: mongoose.connection.asPromise().then((conn) => conn.getClient()),
+            ttl: 24 * 60 * 60 
+        }),
+        cookie: {
+            secure: true, 
+            httpOnly: true,
+            maxAge: 24 * 60 * 60 * 1000,
+            sameSite: 'none' // Membenarkan kuki dihantar merentas domain dalam iframe (WordPress)
+        }
+    });
+
+    // ⚡ Bypass session DB lookups for public/cached APIs to prevent 20s bottlenecks!
+    app.use((req, res, next) => {
+        const publicApiPrefixes = ['/api/branding', '/api/locales', '/api/sports', '/api/pages'];
+        if (publicApiPrefixes.some(prefix => req.path.startsWith(prefix))) {
+            return next(); // Skip session!
+        }
+        return sessionMiddleware(req, res, next);
+    });
+
+    // 9. AKTIFKAN API & VIEW ROUTES
+    if (fs.existsSync(reactDistPath)) {
         // ⚡ Register athleteRoutes so backend rendering routes like /certificate/... can be accessed
         app.use('/', athleteRoutes);
     } else {
