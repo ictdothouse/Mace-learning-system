@@ -115,7 +115,6 @@ mongoose.connect(process.env.MONGO_URI, {
     serverSelectionTimeoutMS: 5000,     // ⚡ Timeout cepat jika Atlas tak respons
     socketTimeoutMS: 45000,             // ⚡ Socket timeout 45s
     heartbeatFrequencyMS: 10000,        // ⚡ Ping setiap 10s untuk elak Hostinger drop connection
-    keepAlive: true,
 })
     .then(async () => {
         console.log('✅ DB Connected successfully to MongoDB Atlas');
@@ -273,7 +272,7 @@ function startServer() {
         resave: false,
         saveUninitialized: false,
         store: MongoStore.create({
-            clientPromise: mongoose.connection.asPromise().then((m) => m.connection.getClient()),
+            clientPromise: mongoose.connection.asPromise().then((conn) => conn.getClient()),
             ttl: 24 * 60 * 60 
         }),
         cookie: {
