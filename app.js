@@ -123,10 +123,9 @@ app.use(limiter);
 let isDbConnected = false;
 
 mongoose.connect(process.env.MONGO_URI, {
-    maxPoolSize: 50,                    // ⚡ Atlas Free max ~100
-    minPoolSize: 5,                     // ⚡ Sentiasa ada 5 connections siap sedia
+    maxPoolSize: 5,                     // ⚡ Hadkan pool ke 5 untuk kurangkan beban memory/socket di Hostinger
     serverSelectionTimeoutMS: 5000,     // ⚡ Timeout cepat jika Atlas tak respons
-    socketTimeoutMS: 45000,             // ⚡ Socket timeout 45s
+    socketTimeoutMS: 20000,             // ⚡ Turunkan socket timeout ke 20s untuk fail-fast
     heartbeatFrequencyMS: 10000,        // ⚡ Ping setiap 10s untuk elak Hostinger drop connection
 })
     .then(async () => {
