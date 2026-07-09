@@ -31,7 +31,7 @@ export default function Dashboard() {
       setError(err.response?.data?.error || 'Gagal memuatkan data dashboard.');
       if (err.response?.status === 401) {
         setAuth({ authenticated: false, role: null, athlete: null, user: null });
-        navigate('/login');
+        navigate(isEmbed ? '/login?embed=true' : '/login');
       }
     } finally {
       setLoadingDashboard(false);
@@ -40,11 +40,11 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!auth.authenticated || auth.role !== 'student') {
-      navigate('/login');
+      navigate(isEmbed ? '/login?embed=true' : '/login');
     } else {
       fetchDashboardData();
     }
-  }, [auth, navigate, lang]);
+  }, [auth, navigate, lang, isEmbed]);
 
   useEffect(() => {
     if (branding.siteName) {
@@ -57,7 +57,7 @@ export default function Dashboard() {
     try {
       await axios.post('/api/auth/logout');
       setAuth({ authenticated: false, role: null, athlete: null, user: null });
-      navigate('/login');
+      navigate(isEmbed ? '/login?embed=true' : '/login');
     } catch (err) {
       console.error('Logout error:', err);
     }

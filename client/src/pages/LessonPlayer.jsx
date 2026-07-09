@@ -67,7 +67,7 @@ export default function LessonPlayer() {
       setError(err.response?.data?.error || 'Gagal memuatkan data pembelajaran.');
       if (err.response?.status === 401) {
         setAuth({ authenticated: false, role: null, athlete: null, user: null });
-        navigate('/login');
+        navigate(isEmbed ? '/login?embed=true' : '/login');
       }
     } finally {
       setLoading(false);
@@ -76,11 +76,11 @@ export default function LessonPlayer() {
 
   useEffect(() => {
     if (!auth.authenticated || auth.role !== 'student') {
-      navigate('/login');
+      navigate(isEmbed ? '/login?embed=true' : '/login');
     } else {
       fetchLessonData();
     }
-  }, [auth.authenticated, auth.role, id, navigate, lang]);
+  }, [auth.authenticated, auth.role, id, navigate, lang, isEmbed]);
 
   useEffect(() => {
     if (branding.siteName && data?.lesson) {
