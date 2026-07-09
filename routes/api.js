@@ -513,10 +513,25 @@ router.post('/athlete/submit-quiz/:id', async (req, res) => {
 // 4. CMS DYNAMIC CUSTOM PAGES API
 // ==========================================
 
+// In-memory cache for CMS custom pages
+const pagesCache = new Map();
+const PAGES_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 // GET: Pemuatan Halaman CMS Dinamik
 router.get('/pages/:slug', async (req, res) => {
+    const { slug } = req.params;
+    const now = Date.now();
+
+    // Check if fresh cache exists
+    if (pagesCache.has(slug)) {
+        const cached = pagesCache.get(slug);
+        if (now - cached.time < PAGES_CACHE_TTL) {
+            return res.json(cached.data);
+        }
+    }
+
     try {
-        const page = await Page.findOne({ slug: req.params.slug, isPublished: true }).lean();
+        const page = await Page.findOne({ slug, isPublished: true }).lean();
         if (!page) return res.status(404).json({ error: 'Halaman tidak dijumpai.' });
         
         let module1 = null;
@@ -524,18 +539,29 @@ router.get('/pages/:slug', async (req, res) => {
             module1 = await Module.findOne({ order: 1 }).lean();
         }
 
-        res.json({ page, module1 });
+        const responseData = { page, module1 };
+        pagesCache.set(slug, {
+            data: responseData,
+            time: now
+        });
+
+        res.json(responseData);
     } catch (err) {
         res.status(500).json({ error: 'Gagal memuatkan kandungan halaman.' });
     }
 });
 
+// In-memory cache for translation dictionaries
+const localesCache = {};
+
 // GET: Dapatkan Kamus Terjemahan Halaman
 router.get('/locales/:lang', (req, res) => {
     try {
         const lang = req.params.lang === 'en' ? 'en' : 'ms';
-        const translations = require(`../locales/${lang}.json`);
-        res.json(translations);
+        if (!localesCache[lang]) {
+            localesCache[lang] = require(`../locales/${lang}.json`);
+        }
+        res.json(localesCache[lang]);
     } catch (err) {
         console.error('API Locales Error:', err);
         res.status(500).json({ error: 'Gagal memuatkan kamus terjemahan.' });
