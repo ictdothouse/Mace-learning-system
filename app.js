@@ -283,7 +283,7 @@ function startServer() {
     }));
 
     // 8. AKTIFKAN ROUTES
-        
+    if (fs.existsSync(reactDistPath)) {
         // Serve index.html for main athlete routes (client-side routing fallback)
         const spaPaths = ['/', '/login', '/dashboard', '/lesson/:id', '/module/:id', '/p/:slug', '/page/:slug'];
         let cachedIndexHtml = null;
