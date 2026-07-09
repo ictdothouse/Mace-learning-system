@@ -271,7 +271,7 @@ function startServer() {
         resave: false,
         saveUninitialized: false,
         store: MongoStore.create({
-            mongoUrl: process.env.MONGO_URI,
+            clientPromise: mongoose.connection.asPromise().then((m) => m.connection.getClient()),
             ttl: 24 * 60 * 60 
         }),
         cookie: {
