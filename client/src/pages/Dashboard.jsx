@@ -6,7 +6,9 @@ import { useApp } from '../context/AppContext';
 export default function Dashboard() {
   const { branding, t, lang, changeLang, setAuth, auth } = useApp();
   const navigate = useNavigate();
-  const isEmbed = new URLSearchParams(window.location.search).get('embed') === 'true';
+  const isEmbedQuery = new URLSearchParams(window.location.search).get('embed') === 'true';
+  if (isEmbedQuery) sessionStorage.setItem('isEmbed', 'true');
+  const isEmbed = isEmbedQuery || sessionStorage.getItem('isEmbed') === 'true';
 
   const [loadingDashboard, setLoadingDashboard] = useState(true);
   const [data, setData] = useState({ athlete: {}, modules: [], lessons: [], levels: [] });

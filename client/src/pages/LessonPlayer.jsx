@@ -7,7 +7,9 @@ export default function LessonPlayer() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t, lang, changeLang, auth, setAuth, branding } = useApp();
-  const isEmbed = new URLSearchParams(window.location.search).get('embed') === 'true';
+  const isEmbedQuery = new URLSearchParams(window.location.search).get('embed') === 'true';
+  if (isEmbedQuery) sessionStorage.setItem('isEmbed', 'true');
+  const isEmbed = isEmbedQuery || sessionStorage.getItem('isEmbed') === 'true';
 
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState({ athlete: {}, lesson: {}, secureVideoUrl: '', allLessons: [] });

@@ -6,7 +6,9 @@ import { useApp } from '../context/AppContext';
 export default function Login() {
   const { branding, t, lang, changeLang, setAuth, auth, loading } = useApp();
   const navigate = useNavigate();
-  const isEmbed = new URLSearchParams(window.location.search).get('embed') === 'true';
+  const isEmbedQuery = new URLSearchParams(window.location.search).get('embed') === 'true';
+  if (isEmbedQuery) sessionStorage.setItem('isEmbed', 'true');
+  const isEmbed = isEmbedQuery || sessionStorage.getItem('isEmbed') === 'true';
 
   const [tab, setTab] = useState('new'); // 'new' or 'resume'
   const [sports, setSports] = useState([
