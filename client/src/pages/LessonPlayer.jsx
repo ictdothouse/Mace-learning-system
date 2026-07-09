@@ -280,8 +280,18 @@ export default function LessonPlayer() {
                 </button>
               </div>
               
-              {/* Exit Course Button */}
-              {!isEmbed && (
+              {/* Exit Course / Back Button */}
+              {isEmbed ? (
+                <Link 
+                  to="/dashboard" 
+                  className="inline-flex items-center gap-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors shrink-0 border border-gray-300/50"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
+                  </svg>
+                  {lang === 'en' ? 'Back' : 'Kembali'}
+                </Link>
+              ) : (
                 <Link 
                   to="/dashboard" 
                   className="inline-flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors shrink-0 border border-red-200/50"
