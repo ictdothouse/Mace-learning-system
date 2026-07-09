@@ -251,6 +251,20 @@ mongoose.connect(process.env.MONGO_URI, {
 function startServer() {
     if (!isDbConnected) return;
 
+    // Fast 204 response for favicon to avoid redundant 404 routing overhead
+    app.get('/favicon.ico', (req, res) => res.status(204).end());
+
+    // Serve React SPA client/dist static assets (JS/CSS) BEFORE session middleware
+    // This prevents static assets from executing MongoDB session lookups (massive speed boost)
+    const reactDistPath = path.join(__dirname, 'client', 'dist');
+    if (fs.existsSync(reactDistPath)) {
+        app.use('/assets', express.static(path.join(reactDistPath, 'assets'), {
+            maxAge: 365 * 24 * 60 * 60 * 1000,
+            immutable: true
+        }));
+        app.use(express.static(reactDistPath));
+    }
+
     // 7. Konfigurasi Session
     app.use(session({
         secret: process.env.SESSION_SECRET,
@@ -268,20 +282,7 @@ function startServer() {
         }
     }));
 
-    // Fast 204 response for favicon to avoid redundant 404 routing overhead
-    app.get('/favicon.ico', (req, res) => res.status(204).end());
-
     // 8. AKTIFKAN ROUTES
-    
-    // Serve React SPA client/dist if it has been compiled/exists
-    const reactDistPath = path.join(__dirname, 'client', 'dist');
-    if (fs.existsSync(reactDistPath)) {
-        // Serve React chunk assets (JS/CSS) with 1-year immutable caching
-        app.use('/assets', express.static(path.join(reactDistPath, 'assets'), {
-            maxAge: 365 * 24 * 60 * 60 * 1000,
-            immutable: true
-        }));
-        app.use(express.static(reactDistPath));
         
         // Serve index.html for main athlete routes (client-side routing fallback)
         const spaPaths = ['/', '/login', '/dashboard', '/lesson/:id', '/module/:id', '/p/:slug', '/page/:slug'];
