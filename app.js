@@ -267,6 +267,33 @@ function startServer() {
     // Fast 204 response for favicon to avoid redundant 404 routing overhead
     app.get('/favicon.ico', (req, res) => res.status(204).end());
 
+    // 🔐 ⚡ Debug status endpoint to diagnose live server performance issues
+    app.get('/api/debug-status', async (req, res) => {
+        try {
+            const dbStatus = mongoose.connection.readyState;
+            const statusNames = ['disconnected', 'connected', 'connecting', 'disconnecting'];
+            
+            let dbPing = 'N/A';
+            if (dbStatus === 1) {
+                const start = Date.now();
+                await mongoose.connection.db.admin().ping();
+                dbPing = `${Date.now() - start}ms`;
+            }
+
+            res.json({
+                status: 'ok',
+                uptime: `${process.uptime().toFixed(1)}s`,
+                memory: process.memoryUsage(),
+                dbStatus: statusNames[dbStatus] || dbStatus,
+                dbPing,
+                nodeVersion: process.version,
+                env: process.env.NODE_ENV
+            });
+        } catch (err) {
+            res.status(500).json({ error: err.message, stack: err.stack });
+        }
+    });
+
     // 7. AKTIFKAN SPA ROUTES SEBELUM SESSION (SUPER FAST HTML DELIVERY)
     if (fs.existsSync(reactDistPath)) {
         // Serve index.html for main athlete routes (client-side routing fallback)
