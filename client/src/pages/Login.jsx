@@ -6,6 +6,7 @@ import { useApp } from '../context/AppContext';
 export default function Login() {
   const { branding, t, lang, changeLang, setAuth, auth, loading } = useApp();
   const navigate = useNavigate();
+  const isEmbed = new URLSearchParams(window.location.search).get('embed') === 'true';
 
   const [tab, setTab] = useState('new'); // 'new' or 'resume'
   const [sports, setSports] = useState([
@@ -148,24 +149,29 @@ export default function Login() {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50 animate-pulse font-sans">
         {/* Navbar Skeleton */}
-        <nav className="bg-[#0f172a] h-16 flex items-center justify-between px-6 md:px-12 border-b border-white/10 shadow-md">
-          <div className="w-36 h-8 bg-white/10 rounded-lg"></div>
-          <div className="flex gap-4">
-            <div className="w-16 h-7 bg-white/10 rounded-lg"></div>
-            <div className="w-20 h-7 bg-white/10 rounded-lg"></div>
-          </div>
-        </nav>
+        {/* Navbar Skeleton */}
+        {!isEmbed && (
+          <nav className="bg-[#0f172a] h-16 flex items-center justify-between px-6 md:px-12 border-b border-white/10 shadow-md">
+            <div className="w-36 h-8 bg-white/10 rounded-lg"></div>
+            <div className="flex gap-4">
+              <div className="w-16 h-7 bg-white/10 rounded-lg"></div>
+              <div className="w-20 h-7 bg-white/10 rounded-lg"></div>
+            </div>
+          </nav>
+        )}
 
         {/* Hero Banner Section Skeleton */}
-        <header className="bg-slate-900 pt-12 pb-24 md:pb-32 px-6 md:px-12 relative shadow-inner min-h-[180px]">
-          <div className="max-w-6xl mx-auto w-full">
-            <div className="w-48 h-10 bg-white/10 rounded-xl"></div>
-          </div>
-        </header>
+        {!isEmbed && (
+          <header className="bg-slate-900 pt-12 pb-24 md:pb-32 px-6 md:px-12 relative shadow-inner min-h-[180px]">
+            <div className="max-w-6xl mx-auto w-full">
+              <div className="w-48 h-10 bg-white/10 rounded-xl"></div>
+            </div>
+          </header>
+        )}
 
         {/* Main Content Form Skeleton */}
         <main className="flex-1 relative py-8 px-4 sm:px-6 z-10">
-          <div className="max-w-6xl mx-auto -mt-20 md:-mt-28 bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100/80">
+          <div className={`max-w-6xl mx-auto ${isEmbed ? 'mt-4' : '-mt-20 md:-mt-28'} bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100/80`}>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 items-stretch">
               {/* Left Form Column Skeleton */}
               <div className="lg:col-span-5 bg-white border-r border-slate-100 p-6 space-y-6">
@@ -221,159 +227,163 @@ export default function Login() {
       )}
 
       {/* Top Navbar */}
-      <nav className="bg-[#0f172a] text-white py-4 px-6 md:px-12 z-50 relative shadow-md">
-        <div className="max-w-6xl mx-auto flex justify-between items-center w-full">
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-3">
-              {branding.logoUrl ? (
-                <img src={branding.logoUrl} alt="Logo" width="160" height="40" className="h-8 md:h-10 w-auto object-contain" />
-              ) : (
-                <h1 className="text-lg md:text-xl font-extrabold uppercase tracking-wider">
-                  {branding.siteName || 'MACE'}
-                </h1>
-              )}
-            </span>
-          </div>
+      {!isEmbed && (
+        <nav className="bg-[#0f172a] text-white py-4 px-6 md:px-12 z-50 relative shadow-md">
+          <div className="max-w-6xl mx-auto flex justify-between items-center w-full">
+            <div className="flex items-center gap-4">
+              <span className="flex items-center gap-3">
+                {branding.logoUrl ? (
+                  <img src={branding.logoUrl} alt="Logo" width="160" height="40" className="h-8 md:h-10 w-auto object-contain" />
+                ) : (
+                  <h1 className="text-lg md:text-xl font-extrabold uppercase tracking-wider">
+                    {branding.siteName || 'MACE'}
+                  </h1>
+                )}
+              </span>
+            </div>
 
-          <div className="flex items-center gap-6">
-            {/* Desktop Menu Links */}
-            {((branding.showMenu && branding.menuLinks?.length > 0) || branding.navPages?.length > 0) && (
-              <div className="hidden md:flex items-center gap-6">
-                {branding.showMenu && branding.menuLinks?.map((link, index) => {
-                  const label = lang === 'en'
-                    ? (link.label_en || (link.label?.toLowerCase() === 'modul' ? 'Modules' : link.label?.toLowerCase() === 'hubungi kami' ? 'Contact Us' : link.label))
-                    : link.label;
-                  return (
-                    <a key={index} href={link.url} className="text-sm font-semibold text-white/80 hover:text-white transition-colors">
-                      {label}
+            <div className="flex items-center gap-6">
+              {/* Desktop Menu Links */}
+              {((branding.showMenu && branding.menuLinks?.length > 0) || branding.navPages?.length > 0) && (
+                <div className="hidden md:flex items-center gap-6">
+                  {branding.showMenu && branding.menuLinks?.map((link, index) => {
+                    const label = lang === 'en'
+                      ? (link.label_en || (link.label?.toLowerCase() === 'modul' ? 'Modules' : link.label?.toLowerCase() === 'hubungi kami' ? 'Contact Us' : link.label))
+                      : link.label;
+                    return (
+                      <a key={index} href={link.url} className="text-sm font-semibold text-white/80 hover:text-white transition-colors">
+                        {label}
+                      </a>
+                    );
+                  })}
+                  {branding.navPages?.map((p, index) => (
+                    <a key={index} href={`/page/${p.slug}`} className="text-sm font-semibold text-white/80 hover:text-white transition-colors">
+                      {lang === 'en' ? (p.title_en || p.title) : p.title}
                     </a>
-                  );
-                })}
-                {branding.navPages?.map((p, index) => (
-                  <a key={index} href={`/page/${p.slug}`} className="text-sm font-semibold text-white/80 hover:text-white transition-colors">
-                    {lang === 'en' ? (p.title_en || p.title) : p.title}
-                  </a>
-                ))}
+                  ))}
+                </div>
+              )}
+
+              {/* Mobile Hamburger Button */}
+              {((branding.showMenu && branding.menuLinks?.length > 0) || branding.navPages?.length > 0) && (
+                <button 
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  className="md:hidden text-white/80 hover:text-white focus:outline-none p-1 rounded-lg hover:bg-white/10 transition"
+                >
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    {mobileMenuOpen ? (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    ) : (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                    )}
+                  </svg>
+                </button>
+              )}
+
+              <div className="flex items-center gap-2 bg-white/10 rounded-lg p-1 border border-white/20">
+                <button
+                  onClick={() => changeLang('ms')}
+                  className={`text-xs px-2 py-1 rounded font-semibold transition-all ${lang === 'ms' ? 'bg-white text-gray-900' : 'text-white/70 hover:text-white'}`}
+                >
+                  BM
+                </button>
+                <button
+                  onClick={() => changeLang('en')}
+                  className={`text-xs px-2 py-1 rounded font-semibold transition-all ${lang === 'en' ? 'bg-white text-gray-900' : 'text-white/70 hover:text-white'}`}
+                >
+                  EN
+                </button>
               </div>
-            )}
-
-            {/* Mobile Hamburger Button */}
-            {((branding.showMenu && branding.menuLinks?.length > 0) || branding.navPages?.length > 0) && (
-              <button 
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden text-white/80 hover:text-white focus:outline-none p-1 rounded-lg hover:bg-white/10 transition"
-              >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  {mobileMenuOpen ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                  ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-                  )}
-                </svg>
-              </button>
-            )}
-
-            <div className="flex items-center gap-2 bg-white/10 rounded-lg p-1 border border-white/20">
-              <button
-                onClick={() => changeLang('ms')}
-                className={`text-xs px-2 py-1 rounded font-semibold transition-all ${lang === 'ms' ? 'bg-white text-gray-900' : 'text-white/70 hover:text-white'}`}
-              >
-                BM
-              </button>
-              <button
-                onClick={() => changeLang('en')}
-                className={`text-xs px-2 py-1 rounded font-semibold transition-all ${lang === 'en' ? 'bg-white text-gray-900' : 'text-white/70 hover:text-white'}`}
-              >
-                EN
-              </button>
             </div>
           </div>
-        </div>
 
-        {/* Mobile Menu Drawer (Right-aligned popover with blur & icons) */}
-        {!loading && mobileMenuOpen && ((branding.showMenu && branding.menuLinks?.length > 0) || branding.navPages?.length > 0) && (
-          <div className="md:hidden absolute right-6 top-full mt-2 w-56 bg-slate-900/95 backdrop-blur-md border border-white/10 rounded-2xl shadow-xl py-3 px-4 z-50 flex flex-col gap-1.5 animate-fade-in">
-            {branding.showMenu && branding.menuLinks?.map((link, index) => {
-              const label = lang === 'en'
-                ? (link.label_en || (link.label?.toLowerCase() === 'modul' ? 'Modules' : link.label?.toLowerCase() === 'hubungi kami' ? 'Contact Us' : link.label))
-                : link.label;
-              const isContact = label.toLowerCase().includes('hubung') || label.toLowerCase().includes('contact');
-              const isModule = label.toLowerCase().includes('modul') || label.toLowerCase().includes('module');
-              
-              return (
-                <a key={index} href={link.url} className="flex items-center gap-3 text-sm font-medium py-2 px-3 rounded-xl hover:bg-white/10 hover:text-orange-400 transition-all text-white">
-                  {isModule && (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
-                  )}
-                  {isContact && (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                  )}
-                  {!isModule && !isContact && (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                  )}
-                  <span>{label}</span>
-                </a>
-              );
-            })}
-            {branding.navPages?.map((p, index) => {
-              const isContact = p.customTemplate === 'contact' || p.title.toLowerCase().includes('hubung') || p.title.toLowerCase().includes('contact');
-              const isModule = p.customTemplate === 'modules' || p.title.toLowerCase().includes('modul') || p.title.toLowerCase().includes('module');
-              const title = lang === 'en' ? (p.title_en || p.title) : p.title;
-              
-              return (
-                <a key={index} href={`/page/${p.slug}`} className="flex items-center gap-3 text-sm font-medium py-2 px-3 rounded-xl hover:bg-white/10 hover:text-orange-400 transition-all text-white">
-                  {isModule && (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
-                  )}
-                  {isContact && (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                  )}
-                  {!isModule && !isContact && (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                  )}
-                  <span>{title}</span>
-                </a>
-              );
-            })}
-          </div>
-        )}
-      </nav>
+          {/* Mobile Menu Drawer (Right-aligned popover with blur & icons) */}
+          {!loading && mobileMenuOpen && ((branding.showMenu && branding.menuLinks?.length > 0) || branding.navPages?.length > 0) && (
+            <div className="md:hidden absolute right-6 top-full mt-2 w-56 bg-slate-900/95 backdrop-blur-md border border-white/10 rounded-2xl shadow-xl py-3 px-4 z-50 flex flex-col gap-1.5 animate-fade-in">
+              {branding.showMenu && branding.menuLinks?.map((link, index) => {
+                const label = lang === 'en'
+                  ? (link.label_en || (link.label?.toLowerCase() === 'modul' ? 'Modules' : link.label?.toLowerCase() === 'hubungi kami' ? 'Contact Us' : link.label))
+                  : link.label;
+                const isContact = label.toLowerCase().includes('hubung') || label.toLowerCase().includes('contact');
+                const isModule = label.toLowerCase().includes('modul') || label.toLowerCase().includes('module');
+                
+                return (
+                  <a key={index} href={link.url} className="flex items-center gap-3 text-sm font-medium py-2 px-3 rounded-xl hover:bg-white/10 hover:text-orange-400 transition-all text-white">
+                    {isModule && (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      </svg>
+                    )}
+                    {isContact && (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                    )}
+                    {!isModule && !isContact && (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    )}
+                    <span>{label}</span>
+                  </a>
+                );
+              })}
+              {branding.navPages?.map((p, index) => {
+                const isContact = p.customTemplate === 'contact' || p.title.toLowerCase().includes('hubung') || p.title.toLowerCase().includes('contact');
+                const isModule = p.customTemplate === 'modules' || p.title.toLowerCase().includes('modul') || p.title.toLowerCase().includes('module');
+                const title = lang === 'en' ? (p.title_en || p.title) : p.title;
+                
+                return (
+                  <a key={index} href={`/page/${p.slug}`} className="flex items-center gap-3 text-sm font-medium py-2 px-3 rounded-xl hover:bg-white/10 hover:text-orange-400 transition-all text-white">
+                    {isModule && (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      </svg>
+                    )}
+                    {isContact && (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                    )}
+                    {!isModule && !isContact && (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    )}
+                    <span>{title}</span>
+                  </a>
+                );
+              })}
+            </div>
+          )}
+        </nav>
+      )}
  
       {/* Hero Banner Section */}
-      <header className="bg-slate-900 pt-12 pb-24 md:pb-32 px-6 md:px-12 relative shadow-inner flex items-center min-h-[180px] z-10 overflow-hidden">
-        {bannerImg && (
-          <img 
-            src={bannerImg} 
-            alt="Hero Banner" 
-            fetchpriority="high"
-            className="absolute inset-0 w-full h-full object-cover z-0" 
-          />
-        )}
-        <div className="absolute inset-0 bg-red-900/40 mix-blend-multiply z-0"></div>
-        <div className="relative z-10 max-w-6xl mx-auto w-full">
-          {branding.showBannerTitle !== false && (
-            <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-md">
-              {lang === 'en' ? (branding.homeBannerTitle_en || 'Modules') : (branding.homeBannerTitle || 'Modul')}
-            </h1>
+      {!isEmbed && (
+        <header className="bg-slate-900 pt-12 pb-24 md:pb-32 px-6 md:px-12 relative shadow-inner flex items-center min-h-[180px] z-10 overflow-hidden">
+          {bannerImg && (
+            <img 
+              src={bannerImg} 
+              alt="Hero Banner" 
+              fetchpriority="high"
+              className="absolute inset-0 w-full h-full object-cover z-0" 
+            />
           )}
-        </div>
-      </header>
+          <div className="absolute inset-0 bg-red-900/40 mix-blend-multiply z-0"></div>
+          <div className="relative z-10 max-w-6xl mx-auto w-full">
+            {branding.showBannerTitle !== false && (
+              <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-md">
+                {lang === 'en' ? (branding.homeBannerTitle_en || 'Modules') : (branding.homeBannerTitle || 'Modul')}
+              </h1>
+            )}
+          </div>
+        </header>
+      )}
  
       {/* Access Form Layout */}
       <main className="flex-1 relative py-8 px-4 sm:px-6 z-10">
-        <div className="max-w-6xl mx-auto -mt-20 md:-mt-28 bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100/80 animate-fade-in">
+        <div className={`max-w-6xl mx-auto ${isEmbed ? 'mt-4' : '-mt-20 md:-mt-28'} bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100/80 animate-fade-in`}>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 items-stretch">
             
             {/* Left Registration Form Column */}

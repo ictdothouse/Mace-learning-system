@@ -6,6 +6,7 @@ import { useApp } from '../context/AppContext';
 export default function Dashboard() {
   const { branding, t, lang, changeLang, setAuth, auth } = useApp();
   const navigate = useNavigate();
+  const isEmbed = new URLSearchParams(window.location.search).get('embed') === 'true';
 
   const [loadingDashboard, setLoadingDashboard] = useState(true);
   const [data, setData] = useState({ athlete: {}, modules: [], lessons: [], levels: [] });
@@ -236,30 +237,32 @@ export default function Dashboard() {
         .module-card.locked::before { background: linear-gradient(135deg, rgba(100,116,139,0.04), rgba(71,85,105,0.04)); }
       `}</style>
 
-      <nav className="sticky top-0 z-50 border-b border-white/10 backdrop-blur-xl bg-black/20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            {branding.logoUrl ? (
-              <img src={branding.logoUrl} alt="Logo" width="128" height="32" className="h-7 sm:h-8 w-auto object-contain filter drop-shadow-md shrink-0" />
-            ) : (
-              <>
-                <span className="text-xl sm:text-2xl shrink-0">🏅</span>
-                <span className="font-bold text-white text-xs sm:text-base truncate">{branding.siteName || 'MACE eLearning'}</span>
-              </>
-            )}
-          </div>
-          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-            <div className="flex gap-0.5 bg-white/10 rounded-lg p-0.5 sm:p-1 shrink-0">
-              <button onClick={() => changeLang('ms')} className={`text-[10px] sm:text-xs px-2 sm:px-2.5 py-0.5 sm:py-1 rounded font-semibold transition-all ${lang === 'ms' ? 'bg-white text-indigo-900' : 'text-white/60 hover:text-white'}`}>BM</button>
-              <button onClick={() => changeLang('en')} className={`text-[10px] sm:text-xs px-2 sm:px-2.5 py-0.5 sm:py-1 rounded font-semibold transition-all ${lang === 'en' ? 'bg-white text-indigo-900' : 'text-white/60 hover:text-white'}`}>EN</button>
+      {!isEmbed && (
+        <nav className="sticky top-0 z-50 border-b border-white/10 backdrop-blur-xl bg-black/20">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              {branding.logoUrl ? (
+                <img src={branding.logoUrl} alt="Logo" width="128" height="32" className="h-7 sm:h-8 w-auto object-contain filter drop-shadow-md shrink-0" />
+              ) : (
+                <>
+                  <span className="text-xl sm:text-2xl shrink-0">🏅</span>
+                  <span className="font-bold text-white text-xs sm:text-base truncate">{branding.siteName || 'MACE eLearning'}</span>
+                </>
+              )}
             </div>
-            <button onClick={handleLogout} className="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-white/60 hover:text-red-400 transition-colors font-medium px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-red-500/10 whitespace-nowrap shrink-0">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 sm:h-4 w-3.5 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-              <span className="whitespace-nowrap">{t('nav_logout', 'Log Keluar')}</span>
-            </button>
+            <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+              <div className="flex gap-0.5 bg-white/10 rounded-lg p-0.5 sm:p-1 shrink-0">
+                <button onClick={() => changeLang('ms')} className={`text-[10px] sm:text-xs px-2 sm:px-2.5 py-0.5 sm:py-1 rounded font-semibold transition-all ${lang === 'ms' ? 'bg-white text-indigo-900' : 'text-white/60 hover:text-white'}`}>BM</button>
+                <button onClick={() => changeLang('en')} className={`text-[10px] sm:text-xs px-2 sm:px-2.5 py-0.5 sm:py-1 rounded font-semibold transition-all ${lang === 'en' ? 'bg-white text-indigo-900' : 'text-white/60 hover:text-white'}`}>EN</button>
+              </div>
+              <button onClick={handleLogout} className="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-white/60 hover:text-red-400 transition-colors font-medium px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-red-500/10 whitespace-nowrap shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 sm:h-4 w-3.5 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                <span className="whitespace-nowrap">{t('nav_logout', 'Log Keluar')}</span>
+              </button>
+            </div>
           </div>
-        </div>
-      </nav>
+        </nav>
+      )}
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10 flex-grow w-full">
         <div className="animate-[fadeInUp_0.5s_ease-out_forwards] opacity-0" style={{ animationDelay: '0.1s' }}>

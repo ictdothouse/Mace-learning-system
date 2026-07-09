@@ -625,6 +625,9 @@
                     <a href="?tab=sports" class="px-4 py-2 border-b-2 font-medium text-sm transition-colors <%= tab === 'sports' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' %>">
                         Daftar Bidang Sukan
                     </a>
+                    <a href="?tab=embed" class="px-4 py-2 border-b-2 font-medium text-sm transition-colors <%= tab === 'embed' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' %>">
+                        Integrasi (Embed)
+                    </a>
                 </div>
 
                 <% if (!locals.tab || tab === 'general') { %>
@@ -1106,6 +1109,51 @@
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                <% } %>
+
+                <% if (tab === 'embed') { %>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 mb-8 animate-fade-in">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                            </svg>
+                            Penjana Kod Embed (WordPress / Iframe)
+                        </h3>
+                        <p class="text-sm text-gray-500 mb-6">Salin kod HTML di bawah untuk dimasukkan ke dalam blok <strong>Custom HTML</strong> di laman web WordPress anda.</p>
+
+                        <div class="space-y-6">
+                            <!-- Embed Login / Registration -->
+                            <div class="bg-gray-50 p-6 rounded-lg border border-gray-100">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h4 class="font-bold text-gray-800 text-sm">1. Iframe Halaman Log Masuk & Pendaftaran</h4>
+                                    <button onclick="copyEmbedCode('embed-login')" class="text-xs bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg font-medium transition">Salin Kod</button>
+                                </div>
+                                <textarea id="embed-login" readonly class="w-full bg-slate-900 text-slate-200 font-mono text-xs p-3 rounded-lg border border-slate-800 focus:outline-none min-h-[80px]" rows="2"><iframe src="https://modulatletmsn.com/login?embed=true" width="100%" height="700" style="border:none; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.05);"></iframe></textarea>
+                                <p class="text-xs text-gray-400 mt-2">Sesuai untuk diletakkan di halaman khas seperti <code>nsc.gov.my/mace-login</code>.</p>
+                            </div>
+
+                            <!-- Embed Learning Dashboard -->
+                            <div class="bg-gray-50 p-6 rounded-lg border border-gray-100">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h4 class="font-bold text-gray-800 text-sm">2. Iframe Dashboard Pembelajaran (Sesi Atlet)</h4>
+                                    <button onclick="copyEmbedCode('embed-dashboard')" class="text-xs bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg font-medium transition">Salin Kod</button>
+                                </div>
+                                <textarea id="embed-dashboard" readonly class="w-full bg-slate-900 text-slate-200 font-mono text-xs p-3 rounded-lg border border-slate-800 focus:outline-none min-h-[80px]" rows="2"><iframe src="https://modulatletmsn.com/dashboard?embed=true" width="100%" height="800" style="border:none; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.05);"></iframe></textarea>
+                                <p class="text-xs text-gray-400 mt-2">Halaman utama atlet selepas log masuk untuk melihat modul pembelajaran.</p>
+                            </div>
+                        </div>
+
+                        <!-- Copy Script -->
+                        <script>
+                            function copyEmbedCode(id) {
+                                const copyText = document.getElementById(id);
+                                copyText.select();
+                                copyText.setSelectionRange(0, 99999);
+                                navigator.clipboard.writeText(copyText.value);
+                                alert('Kod embed telah disalin ke clipboard!');
+                            }
+                        </script>
                     </div>
                 <% } %>
             </div>

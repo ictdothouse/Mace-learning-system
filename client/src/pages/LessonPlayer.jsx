@@ -7,6 +7,7 @@ export default function LessonPlayer() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t, lang, changeLang, auth, setAuth, branding } = useApp();
+  const isEmbed = new URLSearchParams(window.location.search).get('embed') === 'true';
 
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState({ athlete: {}, lesson: {}, secureVideoUrl: '', allLessons: [] });
@@ -278,15 +279,17 @@ export default function LessonPlayer() {
               </div>
               
               {/* Exit Course Button */}
-              <Link 
-                to="/dashboard" 
-                className="inline-flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors shrink-0 border border-red-200/50"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7" />
-                </svg>
-                {lang === 'en' ? 'Exit' : 'Keluar'}
-              </Link>
+              {!isEmbed && (
+                <Link 
+                  to="/dashboard" 
+                  className="inline-flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors shrink-0 border border-red-200/50"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7" />
+                  </svg>
+                  {lang === 'en' ? 'Exit' : 'Keluar'}
+                </Link>
+              )}
             </div>
           </div>
         </div>

@@ -49,8 +49,20 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(compression());
 app.use(helmet({
     contentSecurityPolicy: false, // Ditutup supaya tidak menghalang pemuatan video R2/TinyMCE/FontCDN luaran
-    crossOriginEmbedderPolicy: false
+    crossOriginEmbedderPolicy: false,
+    frameguard: false // Nyahaktifkan SAMEORIGIN untuk membenarkan frame-ancestors
 }));
+
+// Tambah CSP Frame-Ancestors untuk menyokong embedding di WordPress secara selamat
+app.use((req, res, next) => {
+    const allowedOrigins = process.env.ALLOWED_EMBED_ORIGINS || 'https://www.nsc.gov.my,https://modulatlitmace.com';
+    const origins = allowedOrigins.split(',').map(o => o.trim()).filter(Boolean);
+    if (origins.length > 0) {
+        res.setHeader('Content-Security-Policy', `frame-ancestors 'self' ${origins.join(' ')}`);
+    }
+    next();
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -252,7 +264,7 @@ function startServer() {
             secure: true, 
             httpOnly: true,
             maxAge: 24 * 60 * 60 * 1000,
-            sameSite: 'lax'
+            sameSite: 'none' // Membenarkan kuki dihantar merentas domain dalam iframe (WordPress)
         }
     }));
 
