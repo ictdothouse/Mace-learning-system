@@ -579,6 +579,7 @@ router.post('/upload-data', upload.single('dataFile'), async (req, res) => {
         const Branding = require('../models/Branding');
         const Group = require('../models/Group');
         const Page = require('../models/Page');
+        const Level = require('../models/Level');
         
         // Bersihkan database (drop semua)
         await Promise.all([
@@ -587,7 +588,8 @@ router.post('/upload-data', upload.single('dataFile'), async (req, res) => {
             Lesson.deleteMany({}),
             Branding.deleteMany({}),
             Group.deleteMany({}),
-            Page.deleteMany({})
+            Page.deleteMany({}),
+            Level.deleteMany({})
         ]);
         
         // Masukkan data baru
@@ -597,6 +599,7 @@ router.post('/upload-data', upload.single('dataFile'), async (req, res) => {
         if (data.lessons && data.lessons.length > 0) await Lesson.insertMany(data.lessons);
         if (data.athletes && data.athletes.length > 0) await Athlete.insertMany(data.athletes);
         if (data.pages && data.pages.length > 0) await Page.insertMany(data.pages);
+        if (data.levels && data.levels.length > 0) await Level.insertMany(data.levels);
         
         // Buang fail selepas berjaya
         if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
@@ -616,14 +619,16 @@ router.get('/download-system-data', async (req, res) => {
         const Branding = require('../models/Branding');
         const Group = require('../models/Group');
         const Page = require('../models/Page');
+        const Level = require('../models/Level');
 
-        const [athletes, modules, lessons, branding, groups, pages] = await Promise.all([
+        const [athletes, modules, lessons, branding, groups, pages, levels] = await Promise.all([
             Athlete.find().lean(),
             Module.find().lean(),
             Lesson.find().lean(),
             Branding.findOne().lean(),
             Group.find().lean(),
-            Page.find().lean()
+            Page.find().lean(),
+            Level.find().lean()
         ]);
 
         const exportData = {
@@ -633,7 +638,8 @@ router.get('/download-system-data', async (req, res) => {
             modules,
             lessons,
             athletes,
-            pages
+            pages,
+            levels
         };
 
         res.setHeader('Content-disposition', 'attachment; filename=mace_system_data.json');
