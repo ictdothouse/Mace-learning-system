@@ -229,5 +229,10 @@
   "progress_not_started": "Belum Mula",
   "progress_of": "daripada",
   "progress_lessons": "pelajaran",
+  "pdpa_title": "Persetujuan Akta Perlindungan Data Peribadi (PDPA)",
+  "pdpa_desc_1": "Selaras dengan Akta Perlindungan Data Peribadi 2010 (Akta 709) Malaysia, kami memerlukan persetujuan anda untuk memproses maklumat peribadi yang diberikan semasa proses pendaftaran ini.",
+  "pdpa_desc_2": "Data peribadi anda seperti Nama Penuh, Nombor Kad Pengenalan dan butiran lain yang berkaitan akan digunakan khusus untuk tujuan pendaftaran modul, penjanaan sijil, dan rekod profil pengguna sistem ini. Kami komited untuk menjaga kerahsiaan dan keselamatan data anda.",
+  "pdpa_checkbox": "Saya telah membaca dan bersetuju dengan terma PDPA. Saya membenarkan data peribadi saya diproses untuk tujuan berkaitan sistem ini.",
+  "pdpa_btn_agree": "Setuju & Teruskan",
   "pdpa_verified": "PDPA Disahkan"
 }
