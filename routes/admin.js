@@ -2789,5 +2789,6 @@ router.post('/admins/delete/:id', async (req, res) => {
         res.redirect('/admin-mace/admins?msg=error');
     }
 });
+router.use('/settings/media', require('./media-migration-logic'));
 
 module.exports = router;

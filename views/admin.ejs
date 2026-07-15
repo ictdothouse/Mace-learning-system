@@ -883,6 +883,25 @@
                         </form>
                     </div>
                     
+                    <!-- Media Migration Section -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 mb-8">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg>
+                            Migrasi Media (Cloud & Local)
+                        </h3>
+                        <p class="text-sm text-gray-600 mb-6">Fungsi ini membolehkan anda memuat turun atau memuat naik semua fail media (video, imej) antara pelayan tempatan (Local) dan awan (Cloudflare R2).</p>
+                        
+                        <div class="flex gap-4">
+                            <button type="button" onclick="migrateMedia('onload')" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-indigo-700 transition shadow-sm flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                Onload (Cloud ke Local)
+                            </button>
+                            <button type="button" onclick="migrateMedia('offload')" class="bg-emerald-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-emerald-700 transition shadow-sm flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                                Offload (Local ke Cloud)
+                            </button>
+                        </div>
+                    </div>
                     <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
                     <script>
                         tinymce.init({
@@ -952,6 +971,29 @@
                         function addFooterLink() { footerLinks.push({ label: 'Link Baru', url: '#' }); renderFooterLinks(); }
                         function removeFooter(idx) { footerLinks.splice(idx, 1); renderFooterLinks(); }
                         function saveFooterLinks() { document.getElementById('footerLinksJson').value = JSON.stringify(footerLinks); }
+                        
+                        async function migrateMedia(type) {
+                            const isOnload = type === 'onload';
+                            const title = isOnload ? "Muat Turun ke Pelayan Tempatan (Onload)" : "Muat Naik ke Cloud (Offload)";
+                            const warning = isOnload 
+                                ? "Amaran: Proses ini akan memuat turun semua media dari Cloud ke VPS anda. Pastikan ruang SSD mencukupi (>50GB). Sistem mungkin mengambil masa beberapa minit."
+                                : "Amaran: Proses ini akan memuat naik semua media tempatan ke Cloudflare R2 (R2 Credentials MESTI dikonfigurasi di fail .env).";
+
+                            if (!confirm(title + "\\n\\n" + warning + "\\n\\nTeruskan?")) return;
+
+                            try {
+                                alert("Proses migrasi sedang berjalan. Sila tunggu dan biarkan tab ini terbuka. Jangan refresh!");
+                                const response = await fetch('/admin-mace/settings/media/' + type, { method: 'POST' });
+                                const result = await response.json();
+                                if (result.success) {
+                                    alert("✅ SELESAI: " + result.message + "\\nSemua tetapan telah berjaya diselaraskan.");
+                                } else {
+                                    alert("❌ RALAT: " + (result.error || 'Ralat pelayan.'));
+                                }
+                            } catch (e) {
+                                alert("❌ RALAT RANGKAIAN: Sila semak sambungan Internet atau cuba lagi. Proses mungkin tamat masa (timeout).");
+                            }
+                        }
                         
                         document.addEventListener('DOMContentLoaded', () => { renderMenuLinks(); renderFooterLinks(); });
                     </script>
