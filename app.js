@@ -186,6 +186,75 @@ mongoose.connect(process.env.MONGO_URI, {
             console.error('❌ Error seeding sports:', err.message);
         }
 
+        // ==========================================
+        // AUTO-MIGRATE LEGACY LESSONS TO MODULE
+        // ==========================================
+        try {
+            const Module = require('./models/Module');
+            const Lesson = require('./models/Lesson');
+            
+            // Check if there are orphan lessons without a valid ObjectId moduleId
+            const orphanLessons = await Lesson.countDocuments({
+                $or: [
+                    { moduleId: { $exists: false } },
+                    { moduleId: null },
+                    { moduleId: { $type: "number" } },
+                    { moduleId: { $type: "string", $not: { $regex: /^[0-9a-fA-F]{24}$/ } } }
+                ]
+            });
+            
+            if (orphanLessons > 0) {
+                console.log(`⚠️ Jumpa ${orphanLessons} lesson lama tanpa modul! Menjalankan auto-migration...`);
+                let parentModule = await Module.findOne({ title: 'PLAY SAFE WIN STRONG' });
+                if (!parentModule) {
+                    parentModule = await Module.findOne({ title: 'Kurikulum Utama MACE' });
+                }
+                
+                if (!parentModule) {
+                    parentModule = await Module.create({
+                        title: 'PLAY SAFE WIN STRONG',
+                        description: 'Modul pengenalan untuk keselamatan atlet dan sukan berintegriti.',
+                        title_en: 'PLAY SAFE WIN STRONG',
+                        description_en: 'Introductory module for athlete safety and sports integrity.',
+                        order: 1,
+                        isActive: true
+                    });
+                }
+                
+                // Update all orphan lessons to use this new parent module
+                const result = await Lesson.updateMany(
+                    { 
+                        $or: [
+                            { moduleId: { $exists: false } },
+                            { moduleId: null },
+                            { moduleId: { $type: "number" } },
+                            { moduleId: { $type: "string", $not: { $regex: /^[0-9a-fA-F]{24}$/ } } }
+                        ]
+                    },
+                    { $set: { moduleId: parentModule._id } }
+                );
+                console.log(`✅ Berjaya memindahkan ${result.modifiedCount} lesson lama ke Modul "${parentModule.title}".`);
+            } else {
+                // Walaupun tiada orphan lesson, pastikan Modul 1 wujud jika database mempunyai lesson
+                const lessonCount = await Lesson.countDocuments();
+                if (lessonCount > 0) {
+                    const moduleCount = await Module.countDocuments();
+                    if (moduleCount === 0) {
+                        console.log('⚠️ Lesson wujud tetapi tiada rekod modul! Mencipta modul lalai...');
+                        const parentModule = await Module.create({
+                            title: 'PLAY SAFE WIN STRONG',
+                            description: 'Modul pengenalan untuk keselamatan atlet dan sukan berintegriti.',
+                            order: 1,
+                            isActive: true
+                        });
+                        await Lesson.updateMany({}, { $set: { moduleId: parentModule._id } });
+                    }
+                }
+            }
+        } catch (err) {
+            console.error('❌ Ralat semasa auto-migration modul:', err.message);
+        }
+
         // Seed default CMS Page for 'modul' if it doesn't exist
         try {
             const Page = require('./models/Page');
