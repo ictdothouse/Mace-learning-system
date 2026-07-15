@@ -251,7 +251,7 @@ export default function Login() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden flex flex-col">
             <div className="p-6 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
-              <h3 className="font-bold text-lg text-gray-800">Persetujuan Akta Perlindungan Data Peribadi (PDPA)</h3>
+              <h3 className="font-bold text-lg text-gray-800">{t('pdpa_title', 'Persetujuan Akta Perlindungan Data Peribadi (PDPA)')}</h3>
               <button onClick={() => setShowPdpaModal(false)} className="text-gray-400 hover:text-gray-600 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -260,10 +260,10 @@ export default function Login() {
             </div>
             <div className="p-6 overflow-y-auto max-h-[60vh] text-sm text-gray-600 space-y-4">
               <p>
-                Selaras dengan <strong>Akta Perlindungan Data Peribadi 2010 (Akta 709) Malaysia</strong>, kami memerlukan persetujuan anda untuk memproses maklumat peribadi yang diberikan semasa proses pendaftaran ini.
+                {t('pdpa_desc_1', 'Selaras dengan Akta Perlindungan Data Peribadi 2010 (Akta 709) Malaysia, kami memerlukan persetujuan anda untuk memproses maklumat peribadi yang diberikan semasa proses pendaftaran ini.')}
               </p>
               <p>
-                Data peribadi anda seperti Nama Penuh, Nombor Kad Pengenalan dan butiran lain yang berkaitan akan digunakan khusus untuk tujuan pendaftaran modul, penjanaan sijil, dan rekod profil pengguna sistem ini. Kami komited untuk menjaga kerahsiaan dan keselamatan data anda.
+                {t('pdpa_desc_2', 'Data peribadi anda seperti Nama Penuh, Nombor Kad Pengenalan dan butiran lain yang berkaitan akan digunakan khusus untuk tujuan pendaftaran modul, penjanaan sijil, dan rekod profil pengguna sistem ini. Kami komited untuk menjaga kerahsiaan dan keselamatan data anda.')}
               </p>
             </div>
             <div className="p-6 border-t border-gray-100 bg-gray-50">
@@ -275,7 +275,7 @@ export default function Login() {
                   className="mt-1 w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer"
                 />
                 <span className="text-sm text-gray-700 font-medium">
-                  Saya telah membaca dan bersetuju dengan terma PDPA. Saya membenarkan data peribadi saya diproses untuk tujuan berkaitan sistem ini.
+                  {t('pdpa_checkbox', 'Saya telah membaca dan bersetuju dengan terma PDPA. Saya membenarkan data peribadi saya diproses untuk tujuan berkaitan sistem ini.')}
                 </span>
               </label>
               
@@ -285,7 +285,7 @@ export default function Login() {
                   onClick={() => setShowPdpaModal(false)}
                   className="px-4 py-2 text-sm font-semibold text-gray-600 hover:text-gray-800 transition bg-white border border-gray-200 rounded-xl shadow-sm"
                 >
-                  Batal
+                  {t('btn_cancel', 'Batal')}
                 </button>
                 <button 
                   type="button" 
@@ -296,7 +296,7 @@ export default function Login() {
                   }}
                   className={`px-5 py-2 text-sm font-bold rounded-xl shadow-sm transition ${pdpaAccepted ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-indigo-300 text-indigo-50 cursor-not-allowed'}`}
                 >
-                  Setuju & Teruskan
+                  {t('pdpa_btn_agree', 'Setuju & Teruskan')}
                 </button>
               </div>
             </div>
@@ -529,9 +529,19 @@ export default function Login() {
                     {/* Nama Penuh - Show always for 'new', or if 'resume' and loginMethod uses name */}
                     {(tab === 'new' || branding?.loginMethod === 'name_ic' || branding?.loginMethod === 'name_password' || !branding?.loginMethod) && (
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
-                          {t('entry_field_fullname', 'Nama Penuh')} *
-                        </label>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide">
+                            {t('entry_field_fullname', 'Nama Penuh')} *
+                          </label>
+                          {tab === 'new' && pdpaAccepted && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                              {t('pdpa_verified', 'PDPA Disahkan')}
+                            </span>
+                          )}
+                        </div>
                         <input
                           type="text"
                           required
