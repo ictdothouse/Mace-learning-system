@@ -121,6 +121,9 @@ export default function Login() {
       if (!pdpaAccepted) {
         return setError('Sila baca dan bersetuju dengan terma PDPA sebelum mendaftar.');
       }
+      if (!password) {
+        return setError('Sila masukkan kata laluan untuk pendaftaran baru.');
+      }
       if (password !== confirmPassword) {
         return setError('Kata laluan tidak sepadan. Sila semak semula.');
       }
