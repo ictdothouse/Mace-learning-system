@@ -116,8 +116,11 @@ export default function Login() {
     setError(null);
     setSuccess(null);
 
-    // Password match check for new registration
-    if (tab === 'new' && (branding?.loginMethod === 'ic_password' || branding?.loginMethod === 'name_password')) {
+    // Validations for new registration
+    if (tab === 'new') {
+      if (!pdpaAccepted) {
+        return setError('Sila baca dan bersetuju dengan terma PDPA sebelum mendaftar.');
+      }
       if (password !== confirmPassword) {
         return setError('Kata laluan tidak sepadan. Sila semak semula.');
       }
@@ -242,7 +245,7 @@ export default function Login() {
   return (
     <>
       {showPdpaModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden flex flex-col">
             <div className="p-6 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
               <h3 className="font-bold text-lg text-gray-800">Persetujuan Akta Perlindungan Data Peribadi (PDPA)</h3>
