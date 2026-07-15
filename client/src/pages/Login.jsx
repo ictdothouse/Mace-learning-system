@@ -536,8 +536,15 @@ export default function Login() {
                   <form 
                     onSubmit={handleSubmit} 
                     className="p-6 space-y-4"
-                    onClickCapture={(e) => {
+                    onMouseDownCapture={(e) => {
                       if (tab === 'new' && !pdpaAccepted) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        setShowPdpaModal(true);
+                      }
+                    }}
+                    onKeyDownCapture={(e) => {
+                      if (tab === 'new' && !pdpaAccepted && e.key !== 'Tab') {
                         e.stopPropagation();
                         e.preventDefault();
                         setShowPdpaModal(true);
