@@ -234,5 +234,15 @@
   "pdpa_desc_2": "Data peribadi anda seperti Nama Penuh, Nombor Kad Pengenalan dan butiran lain yang berkaitan akan digunakan khusus untuk tujuan pendaftaran modul, penjanaan sijil, dan rekod profil pengguna sistem ini. Kami komited untuk menjaga kerahsiaan dan keselamatan data anda.",
   "pdpa_checkbox": "Saya telah membaca dan bersetuju dengan terma PDPA. Saya membenarkan data peribadi saya diproses untuk tujuan berkaitan sistem ini.",
   "pdpa_btn_agree": "Setuju & Teruskan",
+  "error_pdpa_required": "Sila baca dan bersetuju dengan terma PDPA sebelum mendaftar.",
+  "error_pass_required": "Sila masukkan kata laluan untuk pendaftaran baru.",
+  "error_pass_mismatch": "Kata laluan tidak sepadan. Sila semak semula.",
+  "error_ic_not_found": "No. IC tidak dijumpai dalam sistem.",
+  "error_name_not_found": "Nama penuh tidak dijumpai dalam sistem.",
+  "error_ic_pass_required": "No. IC dan kata laluan wajib diisi.",
+  "error_invalid_password": "Kata laluan salah.",
+  "error_ic_exists": "No. IC sudah berdaftar. Sila guna \"Semak Akaun\".",
+  "error_name_mismatch": "Nama penuh tidak sepadan dengan rekod No. IC ini.",
+  "error_invalid_enrollment": "Enrollment Key tidak sah. Sila semak semula.",
   "pdpa_verified": "PDPA Disahkan"
 }

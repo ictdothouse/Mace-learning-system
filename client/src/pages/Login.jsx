@@ -119,13 +119,13 @@ export default function Login() {
     // Validations for new registration
     if (tab === 'new') {
       if (!pdpaAccepted) {
-        return setError('Sila baca dan bersetuju dengan terma PDPA sebelum mendaftar.');
+        return setError(t('error_pdpa_required', 'Sila baca dan bersetuju dengan terma PDPA sebelum mendaftar.'));
       }
       if (!password) {
-        return setError('Sila masukkan kata laluan untuk pendaftaran baru.');
+        return setError(t('error_pass_required', 'Sila masukkan kata laluan untuk pendaftaran baru.'));
       }
       if (password !== confirmPassword) {
-        return setError('Kata laluan tidak sepadan. Sila semak semula.');
+        return setError(t('error_pass_mismatch', 'Kata laluan tidak sepadan. Sila semak semula.'));
       }
     }
 
@@ -148,7 +148,18 @@ export default function Login() {
         navigate('/dashboard');
       }
     } catch (err) {
-      setError(err.response?.data?.error || t('entry_error_label', 'Ralat sistem. Sila cuba lagi.'));
+      let errorMsg = err.response?.data?.error;
+      if (errorMsg) {
+        if (errorMsg === 'No. IC tidak dijumpai dalam sistem.') errorMsg = t('error_ic_not_found', 'No. IC tidak dijumpai dalam sistem.');
+        else if (errorMsg === 'Nama penuh tidak dijumpai dalam sistem.') errorMsg = t('error_name_not_found', 'Nama penuh tidak dijumpai dalam sistem.');
+        else if (errorMsg === 'No. IC dan kata laluan wajib diisi.') errorMsg = t('error_ic_pass_required', 'No. IC dan kata laluan wajib diisi.');
+        else if (errorMsg === 'Kata laluan salah.') errorMsg = t('error_invalid_password', 'Kata laluan salah.');
+        else if (errorMsg === 'No. IC sudah berdaftar. Sila guna "Semak Akaun".') errorMsg = t('error_ic_exists', 'No. IC sudah berdaftar. Sila guna "Semak Akaun".');
+        else if (errorMsg === 'Nama penuh tidak sepadan dengan rekod No. IC ini.') errorMsg = t('error_name_mismatch', 'Nama penuh tidak sepadan dengan rekod No. IC ini.');
+        else if (errorMsg === 'Kata laluan wajib diisi untuk pendaftaran baru.') errorMsg = t('error_pass_required', 'Kata laluan wajib diisi untuk pendaftaran baru.');
+        else if (errorMsg === 'Enrollment Key tidak sah. Sila semak semula.') errorMsg = t('error_invalid_enrollment', 'Enrollment Key tidak sah. Sila semak semula.');
+      }
+      setError(errorMsg || t('entry_error_label', 'Ralat sistem. Sila cuba lagi.'));
     }
   };
 
