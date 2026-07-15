@@ -633,7 +633,9 @@ router.post('/settings/branding', async (req, res) => {
             homeBannerTitle, homeBannerTitle_en, homeBannerImage, homeBgImage, homeLeftColumnHtml, homeLeftColumnHtml_en, menuLinksJson,
             footerText, footerLinksJson,
             termTeacher_ms, termTeacher_en, termStudent_ms, termStudent_en,
-            homeFormSubtitle, homeFormSubtitle_en
+            homeFormSubtitle, homeFormSubtitle_en,
+            pdpaTitle, pdpaTitle_en, pdpaDesc1, pdpaDesc1_en, pdpaDesc2, pdpaDesc2_en,
+            pdpaCheckbox, pdpaCheckbox_en, pdpaBtnAgree, pdpaBtnAgree_en, pdpaBtnCancel, pdpaBtnCancel_en
         } = req.body;
         const Branding = require('../models/Branding');
         
@@ -690,6 +692,19 @@ router.post('/settings/branding', async (req, res) => {
         if (termStudent_ms !== undefined) branding.termStudent_ms = termStudent_ms;
         if (termStudent_en !== undefined) branding.termStudent_en = termStudent_en;
         
+        if (pdpaTitle !== undefined) branding.pdpaTitle = pdpaTitle;
+        if (pdpaTitle_en !== undefined) branding.pdpaTitle_en = pdpaTitle_en;
+        if (pdpaDesc1 !== undefined) branding.pdpaDesc1 = pdpaDesc1;
+        if (pdpaDesc1_en !== undefined) branding.pdpaDesc1_en = pdpaDesc1_en;
+        if (pdpaDesc2 !== undefined) branding.pdpaDesc2 = pdpaDesc2;
+        if (pdpaDesc2_en !== undefined) branding.pdpaDesc2_en = pdpaDesc2_en;
+        if (pdpaCheckbox !== undefined) branding.pdpaCheckbox = pdpaCheckbox;
+        if (pdpaCheckbox_en !== undefined) branding.pdpaCheckbox_en = pdpaCheckbox_en;
+        if (pdpaBtnAgree !== undefined) branding.pdpaBtnAgree = pdpaBtnAgree;
+        if (pdpaBtnAgree_en !== undefined) branding.pdpaBtnAgree_en = pdpaBtnAgree_en;
+        if (pdpaBtnCancel !== undefined) branding.pdpaBtnCancel = pdpaBtnCancel;
+        if (pdpaBtnCancel_en !== undefined) branding.pdpaBtnCancel_en = pdpaBtnCancel_en;
+
         await branding.save();
         
         if (req.refreshBrandingCache) {

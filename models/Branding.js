@@ -43,7 +43,21 @@ const brandingSchema = new mongoose.Schema({
     termTeacher_ms: { type: String, default: 'Instruktor' },
     termTeacher_en: { type: String, default: 'Instructor' },
     termStudent_ms: { type: String, default: 'Atlit' },
-    termStudent_en: { type: String, default: 'Athlete' }
+    termStudent_en: { type: String, default: 'Athlete' },
+    
+    // PDPA Customization
+    pdpaTitle: { type: String, default: '' },
+    pdpaTitle_en: { type: String, default: '' },
+    pdpaDesc1: { type: String, default: '' },
+    pdpaDesc1_en: { type: String, default: '' },
+    pdpaDesc2: { type: String, default: '' },
+    pdpaDesc2_en: { type: String, default: '' },
+    pdpaCheckbox: { type: String, default: '' },
+    pdpaCheckbox_en: { type: String, default: '' },
+    pdpaBtnAgree: { type: String, default: '' },
+    pdpaBtnAgree_en: { type: String, default: '' },
+    pdpaBtnCancel: { type: String, default: '' },
+    pdpaBtnCancel_en: { type: String, default: '' }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Branding', brandingSchema);
