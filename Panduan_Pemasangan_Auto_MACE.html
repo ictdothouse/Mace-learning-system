@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panduan Pemasangan Automatik MACE (VPS Ubuntu)</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; background-color: #f8fafc; }
+        h1, h2, h3 { color: #1e3a8a; }
+        h1 { border-bottom: 2px solid #3b82f6; padding-bottom: 10px; }
+        .step { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); margin-bottom: 20px; border-left: 5px solid #3b82f6; }
+        .code-block { background: #1e293b; color: #10b981; padding: 15px; border-radius: 6px; font-family: monospace; overflow-x: auto; margin: 10px 0; border: 1px solid #0f172a; }
+        .alert { background: #fee2e2; color: #991b1b; padding: 15px; border-radius: 6px; border-left: 5px solid #ef4444; margin-bottom: 20px; font-weight: bold; }
+        .info { background: #e0f2fe; color: #075985; padding: 15px; border-radius: 6px; border-left: 5px solid #0ea5e9; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <h1>Panduan Pemasangan Automatik (Easy Install) - Sistem MACE</h1>
+    <p>Panduan ini akan membimbing anda memasang keseluruhan sistem MACE ke dalam pelayan (server) VPS baru menggunakan skrip automatik. Skrip ini akan memasang MongoDB, Node.js, NPM, Nginx, dan PM2 secara serentak.</p>
+
+    <div class="info">
+        <strong>Keperluan Pelayan Tinggi (Khas untuk kapasiti 8,000+ Atlet):</strong><br>
+        1. OS: <strong>Ubuntu 22.04 LTS</strong> atau <strong>Ubuntu 24.04 LTS</strong> (Disyorkan).<br>
+        2. RAM: <strong>8GB hingga 16GB</strong> (Wajib untuk menampung pangkalan data MongoDB & trafik ribuan pelajar serentak).<br>
+        3. CPU: <strong>4 Cores hingga 8 Cores</strong>.<br>
+        4. Storan (Disk Space): <strong>Minimum 100GB ke 200GB NVMe SSD</strong> (Wajib, kerana semua video & imej kini disimpan secara tempatan dan SSD NVMe amat pantas untuk penstriman video).<br>
+        5. Rangkaian (Network): Kelajuan sekurang-kurangnya <strong>1 Gbps</strong> dengan kuota data (Bandwidth) yang tinggi.<br>
+        6. Port / Firewall: Sila pastikan Port <strong>80 (HTTP)</strong>, <strong>443 (HTTPS)</strong>, dan <strong>22 (SSH)</strong> dibuka pada firewall pelayan.<br>
+        7. Akses: Menyediakan akses sebagai pengguna <strong>root</strong> (atau sudo) untuk tujuan *deployment*.<br>
+        <br>
+        <strong>Sila maklumkan 3 perkara INI kepada pihak IT (Sangat Penting):</strong><br>
+        8. <strong>Pelayan Kosong (Fresh OS):</strong> Pelayan Ubuntu mestilah *kosong*. JANGAN install web panel seperti cPanel, Plesk, atau Apache. Skrip kami akan memasang <strong>Nginx</strong> dan ia memerlukan Port 80/443 bebas (unoccupied).<br>
+        9. <strong>Domain DNS Berfungsi:</strong> Pihak IT wajib pastikan nama domain (cth: mace.msn.gov.my) telah disambungkan ke alamat IP pelayan ini (A Record) <strong>sebelum</strong> kerja *installation* bermula. Jika belum disambung, tetapan sistem sekuriti HTTPS/SSL akan gagal.<br>
+        10. <strong>Akses Internet Keluar (Outbound Network):</strong> Pelayan mesti mempunyai kebenaran memuat turun terus dari Internet (unrestricted outbound access) untuk memuat turun pakej Node.js, MongoDB, GitHub dan NPM.
+    </div>
+
+    <div class="step">
+        <h2>Langkah 1: Log Masuk ke Pelayan (SSH)</h2>
+        <p>Gunakan Terminal (Mac) atau Command Prompt / PowerShell (Windows) untuk log masuk ke VPS anda.</p>
+        <div class="code-block">ssh root@ALAMAT_IP_SERVER_ANDA</div>
+        <p><em>* Masukkan kata laluan pelayan anda apabila diminta.</em></p>
+    </div>
+
+    <div class="step">
+        <h2>Langkah 2: Muat Turun Kod Sistem (Git Clone)</h2>
+        <p>Sistem MACE berada di dalam GitHub. Tarik (pull) kod terbaru ke dalam pelayan anda.</p>
+        <div class="code-block">git clone https://github.com/ictdothouse/Mace-learning-system.git</div>
+    </div>
+
+    <div class="step">
+        <h2>Langkah 3: Jalankan Skrip Pemasangan Automatik (Wizard)</h2>
+        <p>Masuk ke dalam folder yang baru dimuat turun, dan jalankan skrip <code style="background: #e2e8f0; padding: 2px 5px; border-radius: 3px;">install.sh</code>.</p>
+        <div class="code-block">cd Mace-learning-system
+chmod +x install.sh
+./install.sh</div>
+        
+        <p>Skrip ini akan mengambil masa 2-5 minit untuk memuat turun semua perisian yang diperlukan (NodeJS 20, MongoDB 7, dll).</p>
+        
+        <div class="alert">
+            <strong>SEMASA PEMASANGAN:</strong> Skrip akan bertanya soalan interaktif kepada anda. Pastikan anda mempunyai maklumat ini siap sedia:
+            <ul style="margin-top: 5px;">
+                <li>Kekunci Cloudflare R2 (Access Key & Secret Key) - Boleh guna yang sedia ada di Hostinger.</li>
+                <li>Kata laluan yang anda mahukan untuk akaun Admin baru.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="step">
+        <h2>Langkah 4: Hidupkan Sistem Menggunakan PM2</h2>
+        <p>Setelah selesai, skrip telah membina fail <code style="background: #e2e8f0; padding: 2px 5px; border-radius: 3px;">.env</code> secara automatik dan menyusun front-end React. Kini, anda hanya perlu hidupkan aplikasi untuk berjalan 24/7 di latar belakang.</p>
+        <div class="code-block">pm2 start app.js --name "mace-app"</div>
+        <p>Untuk memastikan aplikasi hidup semula jika pelayan dihidupkan semula (reboot):</p>
+        <div class="code-block">pm2 startup
+pm2 save</div>
+    </div>
+
+    <div class="step">
+        <h2>Langkah 5: Uji Laman Web Anda</h2>
+        <p>Sistem anda kini sedang berjalan di pelayan tempatan pada port 3000 (bersama dengan Nginx di port 80). Buka pelayar web (browser) komputer anda dan layari alamat IP pelayan.</p>
+        <div class="code-block">http://ALAMAT_IP_SERVER_ANDA</div>
+    </div>
+
+    <div class="step">
+        <h2>Langkah 6 (PENTING): Migrasi Data Lama</h2>
+        <p>Sistem ini sekarang ibarat 'kereta baru tanpa penumpang'. Pangkalan data MongoDB di dalam VPS adalah KOSONG. Anda perlu memuat naik fail JSON yang dimuat turun dari Hostinger.</p>
+        <ol>
+            <li>Buka <strong>http://ALAMAT_IP_SERVER_ANDA/admin-mace</strong> (Anda perlu buat akaun Admin pertama kalinya).</li>
+            <li>Pergi ke menu <strong>Settings</strong> -> <strong>Database Migration</strong>.</li>
+            <li>Di bawah bahagian <strong>Muat Naik / Import (Restore)</strong>, pilih fail <code style="background: #e2e8f0; padding: 2px 5px; border-radius: 3px;">mace_system_data.json</code> yang anda telah eksport dari pelayan lama.</li>
+            <li>Klik "Import". Pangkalan data anda akan dipulihkan serta merta!</li>
+        </ol>
+    </div>
+
+</body>
+</html>
