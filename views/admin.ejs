@@ -637,35 +637,30 @@
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 mb-8">
                         <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
-                            Upload Data Backup (CSV/JSON)
+                            Restore & Migrasi Database (.json)
                         </h3>
-                        <p class="text-sm text-gray-500 mb-6">Muat naik fail import / export dari WordPress sebagai simpanan keselamatan sistem.</p>
+                        <p class="text-sm text-gray-500 mb-6">Muat naik fail data JSON yang dimuat turun dari butang di bawah untuk di-import terus ke dalam database. Proses ini akan menimpa (overwrite) keseluruhan sistem secara automatik (disarankan hanya untuk server baru/kosong).</p>
                         
-                        <form action="/admin-mace/upload-data" method="POST" enctype="multipart/form-data" class="flex flex-col sm:flex-row gap-4 items-end">
+                        <form action="/admin-mace/upload-data" method="POST" enctype="multipart/form-data" class="flex flex-col sm:flex-row gap-4 items-end" onsubmit="return confirm('AMARAN: Ini akan memadamkan (overwrite) keseluruhan database semasa dan menggantikannya dengan data dari fail JSON ini. Pastikan anda mahu meneruskan.')">
                             <div class="flex-1 w-full">
-                                <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Pilih Fail Export</label>
-                                <input type="file" name="dataFile" accept=".csv,.json" required 
+                                <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Pilih Fail Backup (JSON)</label>
+                                <input type="file" name="dataFile" accept=".json" required 
                                     class="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 cursor-pointer border border-gray-200 rounded-lg p-2 focus:ring-2 focus:ring-purple-500 outline-none transition">
                             </div>
-                            <button type="submit" class="w-full sm:w-auto bg-purple-600 text-white px-8 py-2.5 rounded-lg font-medium hover:bg-purple-700 transition shadow-sm shrink-0">
-                                Muat Naik
+                            <button type="submit" class="w-full sm:w-auto bg-purple-600 text-white px-8 py-2.5 rounded-lg font-medium hover:bg-purple-700 transition shadow-sm shrink-0" onclick="this.innerHTML='Sedang Restore...'; this.classList.add('opacity-75', 'cursor-wait');">
+                                Restore JSON Sekarang
                             </button>
                         </form>
 
-                        <% if (uploadedFiles && uploadedFiles.length > 0) { %>
-                            <div class="mt-8 pt-6 border-t border-gray-100">
-                                <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Fail Yang Pernah Dimuat Naik:</h4>
-                                <ul class="space-y-2 max-h-40 overflow-y-auto pr-2">
-                                    <% uploadedFiles.forEach(f => { %>
-                                        <li class="flex justify-between items-center bg-gray-50 px-4 py-3 rounded-lg text-sm border border-gray-100">
-                                            <span class="flex items-center gap-2 text-gray-700 truncate">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                                                <%= f.name %>
-                                            </span>
-                                            <span class="text-xs text-gray-400 font-mono ml-4 shrink-0"><%= f.size %></span>
-                                        </li>
-                                    <% }) %>
-                                </ul>
+                        <% if (msg === 'success_upload') { %>
+                            <div class="mt-4 bg-green-50 text-green-700 p-4 rounded-lg flex items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <span><strong>Berjaya!</strong> Database telah dipulihkan dengan jayanya.</span>
+                            </div>
+                        <% } else if (msg === 'error_upload') { %>
+                            <div class="mt-4 bg-red-50 text-red-700 p-4 rounded-lg flex items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <span><strong>Ralat!</strong> Gagal memulihkan database. Sila pastikan format fail JSON adalah betul.</span>
                             </div>
                         <% } %>
                     </div>
@@ -675,12 +670,17 @@
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                             Download Data Sistem
                         </h3>
-                        <p class="text-sm text-gray-500 mb-6">Muat turun semua data pendaftaran atlet, tahap pembelajaran dan tetapan ke dalam format JSON.</p>
+                        <p class="text-sm text-gray-500 mb-6">Muat turun semua data pendaftaran atlet, tahap pembelajaran dan tetapan ke dalam satu fail format JSON.</p>
                         
                         <a href="/admin-mace/download-system-data" class="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium transition shadow-sm">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                            Download Data (.json)
+                            Muat Turun Semua Data (JSON)
                         </a>
+
+                        <div class="mt-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                            <h4 class="font-bold text-blue-800 text-sm mb-1">Cara Backup & Migrasi:</h4>
+                            <p class="text-sm text-blue-700 mt-1">Simpan fail JSON ini sebagai *backup* berkala. Apabila memasang sistem di pelayan/VPS yang baru (database kosong), hanya perlu "Upload" fail JSON tersebut di ruangan Restore di atas untuk memindahkan 100% data anda secara automatik tanpa kehilangan data.</p>
+                        </div>
                     </div>
 
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 mb-8">

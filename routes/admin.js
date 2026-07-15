@@ -564,8 +564,48 @@ router.post('/settings/sports/delete/:id', async (req, res) => {
 router.post('/upload-data', upload.single('dataFile'), async (req, res) => {
     try {
         if (!req.file) return res.redirect('/admin-mace/settings?msg=error_no_file');
-        res.redirect('/admin-mace/settings?msg=success_upload&file=' + encodeURIComponent(req.file.filename));
-    } catch (err) { res.redirect('/admin-mace/settings?msg=error_upload'); }
+        
+        const fs = require('fs');
+        const filePath = req.file.path;
+        
+        // Baca fail JSON
+        const fileContent = fs.readFileSync(filePath, 'utf-8');
+        const data = JSON.parse(fileContent);
+        
+        // Import models
+        const Athlete = require('../models/Athlete');
+        const Module = require('../models/Module');
+        const Lesson = require('../models/Lesson');
+        const Branding = require('../models/Branding');
+        const Group = require('../models/Group');
+        const Page = require('../models/Page');
+        
+        // Bersihkan database (drop semua)
+        await Promise.all([
+            Athlete.deleteMany({}),
+            Module.deleteMany({}),
+            Lesson.deleteMany({}),
+            Branding.deleteMany({}),
+            Group.deleteMany({}),
+            Page.deleteMany({})
+        ]);
+        
+        // Masukkan data baru
+        if (data.branding) await Branding.create(data.branding);
+        if (data.groups && data.groups.length > 0) await Group.insertMany(data.groups);
+        if (data.modules && data.modules.length > 0) await Module.insertMany(data.modules);
+        if (data.lessons && data.lessons.length > 0) await Lesson.insertMany(data.lessons);
+        if (data.athletes && data.athletes.length > 0) await Athlete.insertMany(data.athletes);
+        if (data.pages && data.pages.length > 0) await Page.insertMany(data.pages);
+        
+        // Buang fail selepas berjaya
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        
+        res.redirect('/admin-mace/settings?msg=success_upload');
+    } catch (err) { 
+        console.error('JSON Import Error:', err);
+        res.redirect('/admin-mace/settings?msg=error_upload'); 
+    }
 });
 
 router.get('/download-system-data', async (req, res) => {
@@ -575,13 +615,15 @@ router.get('/download-system-data', async (req, res) => {
         const Lesson = require('../models/Lesson');
         const Branding = require('../models/Branding');
         const Group = require('../models/Group');
+        const Page = require('../models/Page');
 
-        const [athletes, modules, lessons, branding, groups] = await Promise.all([
+        const [athletes, modules, lessons, branding, groups, pages] = await Promise.all([
             Athlete.find().lean(),
             Module.find().lean(),
             Lesson.find().lean(),
             Branding.findOne().lean(),
-            Group.find().lean()
+            Group.find().lean(),
+            Page.find().lean()
         ]);
 
         const exportData = {
@@ -590,7 +632,8 @@ router.get('/download-system-data', async (req, res) => {
             groups,
             modules,
             lessons,
-            athletes
+            athletes,
+            pages
         };
 
         res.setHeader('Content-disposition', 'attachment; filename=mace_system_data.json');
