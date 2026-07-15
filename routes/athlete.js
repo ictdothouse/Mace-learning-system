@@ -188,16 +188,14 @@ router.get('/test-waiting-room', (req, res) => {
     });
 });
 
-router.get('/ms', checkSports, (req, res) => {
+router.get('/ms', (req, res) => {
     res.cookie('lang', 'ms', { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: false, path: '/' });
-    res.locals.lang = 'ms';
-    res.render('entry', { error: null, sports: req.sports });
+    res.redirect('/');
 });
 
-router.get('/en', checkSports, (req, res) => {
+router.get('/en', (req, res) => {
     res.cookie('lang', 'en', { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: false, path: '/' });
-    res.locals.lang = 'en';
-    res.render('entry', { error: null, sports: req.sports });
+    res.redirect('/');
 });
 
 router.post('/access', checkSports, async (req, res) => {
