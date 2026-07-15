@@ -254,7 +254,10 @@ export default function Login() {
               <h3 className="font-bold text-lg text-gray-800">
                 {(lang === 'en' ? branding?.pdpaTitle_en : branding?.pdpaTitle) || t('pdpa_title', 'Persetujuan Akta Perlindungan Data Peribadi (PDPA)')}
               </h3>
-              <button onClick={() => setShowPdpaModal(false)} className="text-gray-400 hover:text-gray-600 transition">
+              <button onClick={() => {
+                setPdpaAccepted(false);
+                setShowPdpaModal(false);
+              }} className="text-gray-400 hover:text-gray-600 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
@@ -284,7 +287,10 @@ export default function Login() {
               <div className="mt-6 flex justify-end gap-3">
                 <button 
                   type="button" 
-                  onClick={() => setShowPdpaModal(false)}
+                  onClick={() => {
+                    setPdpaAccepted(false);
+                    setShowPdpaModal(false);
+                  }}
                   className="px-4 py-2 text-sm font-semibold text-gray-600 hover:text-gray-800 transition bg-white border border-gray-200 rounded-xl shadow-sm"
                 >
                   {(lang === 'en' ? branding?.pdpaBtnCancel_en : branding?.pdpaBtnCancel) || t('btn_cancel', 'Batal')}
@@ -527,7 +533,23 @@ export default function Login() {
                   </div>
 
                   {/* Form */}
-                  <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                  <form onSubmit={handleSubmit} className="p-6 space-y-4 relative">
+                    
+                    {/* PDPA Blocker Overlay */}
+                    {tab === 'new' && !pdpaAccepted && (
+                      <div 
+                        className="absolute inset-0 z-10 bg-white/40 backdrop-blur-[1.5px] cursor-pointer flex items-center justify-center rounded-b-2xl" 
+                        onClick={() => setShowPdpaModal(true)}
+                        title="Sila sahkan PDPA untuk mendaftar"
+                      >
+                        <div className="bg-indigo-600 text-white px-5 py-3 rounded-xl shadow-lg font-bold text-sm flex items-center gap-2 animate-bounce cursor-pointer shadow-indigo-600/30">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                          </svg>
+                          {t('pdpa_overlay_btn', 'Sila sahkan PDPA dahulu')}
+                        </div>
+                      </div>
+                    )}
                     {/* Nama Penuh - Show always for 'new', or if 'resume' and loginMethod uses name */}
                     {(tab === 'new' || branding?.loginMethod === 'name_ic' || branding?.loginMethod === 'name_password' || !branding?.loginMethod) && (
                       <div>
@@ -601,7 +623,7 @@ export default function Login() {
                     {tab === 'resume' && (branding?.loginMethod === 'ic_password' || branding?.loginMethod === 'name_password') && (
                       <div>
                         <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
-                          Kata Laluan *
+                          {t('entry_field_password', 'Kata Laluan')} *
                         </label>
                         <input
                           type="password"
@@ -609,7 +631,7 @@ export default function Login() {
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all text-sm text-slate-800 placeholder-slate-400 font-medium"
-                          placeholder="Masukkan kata laluan"
+                          placeholder={t('entry_field_password_placeholder', 'Masukkan kata laluan')}
                         />
                       </div>
                     )}
@@ -702,7 +724,7 @@ export default function Login() {
                         <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-slate-100">
                           <div>
                             <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
-                              Kata Laluan *
+                              {t('entry_field_password', 'Kata Laluan')} *
                             </label>
                             <input
                               type="password"
@@ -710,12 +732,12 @@ export default function Login() {
                               value={password}
                               onChange={(e) => setPassword(e.target.value)}
                               className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all text-sm text-slate-800 font-medium"
-                              placeholder="KATA LALUAN"
+                              placeholder={t('entry_field_password_placeholder_upper', 'KATA LALUAN')}
                             />
                           </div>
                           <div>
                             <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
-                              Sahkan Kata Laluan *
+                              {t('entry_field_password_confirm', 'Sahkan Kata Laluan')} *
                             </label>
                             <input
                               type="password"
@@ -727,7 +749,7 @@ export default function Login() {
                                   ? 'border-red-400 focus:border-red-500 focus:ring-red-100 bg-red-50' 
                                   : 'border-slate-200 focus:border-indigo-500 focus:ring-indigo-100'
                               }`}
-                              placeholder="SAHKAN KATA LALUAN"
+                              placeholder={t('entry_field_password_confirm_placeholder', 'SAHKAN KATA LALUAN')}
                             />
                           </div>
                         </div>
