@@ -5,9 +5,10 @@
 # ==========================================
 # Script ini akan memasang dan mengkonfigurasi:
 # 1. Node.js & NPM
-# 2. PM2 (Process Manager)
-# 3. Nginx (Web Server & Reverse Proxy)
-# 4. Modul MACE (React Build & Dependencies)
+# 2. MongoDB Server (Local Database)
+# 3. PM2 (Process Manager)
+# 4. Nginx (Web Server & Reverse Proxy)
+# 5. Modul MACE (React Build & Dependencies)
 # ==========================================
 
 # Warna untuk output
@@ -18,7 +19,7 @@ RED='\033[0;31m'
 NC='\033[0m'
 
 echo -e "${BLUE}=================================================${NC}"
-echo -e "${BLUE}  WIZARD PEMASANGAN VPS MACE (UBUNTU)  ${NC}"
+echo -e "${BLUE}  WIZARD PEMASANGAN VPS MACE (UBUNTU 22.04+)   ${NC}"
 echo -e "${BLUE}=================================================${NC}"
 
 # Pastikan script dijalankan sebagai root
@@ -28,35 +29,50 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 echo -e "\n${YELLOW}Langkah 1: Mengumpul Maklumat Sistem...${NC}"
-read -p "Masukkan nama domain (contoh: mace.domain.com) atau IP: " DOMAIN_NAME
-read -p "Masukkan MongoDB URI (cth: mongodb+srv://...): " MONGO_URI
+read -p "Masukkan nama domain (contoh: mace.domain.com) atau IP (kosongkan jika tiada): " DOMAIN_NAME
+DOMAIN_NAME=${DOMAIN_NAME:-localhost}
 read -p "Masukkan Port untuk Node.js (Lalai/Default: 3000): " APP_PORT
 APP_PORT=${APP_PORT:-3000}
 
 # Generate random JWT Secret
 JWT_SECRET=$(openssl rand -hex 32)
+# Gunakan localhost untuk MongoDB
+MONGO_URI="mongodb://127.0.0.1:27017/mace_db"
 
 echo -e "\n${YELLOW}Langkah 2: Memasang Pakej Asas & Node.js...${NC}"
 apt update
-apt install -y curl git build-essential nginx
+apt install -y curl git build-essential nginx gnupg
 
 # Install Node.js (LTS version 20)
 curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
 apt install -y nodejs
 
-echo -e "\n${YELLOW}Langkah 3: Memasang PM2...${NC}"
+echo -e "\n${YELLOW}Langkah 3: Memasang MongoDB (Local Database)...${NC}"
+# Setup MongoDB 7.0 (Sesuai untuk Ubuntu 22.04)
+curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | \
+   sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg \
+   --dearmor --yes
+echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+apt update
+apt install -y mongodb-org
+
+# Hidupkan MongoDB secara automatik
+systemctl enable mongod
+systemctl start mongod
+
+echo -e "\n${YELLOW}Langkah 4: Memasang PM2...${NC}"
 npm install -g pm2
 
-echo -e "\n${YELLOW}Langkah 4: Mengkonfigurasi Fail .env...${NC}"
+echo -e "\n${YELLOW}Langkah 5: Mengkonfigurasi Fail .env...${NC}"
 cat > .env << EOL
 PORT=$APP_PORT
 MONGO_URI=$MONGO_URI
 JWT_SECRET=$JWT_SECRET
 NODE_ENV=production
 EOL
-echo -e "${GREEN}Fail .env berjaya dicipta.${NC}"
+echo -e "${GREEN}Fail .env berjaya dicipta dengan Sambungan Database Local (127.0.0.1).${NC}"
 
-echo -e "\n${YELLOW}Langkah 5: Memasang NPM Dependencies & Membina React App...${NC}"
+echo -e "\n${YELLOW}Langkah 6: Memasang NPM Dependencies & Membina React App...${NC}"
 npm install
 
 if [ -d "client" ]; then
@@ -69,12 +85,12 @@ else
     echo -e "${RED}Amaran: Folder 'client' tidak dijumpai. Binaan React dilangkau.${NC}"
 fi
 
-echo -e "\n${YELLOW}Langkah 6: Menghidupkan Sistem MACE melalui PM2...${NC}"
+echo -e "\n${YELLOW}Langkah 7: Menghidupkan Sistem MACE melalui PM2...${NC}"
 pm2 start app.js --name "mace-system"
 pm2 save
 pm2 startup | grep "sudo" | bash
 
-echo -e "\n${YELLOW}Langkah 7: Mengkonfigurasi Nginx (Reverse Proxy)...${NC}"
+echo -e "\n${YELLOW}Langkah 8: Mengkonfigurasi Nginx (Reverse Proxy)...${NC}"
 NGINX_CONF="/etc/nginx/sites-available/mace"
 
 cat > $NGINX_CONF << EOL
@@ -102,8 +118,11 @@ nginx -t && systemctl restart nginx
 echo -e "\n${BLUE}=================================================${NC}"
 echo -e "${GREEN}✅ PEMASANGAN BERJAYA!${NC}"
 echo -e "${BLUE}=================================================${NC}"
-echo -e "Laman web MACE anda kini aktif di: http://$DOMAIN_NAME"
-echo -e "Fail .env telah dijana secara automatik."
-echo -e "Gunakan 'pm2 logs mace-system' untuk melihat log pelayan."
-echo -e "Gunakan 'pm2 restart mace-system' jika anda mengubah kod."
+echo -e "Laman web MACE dan Database MongoDB anda kini aktif di VPS ini."
+echo -e "Akses laman web anda di: http://$DOMAIN_NAME"
+echo -e "Database berjalan secara senyap di latar belakang (Port: 27017)."
+echo -e "\nLangkah Seterusnya:"
+echo -e "1. Buka http://$DOMAIN_NAME/admin-mace"
+echo -e "2. Pergi ke Settings > Backup"
+echo -e "3. Upload fail JSON yang anda download dari server lama."
 echo -e "${BLUE}=================================================${NC}"
