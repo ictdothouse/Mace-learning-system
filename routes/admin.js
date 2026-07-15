@@ -602,6 +602,29 @@ router.get('/download-system-data', async (req, res) => {
     }
 });
 
+router.get('/download-pdpa', async (req, res) => {
+    try {
+        const Athlete = require('../models/Athlete');
+        const athletes = await Athlete.find({ pdpaAccepted: true }).sort({ pdpaAcceptedAt: -1 }).lean();
+        
+        let csvContent = "Nama Penuh,No Kad Pengenalan,Status PDPA,Tarikh Persetujuan\n";
+        
+        athletes.forEach(a => {
+            const dateStr = a.pdpaAcceptedAt 
+                ? new Date(a.pdpaAcceptedAt).toLocaleString('ms-MY', { timeZone: 'Asia/Kuala_Lumpur' }) 
+                : "Tiada Rekod Tarikh";
+            csvContent += `"${a.fullName}","${a.icNumber}","Bersetuju","${dateStr}"\n`;
+        });
+        
+        res.setHeader('Content-disposition', 'attachment; filename=rekod_persetujuan_pdpa.csv');
+        res.setHeader('Content-type', 'text/csv; charset=utf-8');
+        res.send(Buffer.from('\uFEFF' + csvContent, 'utf-8')); // Add BOM for Excel UTF-8 support
+    } catch (err) {
+        console.error('PDPA Export Error:', err);
+        res.redirect('/admin-mace/settings?msg=error_export');
+    }
+});
+
 // POST: Kemaskini Penjenamaan (Branding)
 router.post('/settings/branding', async (req, res) => {
     try {
@@ -640,6 +663,8 @@ router.post('/settings/branding', async (req, res) => {
         branding.showMenu = req.body.showMenu === 'on';
         branding.showBannerTitle = req.body.showBannerTitle === 'on';
         branding.showRegistrationForm = req.body.showRegistrationForm === 'on';
+        
+        if (req.body.loginMethod !== undefined) branding.loginMethod = req.body.loginMethod;
         
         if (menuLinksJson) {
             try {

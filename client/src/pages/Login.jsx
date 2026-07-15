@@ -54,6 +54,15 @@ export default function Login() {
   const [enrollmentKey, setEnrollmentKey] = useState('');
   const [showEnrollmentKey, setShowEnrollmentKey] = useState(false);
 
+  // PDPA States
+  const [showPdpaModal, setShowPdpaModal] = useState(false);
+  const [pdpaAccepted, setPdpaAccepted] = useState(false);
+  const [hasTouchedName, setHasTouchedName] = useState(false);
+
+  // Password States
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
   useEffect(() => {
     // If already logged in, redirect to dashboard
     if (auth.authenticated && auth.role === 'student') {
@@ -107,6 +116,13 @@ export default function Login() {
     setError(null);
     setSuccess(null);
 
+    // Password match check for new registration
+    if (tab === 'new' && (branding?.loginMethod === 'ic_password' || branding?.loginMethod === 'name_password')) {
+      if (password !== confirmPassword) {
+        return setError('Kata laluan tidak sepadan. Sila semak semula.');
+      }
+    }
+
     try {
       const payload = {
         action: tab,
@@ -116,6 +132,7 @@ export default function Login() {
         umur: parseInt(umur),
         negeri,
         sukan: sukan.toUpperCase().trim(),
+        password,
         enrollmentKey: showEnrollmentKey ? enrollmentKey.trim() : ''
       };
 
@@ -223,6 +240,63 @@ export default function Login() {
   }
 
   return (
+    <>
+      {showPdpaModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+              <h3 className="font-bold text-lg text-gray-800">Persetujuan Akta Perlindungan Data Peribadi (PDPA)</h3>
+              <button onClick={() => setShowPdpaModal(false)} className="text-gray-400 hover:text-gray-600 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[60vh] text-sm text-gray-600 space-y-4">
+              <p>
+                Selaras dengan <strong>Akta Perlindungan Data Peribadi 2010 (Akta 709) Malaysia</strong>, kami memerlukan persetujuan anda untuk memproses maklumat peribadi yang diberikan semasa proses pendaftaran ini.
+              </p>
+              <p>
+                Data peribadi anda seperti Nama Penuh, Nombor Kad Pengenalan dan butiran lain yang berkaitan akan digunakan khusus untuk tujuan pendaftaran modul, penjanaan sijil, dan rekod profil pengguna sistem ini. Kami komited untuk menjaga kerahsiaan dan keselamatan data anda.
+              </p>
+            </div>
+            <div className="p-6 border-t border-gray-100 bg-gray-50">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  checked={pdpaAccepted}
+                  onChange={(e) => setPdpaAccepted(e.target.checked)}
+                  className="mt-1 w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer"
+                />
+                <span className="text-sm text-gray-700 font-medium">
+                  Saya telah membaca dan bersetuju dengan terma PDPA. Saya membenarkan data peribadi saya diproses untuk tujuan berkaitan sistem ini.
+                </span>
+              </label>
+              
+              <div className="mt-6 flex justify-end gap-3">
+                <button 
+                  type="button" 
+                  onClick={() => setShowPdpaModal(false)}
+                  className="px-4 py-2 text-sm font-semibold text-gray-600 hover:text-gray-800 transition bg-white border border-gray-200 rounded-xl shadow-sm"
+                >
+                  Batal
+                </button>
+                <button 
+                  type="button" 
+                  disabled={!pdpaAccepted}
+                  onClick={() => {
+                    setShowPdpaModal(false);
+                    setHasTouchedName(true);
+                  }}
+                  className={`px-5 py-2 text-sm font-bold rounded-xl shadow-sm transition ${pdpaAccepted ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-indigo-300 text-indigo-50 cursor-not-allowed'}`}
+                >
+                  Setuju & Teruskan
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     <div className="min-h-screen flex flex-col bg-gray-50 font-sans" style={bodyBgStyle}>
       {branding.homeBgImage && (
         <div className="fixed inset-0 bg-white/60 backdrop-blur-sm z-0 pointer-events-none"></div>
@@ -446,49 +520,81 @@ export default function Login() {
 
                   {/* Form */}
                   <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
-                        {t('entry_field_fullname', 'Nama Penuh')} *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={fullName}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setFullName(val);
-                          setShowNameHint(val.trim().length > 0);
-                        }}
-                        className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all text-sm text-slate-800 placeholder-slate-400 font-medium uppercase"
-                        placeholder={tab === 'new' ? t('entry_field_fullname_placeholder', 'NAMA PENUH SEPERTI DALAM KAD PENGENALAN') : t('entry_resume_name_placeholder', 'NAMA PENUH PENDAFTARAN')}
-                      />
-                      {tab === 'new' && showNameHint && (
-                        <div className="mt-2 flex items-start gap-1.5 text-[10px] text-amber-600 bg-amber-50/50 border border-amber-200 rounded-xl p-3 leading-relaxed">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 flex-shrink-0 text-amber-500 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                          </svg>
-                          <span>
-                            <strong>{t('entry_important', 'Penting')}:</strong> {t('entry_field_fullname_hint', 'Sila masukkan nama penuh mengikut Kad Pengenalan untuk cetakan sijil penyertaan.')}
-                          </span>
-                        </div>
-                      )}
-                    </div>
+                    {/* Nama Penuh - Show always for 'new', or if 'resume' and loginMethod uses name */}
+                    {(tab === 'new' || branding?.loginMethod === 'name_ic' || branding?.loginMethod === 'name_password' || !branding?.loginMethod) && (
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
+                          {t('entry_field_fullname', 'Nama Penuh')} *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={fullName}
+                          onFocus={() => {
+                            if (tab === 'new' && !pdpaAccepted) {
+                              setShowPdpaModal(true);
+                            }
+                          }}
+                          onChange={(e) => {
+                            if (tab === 'new' && !pdpaAccepted) {
+                              setShowPdpaModal(true);
+                              return;
+                            }
+                            const val = e.target.value;
+                            setFullName(val);
+                            setShowNameHint(val.trim().length > 0);
+                          }}
+                          className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all text-sm text-slate-800 placeholder-slate-400 font-medium uppercase"
+                          placeholder={tab === 'new' ? t('entry_field_fullname_placeholder', 'NAMA PENUH SEPERTI DALAM KAD PENGENALAN') : t('entry_resume_name_placeholder', 'NAMA PENUH PENDAFTARAN')}
+                        />
+                        {tab === 'new' && showNameHint && (
+                          <div className="mt-2 flex items-start gap-1.5 text-[10px] text-amber-600 bg-amber-50/50 border border-amber-200 rounded-xl p-3 leading-relaxed">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 flex-shrink-0 text-amber-500 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <span>
+                              <strong>{t('entry_important', 'Penting')}:</strong> {t('entry_field_fullname_hint', 'Sila masukkan nama penuh mengikut Kad Pengenalan untuk cetakan sijil penyertaan.')}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
-                        {t('entry_field_ic', 'No. Kad Pengenalan')} *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={icNumber}
-                        maxLength={12}
-                        pattern="[0-9]{12}"
-                        onChange={(e) => setIcNumber(e.target.value.replace(/\D/g, ''))}
-                        className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all text-sm text-slate-800 placeholder-slate-400 font-medium"
-                        placeholder={tab === 'new' ? t('entry_field_ic_placeholder', 'CONTOH: 020815145566 (TANPA -)') : t('entry_resume_ic_placeholder', 'MASUKKAN NO. IC 12 DIGIT')}
-                      />
-                    </div>
+                    {/* IC Number - Show always for 'new', or if 'resume' and loginMethod uses IC */}
+                    {(tab === 'new' || branding?.loginMethod === 'name_ic' || branding?.loginMethod === 'ic_password' || !branding?.loginMethod) && (
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
+                          {t('entry_field_ic', 'No. Kad Pengenalan')} *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={icNumber}
+                          maxLength={12}
+                          pattern="[0-9]{12}"
+                          onChange={(e) => setIcNumber(e.target.value.replace(/\D/g, ''))}
+                          className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all text-sm text-slate-800 placeholder-slate-400 font-medium"
+                          placeholder={tab === 'new' ? t('entry_field_ic_placeholder', 'CONTOH: 020815145566 (TANPA -)') : t('entry_resume_ic_placeholder', 'MASUKKAN NO. IC 12 DIGIT')}
+                        />
+                      </div>
+                    )}
+                    
+                    {/* Password for 'resume' if required by loginMethod */}
+                    {tab === 'resume' && (branding?.loginMethod === 'ic_password' || branding?.loginMethod === 'name_password') && (
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
+                          Kata Laluan *
+                        </label>
+                        <input
+                          type="password"
+                          required
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all text-sm text-slate-800 placeholder-slate-400 font-medium"
+                          placeholder="Masukkan kata laluan"
+                        />
+                      </div>
+                    )}
 
                     {tab === 'new' && (
                       <>
@@ -575,6 +681,38 @@ export default function Login() {
                             ))}
                           </datalist>
                         </div>
+                        <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-slate-100">
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
+                              Kata Laluan *
+                            </label>
+                            <input
+                              type="password"
+                              required
+                              value={password}
+                              onChange={(e) => setPassword(e.target.value)}
+                              className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all text-sm text-slate-800 font-medium"
+                              placeholder="KATA LALUAN"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
+                              Sahkan Kata Laluan *
+                            </label>
+                            <input
+                              type="password"
+                              required
+                              value={confirmPassword}
+                              onChange={(e) => setConfirmPassword(e.target.value)}
+                              className={`w-full px-4 py-3 border rounded-xl focus:ring-4 outline-none transition-all text-sm text-slate-800 font-medium ${
+                                confirmPassword && password !== confirmPassword 
+                                  ? 'border-red-400 focus:border-red-500 focus:ring-red-100 bg-red-50' 
+                                  : 'border-slate-200 focus:border-indigo-500 focus:ring-indigo-100'
+                              }`}
+                              placeholder="SAHKAN KATA LALUAN"
+                            />
+                          </div>
+                        </div>
                       </>
                     )}
 
@@ -640,5 +778,6 @@ export default function Login() {
         </div>
       </main>
     </div>
+    </>
   );
 }

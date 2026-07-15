@@ -8,6 +8,7 @@ const Level = require('../models/Level');
 const Sport = require('../models/Sport');
 const Page = require('../models/Page');
 const Group = require('../models/Group');
+const Branding = require('../models/Branding');
 const { concurrencyGuardApi } = require('../middleware/concurrency');
 
 // ==========================================
@@ -163,10 +164,28 @@ router.get('/auth/me', async (req, res) => {
 
 // POST: Pendaftaran / Semakan Masuk Atlet
 router.post('/auth/access', async (req, res) => {
-    const { action, fullName, icNumber, jantina, umur, negeri, sukan, enrollmentKey } = req.body;
+    const { action, fullName, icNumber, jantina, umur, negeri, sukan, enrollmentKey, password } = req.body;
     try {
-        if (!fullName || !icNumber) {
-            return res.status(400).json({ error: 'Nama penuh dan No. IC wajib diisi.' });
+        let branding = await Branding.findOne();
+        if (!branding) branding = { loginMethod: 'name_ic' };
+        
+        const loginMethod = branding.loginMethod || 'name_ic';
+        
+        if (action === 'new') {
+            if (!fullName || !icNumber) {
+                return res.status(400).json({ error: 'Nama penuh dan No. IC wajib diisi.' });
+            }
+            if ((loginMethod === 'ic_password' || loginMethod === 'name_password') && !password) {
+                return res.status(400).json({ error: 'Kata laluan wajib diisi mengikut tetapan sistem.' });
+            }
+        } else if (action === 'resume') {
+            if (loginMethod === 'name_ic') {
+                if (!fullName || !icNumber) return res.status(400).json({ error: 'Nama penuh dan No. IC wajib diisi.' });
+            } else if (loginMethod === 'ic_password') {
+                if (!icNumber || !password) return res.status(400).json({ error: 'No. IC dan kata laluan wajib diisi.' });
+            } else if (loginMethod === 'name_password') {
+                if (!fullName || !password) return res.status(400).json({ error: 'Nama penuh dan kata laluan wajib diisi.' });
+            }
         }
         
         let targetGroup = null;
@@ -190,24 +209,49 @@ router.post('/auth/access', async (req, res) => {
                 umur, 
                 negeriWakil: negeri, 
                 sukan,
+                password: password || undefined,
+                pdpaAccepted: true,
+                pdpaAcceptedAt: new Date(),
                 enrolledGroups: targetGroup ? [targetGroup._id] : []
             });
             req.session.athleteId = newAthlete._id;
             return res.json({ success: true, role: 'student', athlete: newAthlete });
         } else if (action === 'resume') {
-            const athlete = await Athlete.findOne({ icNumber });
+            // Find athlete depending on login method
+            let athlete = null;
+            if (loginMethod === 'name_ic' || loginMethod === 'ic_password') {
+                athlete = await Athlete.findOne({ icNumber });
+                if (!athlete) {
+                    return res.status(404).json({ error: 'No. IC tidak dijumpai dalam sistem.' });
+                }
+            } else if (loginMethod === 'name_password') {
+                // Find by name (loose match)
+                const cleanInputName = fullName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+                const athletes = await Athlete.find();
+                athlete = athletes.find(a => {
+                    const cleanDbName = a.fullName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+                    return cleanDbName === cleanInputName || cleanDbName.includes(cleanInputName);
+                });
+                if (!athlete) {
+                    return res.status(404).json({ error: 'Nama penuh tidak dijumpai dalam sistem.' });
+                }
+            }
             
-            if (!athlete) {
-                return res.status(404).json({ error: 'No. IC tidak dijumpai dalam sistem.' });
+            // Password Check
+            if (loginMethod === 'ic_password' || loginMethod === 'name_password') {
+                const isMatch = await athlete.comparePassword(password);
+                if (!isMatch) {
+                    return res.status(400).json({ error: 'Kata laluan salah.' });
+                }
             }
 
-            // Loose name matching: remove all spaces and special chars, convert to lowercase
-            const cleanDbName = athlete.fullName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-            const cleanInputName = fullName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-
-            // Allow login if names match loosely, or if input is at least part of the DB name
-            if (cleanDbName !== cleanInputName && !cleanDbName.includes(cleanInputName)) {
-                return res.status(400).json({ error: 'Nama penuh tidak sepadan dengan rekod No. IC ini.' });
+            // Loose name matching for name_ic
+            if (loginMethod === 'name_ic') {
+                const cleanDbName = athlete.fullName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+                const cleanInputName = fullName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+                if (cleanDbName !== cleanInputName && !cleanDbName.includes(cleanInputName)) {
+                    return res.status(400).json({ error: 'Nama penuh tidak sepadan dengan rekod No. IC ini.' });
+                }
             }
 
             if (targetGroup) {

@@ -11,6 +11,11 @@ const brandingSchema = new mongoose.Schema({
     dashboardSubtitle: { type: String, default: 'Pantau kemajuan pembelajaran anda di sini.' },
     dashboardSubtitle_en: { type: String, default: 'Monitor your learning progress here.' },
     allowModuleSelectionInEnrollment: { type: Boolean, default: false },
+    loginMethod: { 
+        type: String, 
+        enum: ['name_ic', 'ic_password', 'name_password'], 
+        default: 'name_ic' 
+    },
     
     // Homepage Customization
     homeBannerTitle: { type: String, default: 'Modul' },
