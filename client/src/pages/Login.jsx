@@ -533,23 +533,25 @@ export default function Login() {
                   </div>
 
                   {/* Form */}
-                  <form onSubmit={handleSubmit} className="p-6 space-y-4 relative">
-                    
-                    {/* PDPA Blocker Overlay */}
-                    {tab === 'new' && !pdpaAccepted && (
-                      <div 
-                        className="absolute inset-0 z-10 bg-white/40 backdrop-blur-[1.5px] cursor-pointer flex items-center justify-center rounded-b-2xl" 
-                        onClick={() => setShowPdpaModal(true)}
-                        title="Sila sahkan PDPA untuk mendaftar"
-                      >
-                        <div className="bg-indigo-600 text-white px-5 py-3 rounded-xl shadow-lg font-bold text-sm flex items-center gap-2 animate-bounce cursor-pointer shadow-indigo-600/30">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                          </svg>
-                          {t('pdpa_overlay_btn', 'Sila sahkan PDPA dahulu')}
-                        </div>
-                      </div>
-                    )}
+                  <form 
+                    onSubmit={handleSubmit} 
+                    className="p-6 space-y-4"
+                    onClickCapture={(e) => {
+                      if (tab === 'new' && !pdpaAccepted) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        setShowPdpaModal(true);
+                      }
+                    }}
+                    onFocusCapture={(e) => {
+                      if (tab === 'new' && !pdpaAccepted) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        e.target.blur();
+                        setShowPdpaModal(true);
+                      }
+                    }}
+                  >
                     {/* Nama Penuh - Show always for 'new', or if 'resume' and loginMethod uses name */}
                     {(tab === 'new' || branding?.loginMethod === 'name_ic' || branding?.loginMethod === 'name_password' || !branding?.loginMethod) && (
                       <div>
