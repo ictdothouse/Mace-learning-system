@@ -10,6 +10,7 @@ const { GetObjectCommand } = require('@aws-sdk/client-s3');
 // Cloudflare R2 Client for background images
 const r2Client = new S3Client({
     region: 'auto',
+    forcePathStyle: true,
     endpoint: process.env.R2_ENDPOINT || `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
     credentials: {
         accessKeyId: process.env.R2_ACCESS_KEY_ID,

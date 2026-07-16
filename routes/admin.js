@@ -25,6 +25,7 @@ const ffmpegPath = require('ffmpeg-static');
 // Cloudflare R2 client for Featured Images upload
 const r2Client = new S3Client({
     region: 'auto',
+    forcePathStyle: true,
     endpoint: process.env.R2_ENDPOINT || (process.env.R2_ACCOUNT_ID ? `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com` : undefined),
     credentials: {
         accessKeyId: process.env.R2_ACCESS_KEY_ID,
