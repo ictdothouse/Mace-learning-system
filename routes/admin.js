@@ -590,6 +590,7 @@ router.post('/upload-data', upload.single('dataFile'), async (req, res) => {
         const Group = require('../models/Group');
         const Page = require('../models/Page');
         const Level = require('../models/Level');
+        const CertificateTemplate = require('../models/CertificateTemplate');
         
         // Bersihkan database (drop semua)
         await Promise.all([
@@ -599,7 +600,8 @@ router.post('/upload-data', upload.single('dataFile'), async (req, res) => {
             Branding.deleteMany({}),
             Group.deleteMany({}),
             Page.deleteMany({}),
-            Level.deleteMany({})
+            Level.deleteMany({}),
+            CertificateTemplate.deleteMany({})
         ]);
         
         // Masukkan data baru
@@ -619,6 +621,7 @@ router.post('/upload-data', upload.single('dataFile'), async (req, res) => {
         
         if (data.pages && data.pages.length > 0) await Page.insertMany(data.pages);
         if (data.levels && data.levels.length > 0) await Level.insertMany(data.levels);
+        if (data.templates && data.templates.length > 0) await CertificateTemplate.insertMany(data.templates);
         
         // Refresh branding cache so the restored branding shows up immediately
         if (typeof req.refreshBrandingCache === 'function') {
@@ -644,15 +647,17 @@ router.get('/download-system-data', async (req, res) => {
         const Group = require('../models/Group');
         const Page = require('../models/Page');
         const Level = require('../models/Level');
+        const CertificateTemplate = require('../models/CertificateTemplate');
 
-        const [athletes, modules, lessons, branding, groups, pages, levels] = await Promise.all([
+        const [athletes, modules, lessons, branding, groups, pages, levels, templates] = await Promise.all([
             Athlete.find().lean(),
             Module.find().lean(),
             Lesson.find().lean(),
             Branding.findOne().lean(),
             Group.find().lean(),
             Page.find().lean(),
-            Level.find().lean()
+            Level.find().lean(),
+            CertificateTemplate.find().lean()
         ]);
 
         const exportData = {
@@ -663,7 +668,8 @@ router.get('/download-system-data', async (req, res) => {
             lessons,
             athletes,
             pages,
-            levels
+            levels,
+            templates
         };
 
         res.setHeader('Content-disposition', 'attachment; filename=mace_system_data.json');
