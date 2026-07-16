@@ -91,6 +91,7 @@ pm2 save</div>
         <h2>Langkah 5: Uji Laman Web Anda</h2>
         <p>Sistem anda kini sedang berjalan di pelayan tempatan pada port 3000 (bersama dengan Nginx di port 80). Buka pelayar web (browser) komputer anda dan layari alamat IP pelayan.</p>
         <div class="code-block">http://ALAMAT_IP_SERVER_ANDA</div>
+        <p style="margin-top: 5px; font-size: 14px; color: #4b5563;"><em>Pastikan anda menaip <code>http://</code> (tiada 's'). Sesetengah pelayar web akan menukarnya kepada <code>https://</code> secara automatik yang menyebabkan ralat.</em></p>
     </div>
 
     <div class="step">
@@ -114,11 +115,11 @@ pm2 save</div>
         <h2>Langkah 7: Akses MonitorPanel</h2>
         <p>Bagi memudahkan penyelenggaraan, sistem ini dilengkapi dengan MonitorPanel terbina dalam. Daripada menggunakan terminal Linux untuk <em>restart</em> atau mengemaskini (redeploy) kod baru, anda boleh lakukannya terus dari antaramuka web.</p>
         <ol>
-            <li>Buka <strong>http://ALAMAT_IP_SERVER_ANDA:4000</strong>.</li>
+            <li>Buka <strong>http://ALAMAT_IP_SERVER_ANDA:4000</strong> (Pastikan bermula dengan <code>http://</code> dan diakhiri dengan <code>:4000</code>).</li>
             <li>Log masuk menggunakan kata laluan Master Admin yang sama.</li>
             <li>Anda boleh melihat status RAM/CPU, menyemak log ralat, dan menekan butang <em>Restart Sistem</em> atau <em>Git Pull</em>.</li>
         </ol>
-        <p style="margin-top: 10px; font-size: 14px; color: #4b5563;"><em>Nota: Pastikan anda telah membuka (Allow) Port 4000 di dalam panel Firewall / Security Group pelayan anda untuk mengakses MonitorPanel ini dari luar.</em></p>
+        <p style="margin-top: 10px; font-size: 14px; color: #4b5563;"><em><strong>Nota Penting:</strong> Anda DIWAJIBKAN untuk membuka (Allow) <strong>Port 4000 (Custom TCP)</strong> di dalam panel Firewall / Security Group pelayan anda terlebih dahulu. Jika tidak, MonitorPanel ini langsung tidak akan dapat diakses dari luar.</em></p>
     </div>
 
     <div class="step" style="border: 2px solid #ef4444;">
