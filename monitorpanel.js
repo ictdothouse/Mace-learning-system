@@ -77,6 +77,7 @@ app.post('/api/exec', (req, res) => {
         'git pull origin main',
         'pm2 restart mace-system',
         'pm2 restart mace-system --update-env',
+        'pm2 restart mace-monitor',
         'pm2 status',
         'pm2 logs mace-system --lines 50 --nostream',
         'npm install',

@@ -123,6 +123,14 @@
                                 <p class="text-xs text-purple-700">Lihat ralat 50 baris terakhir</p>
                             </div>
                         </button>
+                        
+                        <button onclick="runCommand('pm2 restart mace-monitor')" class="w-full text-left px-4 py-3 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg flex items-center gap-3 transition">
+                            <span class="bg-gray-300 text-gray-800 p-2 rounded-md">⚙️</span>
+                            <div>
+                                <p class="font-semibold text-sm text-gray-900">Restart MonitorPanel</p>
+                                <p class="text-xs text-gray-600">Kemas kini sistem panel ini</p>
+                            </div>
+                        </button>
                     </div>
                 </div>
 
@@ -241,11 +249,21 @@ Sila klik butang di sebelah kiri untuk menjalankan arahan server.</div>
                     terminal.innerHTML += safeOutput;
                 }
             } catch (err) {
-                terminal.innerHTML += `<span style="color:#ff5555;">[Network Error] Gagal menghubungi pelayan.</span>`;
+                if (cmd === 'pm2 restart mace-monitor') {
+                    terminal.innerHTML += `\n<span style="color:#a7f3d0;">[Info] MonitorPanel sedang dimulakan semula. Memuat semula (refresh) secara automatik...</span>`;
+                    setTimeout(() => window.location.reload(), 2500);
+                } else {
+                    terminal.innerHTML += `<span style="color:#ff5555;">[Network Error] Gagal menghubungi pelayan.</span>`;
+                }
             }
             
             loader.classList.add('hidden');
             terminal.scrollTop = terminal.scrollHeight;
+            
+            // Auto reload without error message for monitor restart success (if it somehow responds before dying)
+            if (cmd === 'pm2 restart mace-monitor') {
+                setTimeout(() => window.location.reload(), 2500);
+            }
         }
     </script>
 </body>
