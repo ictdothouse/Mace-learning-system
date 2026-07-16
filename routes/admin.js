@@ -597,7 +597,16 @@ router.post('/upload-data', upload.single('dataFile'), async (req, res) => {
         if (data.groups && data.groups.length > 0) await Group.insertMany(data.groups);
         if (data.modules && data.modules.length > 0) await Module.insertMany(data.modules);
         if (data.lessons && data.lessons.length > 0) await Lesson.insertMany(data.lessons);
-        if (data.athletes && data.athletes.length > 0) await Athlete.insertMany(data.athletes);
+        
+        if (data.athletes && data.athletes.length > 0) {
+            // Fix missing required fields for older backups
+            const athletesToInsert = data.athletes.map(a => {
+                if (!a.sukan) a.sukan = 'Umum';
+                return a;
+            });
+            await Athlete.insertMany(athletesToInsert);
+        }
+        
         if (data.pages && data.pages.length > 0) await Page.insertMany(data.pages);
         if (data.levels && data.levels.length > 0) await Level.insertMany(data.levels);
         
