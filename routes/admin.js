@@ -120,7 +120,7 @@ const getSecureVideoUrl = async (filename) => {
 };
 
 // GET: API to generate signed URL dynamically for frontend previews
-router.get('/api/sign-video-url', isAuthenticated, async (req, res) => {
+router.get('/api/sign-video-url', async (req, res) => {
     const filename = req.query.filename;
     if (!filename) return res.json({ url: '' });
     
