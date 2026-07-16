@@ -11,7 +11,8 @@
     <div class="max-w-4xl mx-auto py-12 px-6">
         <!-- Header -->
         <div class="mb-8">
-            <a href="/admin-mace/lessons?moduleId=<%= lesson ? lesson.moduleId : (modules[0] ? modules[0]._id : '') %>" class="text-blue-600 hover:text-blue-800 text-sm font-medium mb-4 inline-block flex items-center gap-2">
+            <a href="/admin-mace/lessons?moduleId=<%= lesson && lesson.moduleId ? (lesson.moduleId._id || lesson.moduleId) : (modules[0] ? modules[0]._id : '') %>" 
+                    class="text-blue-600 hover:text-blue-800 text-sm font-medium inline-flex items-center gap-1 mb-6 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                 Kembali ke Senarai Pelajaran
             </a>
@@ -153,7 +154,7 @@
                 <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm">
                     💾 Simpan Pelajaran
                 </button>
-                <a href="/admin-mace/lessons?moduleId=<%= lesson ? lesson.moduleId : (modules[0] ? modules[0]._id : '') %>" 
+                <a href="/admin-mace/lessons?moduleId=<%= lesson && lesson.moduleId ? (lesson.moduleId._id || lesson.moduleId) : (modules[0] ? modules[0]._id : '') %>" 
                     class="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition">
                     Batal
                 </a>
@@ -520,16 +521,23 @@
         videoUrlInput.addEventListener('change', function() {
             const val = this.value.trim();
             if (val) {
-                if (val.startsWith('http') || val.length > 3) {
+                if (val.startsWith('http')) {
                     videoPreview.innerHTML = '';
                     const source = document.createElement('source');
-                    source.src = val.startsWith('http') ? val : `/uploads/${val}`;
+                    source.src = val;
                     source.type = 'video/mp4';
                     videoPreview.appendChild(source);
-                    
                     videoPreview.load();
                     videoPreviewContainer.classList.remove('hidden');
-                    videoFileInput.value = ''; // clear file input
+                    videoFileInput.value = '';
+                } else if (val.length > 3) {
+                    // It's an R2 filename, backend needs to sign it. Hide preview until saved.
+                    videoPreviewContainer.classList.add('hidden');
+                    const uploadStatusDiv = document.getElementById('upload-status');
+                    if (uploadStatusDiv) {
+                        uploadStatusDiv.className = 'text-xs mt-1 font-semibold text-blue-600';
+                        uploadStatusDiv.innerText = 'Sila klik Simpan untuk menjana preview R2 yang sah.';
+                    }
                 }
             } else {
                 if (!videoFileInput.files[0]) {
