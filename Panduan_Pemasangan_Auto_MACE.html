@@ -80,7 +80,8 @@ sudo bash install.sh</div>
     <div class="step">
         <h2>Langkah 4: Hidupkan Sistem Menggunakan PM2</h2>
         <p>Setelah selesai, skrip telah membina fail <code style="background: #e2e8f0; padding: 2px 5px; border-radius: 3px;">.env</code> secara automatik dan menyusun front-end React. Kini, anda hanya perlu hidupkan aplikasi untuk berjalan 24/7 di latar belakang.</p>
-        <div class="code-block">pm2 start app.js --name "mace-app"</div>
+        <div class="code-block">pm2 start app.js --name "mace-system"
+pm2 start monitorpanel.js --name "mace-monitor"</div>
         <p>Untuk memastikan aplikasi hidup semula jika pelayan dihidupkan semula (reboot):</p>
         <div class="code-block">pm2 startup
 pm2 save</div>
@@ -109,6 +110,17 @@ pm2 save</div>
         </ol>
     </div>
 
+    <div class="step">
+        <h2>Langkah 7: Akses MonitorPanel</h2>
+        <p>Bagi memudahkan penyelenggaraan, sistem ini dilengkapi dengan MonitorPanel terbina dalam. Daripada menggunakan terminal Linux untuk <em>restart</em> atau mengemaskini (redeploy) kod baru, anda boleh lakukannya terus dari antaramuka web.</p>
+        <ol>
+            <li>Buka <strong>http://ALAMAT_IP_SERVER_ANDA:4000</strong>.</li>
+            <li>Log masuk menggunakan kata laluan Master Admin yang sama.</li>
+            <li>Anda boleh melihat status RAM/CPU, menyemak log ralat, dan menekan butang <em>Restart Sistem</em> atau <em>Git Pull</em>.</li>
+        </ol>
+        <p style="margin-top: 10px; font-size: 14px; color: #4b5563;"><em>Nota: Pastikan anda telah membuka (Allow) Port 4000 di dalam panel Firewall Hostinger anda untuk mengakses MonitorPanel ini dari luar.</em></p>
+    </div>
+
     <div class="step" style="border: 2px solid #ef4444;">
         <h2 style="color: #b91c1c;">Penyelesaian Masalah 1: Ralat 502 Bad Gateway</h2>
         <p>Jika anda melayari alamat IP anda dan mendapat ralat <strong>502 Bad Gateway</strong>, ia berkemungkinan besar berpunca daripada Pangkalan Data (MongoDB) yang terhenti atau terpadam. Sistem tidak dapat berhubung dengan database lalu menyebabkan ralat ini.</p>
@@ -135,8 +147,9 @@ sudo pkill -9 -f pm2
 # 2. Matikan apa-apa proses Node.js yang tersangkut (pilihan)
 sudo pkill -9 -f node
 
-# 3. Hidupkan semula PM2 dan Sistem MACE
-sudo pm2 start app.js --name "mace-system"</div>
+# 3. Hidupkan semula PM2, Sistem MACE dan MonitorPanel
+sudo pm2 start app.js --name "mace-system"
+sudo pm2 start monitorpanel.js --name "mace-monitor"</div>
     </div>
 
     <div class="step" style="border: 2px solid #3b82f6;">
