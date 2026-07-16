@@ -104,6 +104,9 @@ cat > $NGINX_CONF << EOL
 server {
     listen 80;
     server_name $DOMAIN_NAME;
+    
+    # Membenarkan upload fail besar sehingga 500MB (untuk JSON dan Video)
+    client_max_body_size 500M;
 
     location / {
         proxy_pass http://localhost:$APP_PORT;
