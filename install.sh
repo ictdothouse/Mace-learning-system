@@ -43,7 +43,15 @@ SESSION_SECRET=$(openssl rand -hex 48)
 # Gunakan localhost untuk MongoDB
 MONGO_URI="mongodb://127.0.0.1:27017/mace_db"
 
-echo -e "\n${YELLOW}Langkah 2: Memasang Pakej Asas & Node.js...${NC}"
+echo -e "\n${YELLOW}Langkah 2: Menyiapkan Memori Maya (Swap) & Memasang Pakej...${NC}"
+if [ ! -f /swapfile ]; then
+    echo -e "${BLUE}Mencipta Swap Memory (2GB) untuk kestabilan pemasangan NPM...${NC}"
+    fallocate -l 2G /swapfile || dd if=/dev/zero of=/swapfile bs=1M count=2048
+    chmod 600 /swapfile
+    mkswap /swapfile
+    swapon /swapfile
+    echo '/swapfile none swap sw 0 0' | tee -a /etc/fstab
+fi
 apt update
 apt install -y curl git build-essential nginx gnupg
 
