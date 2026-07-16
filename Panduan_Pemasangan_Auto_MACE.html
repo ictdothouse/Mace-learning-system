@@ -99,5 +99,15 @@ pm2 save</div>
         </ol>
     </div>
 
+    <div class="step">
+        <h2>Langkah 7 (Penyelesaian Masalah): Ralat 502 Bad Gateway</h2>
+        <p>Jika anda melayari alamat IP anda dan mendapat ralat <strong>502 Bad Gateway</strong>, ia berkemungkinan besar berpunca daripada kehilangan konfigurasi kod rahsia dalam fail <code>.env</code>.</p>
+        <p>Anda boleh memeriksa log ralat dengan menaip arahan berikut di terminal:</p>
+        <div class="code-block">sudo pm2 logs mace-system --lines 50</div>
+        <p>Jika anda melihat ralat <code>SESSION_SECRET tidak dikonfigurasikan</code>, sila jalankan kedua-dua arahan di bawah secara berasingan untuk membetulkannya:</p>
+        <div class="code-block">sudo bash -c "echo 'SESSION_SECRET=a2b4c6d8e0f1a3b5c7d9e2f4a6b8c0d2e4f6a8b0c2d4e6f8a0b2c4d6e8f0a2b4' >> .env"
+sudo pm2 restart mace-system</div>
+    </div>
+
 </body>
 </html>
