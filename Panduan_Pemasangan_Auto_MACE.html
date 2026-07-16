@@ -71,7 +71,7 @@ sudo bash install.sh</div>
         <div class="alert">
             <strong>SEMASA PEMASANGAN:</strong> Skrip akan bertanya soalan interaktif kepada anda. Pastikan anda mempunyai maklumat ini siap sedia:
             <ul style="margin-top: 5px;">
-                <li>Kekunci Cloudflare R2 (Access Key & Secret Key) - Boleh guna yang sedia ada di Hostinger.</li>
+                <li>Kekunci Cloudflare R2 (Access Key & Secret Key) - Boleh guna yang sedia ada.</li>
                 <li>Kata laluan yang anda mahukan untuk akaun Admin baru.</li>
             </ul>
         </div>
@@ -95,7 +95,7 @@ pm2 save</div>
 
     <div class="step">
         <h2>Langkah 6 (PENTING): Migrasi Data Lama</h2>
-        <p>Sistem ini sekarang ibarat 'kereta baru tanpa penumpang'. Pangkalan data MongoDB di dalam VPS adalah KOSONG. Anda perlu memuat naik fail JSON yang dimuat turun dari Hostinger.</p>
+        <p>Sistem ini sekarang ibarat 'kereta baru tanpa penumpang'. Pangkalan data MongoDB di dalam VPS adalah KOSONG. Anda perlu memuat naik fail JSON yang dimuat turun dari pelayan lama.</p>
         <ol>
             <li>Buka <strong>http://ALAMAT_IP_SERVER_ANDA/admin-mace</strong>.</li>
             <li>Anda akan diminta untuk memasukkan maklumat <em>Basic Auth</em> Master Admin. Masukkan:
@@ -118,7 +118,7 @@ pm2 save</div>
             <li>Log masuk menggunakan kata laluan Master Admin yang sama.</li>
             <li>Anda boleh melihat status RAM/CPU, menyemak log ralat, dan menekan butang <em>Restart Sistem</em> atau <em>Git Pull</em>.</li>
         </ol>
-        <p style="margin-top: 10px; font-size: 14px; color: #4b5563;"><em>Nota: Pastikan anda telah membuka (Allow) Port 4000 di dalam panel Firewall Hostinger anda untuk mengakses MonitorPanel ini dari luar.</em></p>
+        <p style="margin-top: 10px; font-size: 14px; color: #4b5563;"><em>Nota: Pastikan anda telah membuka (Allow) Port 4000 di dalam panel Firewall / Security Group pelayan anda untuk mengakses MonitorPanel ini dari luar.</em></p>
     </div>
 
     <div class="step" style="border: 2px solid #ef4444;">
