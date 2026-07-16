@@ -274,7 +274,7 @@ router.post('/auth/access', async (req, res) => {
         }
     } catch (err) {
         console.error('API Access Error:', err);
-        res.status(500).json({ error: 'Ralat sistem pendaftaran.' });
+        res.status(500).json({ error: 'Ralat sistem pendaftaran: ' + err.message });
     }
 });
 
