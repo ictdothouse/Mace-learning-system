@@ -119,6 +119,15 @@ const getSecureVideoUrl = async (filename) => {
     }
 };
 
+// GET: API to generate signed URL dynamically for frontend previews
+router.get('/api/sign-video-url', isAuthenticated, async (req, res) => {
+    const filename = req.query.filename;
+    if (!filename) return res.json({ url: '' });
+    
+    const signedUrl = await getSecureVideoUrl(filename);
+    res.json({ url: signedUrl });
+});
+
 const compressVideo = (inputPath, outputPath) => {
     return new Promise((resolve, reject) => {
         // We compress the video using ffmpeg:

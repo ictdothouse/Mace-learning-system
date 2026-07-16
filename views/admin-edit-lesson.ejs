@@ -518,7 +518,7 @@
             }
         });
 
-        videoUrlInput.addEventListener('change', function() {
+        videoUrlInput.addEventListener('change', async function() {
             const val = this.value.trim();
             if (val) {
                 if (val.startsWith('http')) {
@@ -531,12 +531,34 @@
                     videoPreviewContainer.classList.remove('hidden');
                     videoFileInput.value = '';
                 } else if (val.length > 3) {
-                    // It's an R2 filename, backend needs to sign it. Hide preview until saved.
-                    videoPreviewContainer.classList.add('hidden');
-                    const uploadStatusDiv = document.getElementById('upload-status');
-                    if (uploadStatusDiv) {
-                        uploadStatusDiv.className = 'text-xs mt-1 font-semibold text-blue-600';
-                        uploadStatusDiv.innerText = 'Sila klik Simpan untuk menjana preview R2 yang sah.';
+                    // Fetch signed URL from backend
+                    try {
+                        const uploadStatusDiv = document.getElementById('upload-status');
+                        if (uploadStatusDiv) {
+                            uploadStatusDiv.className = 'text-xs mt-1 font-semibold text-gray-500';
+                            uploadStatusDiv.innerText = 'Menjana pautan R2 yang sah...';
+                        }
+                        
+                        const response = await fetch(`/admin-mace/api/sign-video-url?filename=${encodeURIComponent(val)}`);
+                        const data = await response.json();
+                        
+                        if (data.url) {
+                            videoPreview.innerHTML = '';
+                            const source = document.createElement('source');
+                            source.src = data.url;
+                            source.type = 'video/mp4';
+                            videoPreview.appendChild(source);
+                            videoPreview.load();
+                            videoPreviewContainer.classList.remove('hidden');
+                            videoFileInput.value = '';
+                            
+                            if (uploadStatusDiv) {
+                                uploadStatusDiv.className = 'text-xs mt-1 font-semibold text-blue-600';
+                                uploadStatusDiv.innerText = 'Pautan R2 berjaya dihubungkan!';
+                            }
+                        }
+                    } catch (err) {
+                        console.error('Failed to fetch signed url:', err);
                     }
                 }
             } else {
