@@ -87,14 +87,13 @@ athleteSchema.index({ completedAt: 1 });           // Sort by completion date
 athleteSchema.index({ negeriWakil: 1, sukan: 1 }); // Compound: state + sport filter
 
 // Hash password sebelum simpan
-athleteSchema.pre('save', async function(next) {
-    if (!this.isModified('password') || !this.password) return next();
+athleteSchema.pre('save', async function() {
+    if (!this.isModified('password') || !this.password) return;
     try {
         const salt = await bcrypt.genSalt(10);
         this.password = await bcrypt.hash(this.password, salt);
-        next();
     } catch (err) {
-        next(err);
+        throw err;
     }
 });
 
