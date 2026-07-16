@@ -34,8 +34,10 @@ DOMAIN_NAME=${DOMAIN_NAME:-localhost}
 read -p "Masukkan Port untuk Node.js (Lalai/Default: 3000): " APP_PORT
 APP_PORT=${APP_PORT:-3000}
 
-# Generate random JWT Secret
+# Generate random secrets
 JWT_SECRET=$(openssl rand -hex 32)
+SESSION_SECRET=$(openssl rand -hex 48)
+
 # Gunakan localhost untuk MongoDB
 MONGO_URI="mongodb://127.0.0.1:27017/mace_db"
 
@@ -68,6 +70,7 @@ cat > .env << EOL
 PORT=$APP_PORT
 MONGO_URI=$MONGO_URI
 JWT_SECRET=$JWT_SECRET
+SESSION_SECRET=$SESSION_SECRET
 NODE_ENV=production
 EOL
 echo -e "${GREEN}Fail .env berjaya dicipta dengan Sambungan Database Local (127.0.0.1).${NC}"

@@ -31,7 +31,7 @@
         <br>
         <strong>Sila maklumkan 3 perkara INI kepada pihak IT (Sangat Penting):</strong><br>
         8. <strong>Pelayan Kosong (Fresh OS):</strong> Pelayan Ubuntu mestilah *kosong*. JANGAN install web panel seperti cPanel, Plesk, atau Apache. Skrip kami akan memasang <strong>Nginx</strong> dan ia memerlukan Port 80/443 bebas (unoccupied).<br>
-        9. <strong>Domain DNS Berfungsi:</strong> Pihak IT wajib pastikan nama domain (cth: mace.msn.gov.my) telah disambungkan ke alamat IP pelayan ini (A Record) <strong>sebelum</strong> kerja *installation* bermula. Jika belum disambung, tetapan sistem sekuriti HTTPS/SSL akan gagal.<br>
+        9. <strong>Domain DNS / Alamat IP:</strong> Jika nama domain (cth: mace.msn.gov.my) sudah bersedia, pastikan ia telah disambungkan ke alamat IP pelayan (A Record) sebelum mula. <strong>Namun, jika domain belum siap,</strong> pihak IT boleh teruskan pemasangan menggunakan <strong>Alamat IP Pelayan</strong> sahaja terlebih dahulu. Sistem tetap akan berfungsi (tanpa SSL/HTTPS). HTTPS boleh dipasang di kemudian hari apabila domain rasmi telah diluluskan.<br>
         10. <strong>Akses Internet Keluar (Outbound Network):</strong> Pelayan mesti mempunyai kebenaran memuat turun terus dari Internet (unrestricted outbound access) untuk memuat turun pakej Node.js, MongoDB, GitHub dan NPM.
     </div>
 
@@ -53,7 +53,14 @@
         <p>Masuk ke dalam folder yang baru dimuat turun, dan jalankan skrip <code style="background: #e2e8f0; padding: 2px 5px; border-radius: 3px;">install.sh</code>.</p>
         <div class="code-block">cd Mace-learning-system
 chmod +x install.sh
-./install.sh</div>
+sudo bash install.sh</div>
+
+        <div class="alert" style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 15px 0;">
+            <strong>Nota Penting / Penyelesaian Masalah:</strong><br>
+            Jika anda ingin menjalankan semua arahan di atas dalam satu baris (single line), pastikan anda menggunakan pemisah <code>&&</code> seperti ini:<br>
+            <code style="background: #e2e8f0; padding: 2px 5px; border-radius: 3px; display:inline-block; margin-top:5px;">cd Mace-learning-system && chmod +x install.sh && sudo bash install.sh</code><br>
+            Jika anda mendapat ralat <em>"Sila jalankan script ini sebagai root"</em>, pastikan anda menggunakan awalan <strong>sudo bash</strong>.
+        </div>
         
         <p>Skrip ini akan mengambil masa 2-5 minit untuk memuat turun semua perisian yang diperlukan (NodeJS 20, MongoDB 7, dll).</p>
         
