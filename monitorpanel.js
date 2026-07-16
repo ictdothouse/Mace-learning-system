@@ -79,7 +79,9 @@ app.post('/api/exec', (req, res) => {
         'pm2 restart mace-system --update-env',
         'pm2 status',
         'pm2 logs mace-system --lines 50 --nostream',
-        'npm install'
+        'npm install',
+        'sudo systemctl status mongod',
+        'sudo systemctl restart mongod'
     ];
 
     if (!allowedCommands.includes(cmd)) {

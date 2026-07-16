@@ -126,6 +126,28 @@
                     </div>
                 </div>
 
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h2 class="text-lg font-bold mb-4">Pusat Kawalan MongoDB</h2>
+                    
+                    <div class="space-y-3">
+                        <button onclick="runCommand('sudo systemctl status mongod')" class="w-full text-left px-4 py-3 bg-green-50 hover:bg-green-100 border border-green-200 rounded-lg flex items-center gap-3 transition">
+                            <span class="bg-green-200 text-green-700 p-2 rounded-md">🟢</span>
+                            <div>
+                                <p class="font-semibold text-sm text-green-900">Status MongoDB</p>
+                                <p class="text-xs text-green-700">Semak sama ada DB aktif</p>
+                            </div>
+                        </button>
+
+                        <button onclick="runCommand('sudo systemctl restart mongod')" class="w-full text-left px-4 py-3 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg flex items-center gap-3 transition">
+                            <span class="bg-red-200 text-red-700 p-2 rounded-md">🔁</span>
+                            <div>
+                                <p class="font-semibold text-sm text-red-900">Restart MongoDB</p>
+                                <p class="text-xs text-red-700">Jika berlaku ralat 502</p>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Auto Deploy Info Box -->
                 <div class="bg-gradient-to-br from-gray-900 to-gray-800 p-6 rounded-xl shadow-sm text-white">
                     <h2 class="text-lg font-bold mb-2 flex items-center gap-2">
