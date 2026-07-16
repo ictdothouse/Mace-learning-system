@@ -286,7 +286,19 @@ Ready to execute commands. Please select an action from the left panel.</div>
                     
                     terminal.innerHTML += `<span class="term-err">[Error] ${data.error}</span>`;
                 } else {
-                    const safeOutput = data.output.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    let safeOutput = data.output.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    
+                    // 1. Buang simbol-simbol pelik (ANSI escape codes) dari output terminal asal
+                    safeOutput = safeOutput.replace(/\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])/g, '');
+                    
+                    // 2. Warnakan kata kunci secara manual untuk keterlihatan yang cantik (Syntax Highlighting)
+                    safeOutput = safeOutput
+                        .replace(/\b(online|active|success)\b/gi, '<span class="text-emerald-400 font-bold">$&</span>')
+                        .replace(/\b(error|failed|ralat|amar[aA]n)\b/gi, '<span class="text-destructive font-bold">$&</span>')
+                        .replace(/\b(stopped|disabled|errored)\b/gi, '<span class="text-zinc-500 font-semibold italic">$&</span>')
+                        .replace(/\b(mace-system|mace-monitor)\b/g, '<span class="text-cyan-400 font-bold">$&</span>')
+                        .replace(/\b(mongod)\b/g, '<span class="text-emerald-300 font-bold">$&</span>')
+                        .replace(/\b(pm2|node)\b/gi, '<span class="text-green-400 font-bold">$&</span>');
                     
                     // Ekstrak amaran/ralat dari output
                     if (safeOutput.includes('[Ralat Sistem]:')) {
