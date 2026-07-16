@@ -178,6 +178,9 @@ router.post('/auth/access', async (req, res) => {
             if (!password) {
                 return res.status(400).json({ error: 'Kata laluan wajib diisi untuk pendaftaran baru.' });
             }
+            if (!jantina || !umur || !negeri || !sukan) {
+                return res.status(400).json({ error: 'Sila lengkapkan semua butiran (Jantina, Umur, Negeri, Sukan).' });
+            }
         } else if (action === 'resume') {
             if (loginMethod === 'name_ic') {
                 if (!fullName || !icNumber) return res.status(400).json({ error: 'Nama penuh dan No. IC wajib diisi.' });
