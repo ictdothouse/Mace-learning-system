@@ -103,8 +103,9 @@ else
     echo -e "${RED}Amaran: Folder 'client' tidak dijumpai. Binaan React dilangkau.${NC}"
 fi
 
-echo -e "\n${YELLOW}Langkah 7: Menghidupkan Sistem MACE melalui PM2...${NC}"
+echo -e "\n${YELLOW}Langkah 7: Menghidupkan Sistem MACE & MonitorPanel melalui PM2...${NC}"
 pm2 start app.js --name "mace-system"
+pm2 start monitorpanel.js --name "mace-monitor"
 pm2 save
 pm2 startup | grep "sudo" | bash
 
@@ -142,8 +143,11 @@ echo -e "${BLUE}=================================================${NC}"
 echo -e "Laman web MACE dan Database MongoDB anda kini aktif di VPS ini."
 echo -e "Akses laman web anda di: http://$DOMAIN_NAME"
 echo -e "Database berjalan secara senyap di latar belakang (Port: 27017)."
-echo -e "\nLangkah Seterusnya:"
+echo -e "Langkah Seterusnya:"
 echo -e "1. Buka http://$DOMAIN_NAME/admin-mace"
 echo -e "2. Pergi ke Settings > Backup"
 echo -e "3. Upload fail JSON yang anda download dari server lama."
+echo -e "\n[PENTING] MonitorPanel beroperasi pada Port 4000."
+echo -e "Pastikan anda 'Allow Port 4000 (TCP)' di firewall AWS Lightsail anda."
+echo -e "Akses MonitorPanel di: http://$DOMAIN_NAME:4000"
 echo -e "${BLUE}=================================================${NC}"
