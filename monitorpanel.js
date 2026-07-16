@@ -5,7 +5,7 @@ const os = require('os');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.CPANEL_PORT || 4000;
+const PORT = process.env.MONITOR_PORT || 4000;
 
 // Set up EJS view engine
 app.set('view engine', 'ejs');
@@ -27,8 +27,8 @@ const requireAuth = (req, res, next) => {
         return next();
     }
 
-    res.set('WWW-Authenticate', 'Basic realm="MACE C-Panel"');
-    res.status(401).send('Akses Ditolak. Sila masukkan ID dan Kata Laluan C-Panel.');
+    res.set('WWW-Authenticate', 'Basic realm="MACE MonitorPanel"');
+    res.status(401).send('Akses Ditolak. Sila masukkan ID dan Kata Laluan MonitorPanel.');
 };
 
 app.use(requireAuth);
@@ -64,7 +64,7 @@ app.get('/', (req, res) => {
         cpus: os.cpus().length
     };
 
-    res.render('cpanel', { systemInfo });
+    res.render('monitorpanel', { systemInfo });
 });
 
 // API Execute Command
@@ -122,5 +122,5 @@ app.post('/webhook/github', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`🚀 C-Panel Server running on port ${PORT}`);
+    console.log(`🚀 MonitorPanel Server running on port ${PORT}`);
 });
