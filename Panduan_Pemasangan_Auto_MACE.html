@@ -36,7 +36,8 @@
         <strong>Sila maklumkan 3 perkara INI kepada pihak IT (Sangat Penting):</strong><br>
         8. <strong>Pelayan Kosong (Fresh OS):</strong> Pelayan Ubuntu mestilah *kosong*. JANGAN install web panel seperti cPanel, Plesk, atau Apache. Skrip kami akan memasang <strong>Nginx</strong> dan ia memerlukan Port 80/443 bebas (unoccupied).<br>
         9. <strong>Domain DNS / Alamat IP:</strong> Jika nama domain (cth: mace.msn.gov.my) sudah bersedia, pastikan ia telah disambungkan ke alamat IP pelayan (A Record) sebelum mula. <strong>Namun, jika domain belum siap,</strong> pihak IT boleh teruskan pemasangan menggunakan <strong>Alamat IP Pelayan</strong> sahaja terlebih dahulu. Sistem tetap akan berfungsi (tanpa SSL/HTTPS). HTTPS boleh dipasang di kemudian hari apabila domain rasmi telah diluluskan.<br>
-        10. <strong>Akses Internet Keluar (Outbound Network):</strong> Pelayan mesti mempunyai kebenaran memuat turun terus dari Internet (unrestricted outbound access) untuk memuat turun pakej Node.js, MongoDB, GitHub dan NPM.
+        10. <strong>Akses Internet Keluar (Outbound Network):</strong> Pelayan mesti mempunyai kebenaran memuat turun terus dari Internet (unrestricted outbound access) untuk memuat turun pakej Node.js, MongoDB, GitHub dan NPM.<br>
+        11. <strong>Pemetaan IP (Public & Private IP NAT):</strong> Memandangkan pelayan berada di dalam pusat data kerajaan, ia mungkin diletakkan di belakang <em>Hardware Firewall</em> jabatan. Pastikan pihak IT memetakan (Port Forward) <strong>Public IP</strong> dengan betul kepada <strong>Private IP (Local IP)</strong> pelayan Ubuntu tersebut supaya ia boleh diakses dari luar. Trafik masuk untuk port 80, 443, dan 4000 mesti dihalakan terus ke Private IP mesin ini.
     </div>
 
     <div class="step">
