@@ -15,6 +15,10 @@
     </style>
 </head>
 <body>
+    <!-- WATERMARK SULIT -->
+    <div style="text-align: center; color: red; font-weight: bold; padding: 10px; border: 2px dashed red; margin-bottom: 20px; text-transform: uppercase;">
+        Dokumen Ini Adalah Sulit (Confidential) - Jangan Kongsi Kepada Pihak Luar
+    </div>
 
     <h1>Panduan Pemasangan Automatik (Easy Install) - Sistem MACE</h1>
     <p>Panduan ini akan membimbing anda memasang keseluruhan sistem MACE ke dalam pelayan (server) VPS baru menggunakan skrip automatik. Skrip ini akan memasang MongoDB, Node.js, NPM, Nginx, dan PM2 secara serentak.</p>
@@ -92,8 +96,14 @@ pm2 save</div>
         <h2>Langkah 6 (PENTING): Migrasi Data Lama</h2>
         <p>Sistem ini sekarang ibarat 'kereta baru tanpa penumpang'. Pangkalan data MongoDB di dalam VPS adalah KOSONG. Anda perlu memuat naik fail JSON yang dimuat turun dari Hostinger.</p>
         <ol>
-            <li>Buka <strong>http://ALAMAT_IP_SERVER_ANDA/admin-mace</strong> (Anda perlu buat akaun Admin pertama kalinya).</li>
-            <li>Pergi ke menu <strong>Settings</strong> -> <strong>Database Migration</strong>.</li>
+            <li>Buka <strong>http://ALAMAT_IP_SERVER_ANDA/admin-mace</strong>.</li>
+            <li>Anda akan diminta untuk memasukkan maklumat <em>Basic Auth</em> Master Admin. Masukkan:
+                <ul style="margin-top: 5px;">
+                    <li><strong>Username:</strong> <code>admin</code></li>
+                    <li><strong>Password:</strong> Kata laluan yang anda masukkan semasa menjalankan skrip <code>install.sh</code> (atau <code>admin123</code> secara lalai/default).</li>
+                </ul>
+            </li>
+            <li>Selepas berjaya log masuk, pergi ke menu <strong>Settings</strong> -> <strong>Database Migration</strong>.</li>
             <li>Di bawah bahagian <strong>Muat Naik / Import (Restore)</strong>, pilih fail <code style="background: #e2e8f0; padding: 2px 5px; border-radius: 3px;">mace_system_data.json</code> yang anda telah eksport dari pelayan lama.</li>
             <li>Klik "Import". Pangkalan data anda akan dipulihkan serta merta!</li>
         </ol>

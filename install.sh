@@ -33,6 +33,8 @@ read -p "Masukkan nama domain (contoh: mace.domain.com) atau IP (kosongkan jika 
 DOMAIN_NAME=${DOMAIN_NAME:-localhost}
 read -p "Masukkan Port untuk Node.js (Lalai/Default: 3000): " APP_PORT
 APP_PORT=${APP_PORT:-3000}
+read -p "Masukkan Kata Laluan untuk Akaun Master Admin (Lalai: admin123): " ADMIN_PASS
+ADMIN_PASS=${ADMIN_PASS:-admin123}
 
 # Generate random secrets
 JWT_SECRET=$(openssl rand -hex 32)
@@ -71,6 +73,8 @@ PORT=$APP_PORT
 MONGO_URI=$MONGO_URI
 JWT_SECRET=$JWT_SECRET
 SESSION_SECRET=$SESSION_SECRET
+ADMIN_USER=admin
+ADMIN_PASS=$ADMIN_PASS
 NODE_ENV=production
 EOL
 echo -e "${GREEN}Fail .env berjaya dicipta dengan Sambungan Database Local (127.0.0.1).${NC}"
