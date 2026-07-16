@@ -620,6 +620,11 @@ router.post('/upload-data', upload.single('dataFile'), async (req, res) => {
         if (data.pages && data.pages.length > 0) await Page.insertMany(data.pages);
         if (data.levels && data.levels.length > 0) await Level.insertMany(data.levels);
         
+        // Refresh branding cache so the restored branding shows up immediately
+        if (typeof req.refreshBrandingCache === 'function') {
+            await req.refreshBrandingCache();
+        }
+        
         // Buang fail selepas berjaya
         if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
         
