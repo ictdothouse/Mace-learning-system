@@ -413,10 +413,10 @@ function startServer() {
             ttl: 24 * 60 * 60 
         }),
         cookie: {
-            secure: true, 
+            secure: process.env.SECURE_COOKIE === 'true', // Mesti 'true' jika nak embed dalam iframe HTTPS
             httpOnly: true,
             maxAge: 24 * 60 * 60 * 1000,
-            sameSite: 'none' // Membenarkan kuki dihantar merentas domain dalam iframe (WordPress)
+            sameSite: process.env.SECURE_COOKIE === 'true' ? 'none' : 'lax'
         }
     });
 
