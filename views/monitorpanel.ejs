@@ -179,6 +179,10 @@
                             Menjalankan arahan...
                         </span>
                     </div>
+                    
+                    <!-- Alert Box untuk Ralat & Amaran -->
+                    <div id="alertBox" class="hidden mb-4 p-4 rounded-lg border text-sm font-mono whitespace-pre-wrap max-h-40 overflow-y-auto"></div>
+
                     <div id="terminal" class="terminal flex-grow">Selamat datang ke MACE MonitorPanel.
 Sila klik butang di sebelah kiri untuk menjalankan arahan server.</div>
                 </div>
@@ -191,6 +195,11 @@ Sila klik butang di sebelah kiri untuk menjalankan arahan server.</div>
         async function runCommand(cmd) {
             const terminal = document.getElementById('terminal');
             const loader = document.getElementById('loader');
+            const alertBox = document.getElementById('alertBox');
+            
+            alertBox.classList.add('hidden');
+            alertBox.className = 'hidden mb-4 p-4 rounded-lg border text-sm font-mono whitespace-pre-wrap max-h-40 overflow-y-auto';
+            alertBox.innerHTML = '';
             
             terminal.innerHTML += `\n\n<span style="color:#fff;">$ ${cmd}</span>\n`;
             terminal.scrollTop = terminal.scrollHeight;
@@ -207,10 +216,28 @@ Sila klik butang di sebelah kiri untuk menjalankan arahan server.</div>
                 const data = await res.json();
                 
                 if (data.error) {
+                    alertBox.innerHTML = `<strong>Ralat Dikesan:</strong>\n${data.error}`;
+                    alertBox.classList.remove('hidden');
+                    alertBox.classList.add('bg-red-50', 'border-red-200', 'text-red-800');
+                    
                     terminal.innerHTML += `<span style="color:#ff5555;">[Error] ${data.error}</span>`;
                 } else {
-                    // escape html to prevent rendering issues in terminal
                     const safeOutput = data.output.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    
+                    // Ekstrak amaran/ralat dari output
+                    if (safeOutput.includes('[Ralat Sistem]:')) {
+                        const errMatch = safeOutput.split('[Ralat Sistem]:')[1];
+                        alertBox.innerHTML = `<strong>Ralat Sistem:</strong>\n${errMatch.trim()}`;
+                        alertBox.classList.remove('hidden');
+                        alertBox.classList.add('bg-red-50', 'border-red-200', 'text-red-800');
+                    } 
+                    else if (safeOutput.includes('[Ralat/Amaran]:')) {
+                        const warnMatch = safeOutput.split('[Ralat/Amaran]:')[1].split('[Ralat Sistem]:')[0];
+                        alertBox.innerHTML = `<strong>Amaran Keluaran (Warning):</strong>\n${warnMatch.trim()}`;
+                        alertBox.classList.remove('hidden');
+                        alertBox.classList.add('bg-amber-50', 'border-amber-200', 'text-amber-800');
+                    }
+                    
                     terminal.innerHTML += safeOutput;
                 }
             } catch (err) {
