@@ -197,9 +197,7 @@ mongoose.connect(process.env.MONGO_URI, {
             const orphanLessons = await Lesson.countDocuments({
                 $or: [
                     { moduleId: { $exists: false } },
-                    { moduleId: null },
-                    { moduleId: { $type: "number" } },
-                    { moduleId: { $type: "string", $not: { $regex: /^[0-9a-fA-F]{24}$/ } } }
+                    { moduleId: null }
                 ]
             });
             
@@ -226,9 +224,7 @@ mongoose.connect(process.env.MONGO_URI, {
                     { 
                         $or: [
                             { moduleId: { $exists: false } },
-                            { moduleId: null },
-                            { moduleId: { $type: "number" } },
-                            { moduleId: { $type: "string", $not: { $regex: /^[0-9a-fA-F]{24}$/ } } }
+                            { moduleId: null }
                         ]
                     },
                     { $set: { moduleId: parentModule._id } }
