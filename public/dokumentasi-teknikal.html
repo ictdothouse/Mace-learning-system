@@ -810,6 +810,8 @@
                     useCORS: true, 
                     logging: false,
                     letterRendering: true,
+                    scrollY: 0, // ELAKKAN margin kosong di atas kertas jika user sedang scroll ke bawah
+                    scrollX: 0,
                     width: 794 // Paksa render canvas pada saiz tepat untuk mengelakkan pemotongan sebelah kanan
                 },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
