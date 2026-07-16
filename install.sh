@@ -63,6 +63,7 @@ apt install -y mongodb-org
 # Hidupkan MongoDB secara automatik
 systemctl enable mongod
 systemctl start mongod
+sleep 3
 
 echo -e "\n${YELLOW}Langkah 4: Memasang PM2...${NC}"
 npm install -g pm2

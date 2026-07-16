@@ -109,14 +109,34 @@ pm2 save</div>
         </ol>
     </div>
 
-    <div class="step">
-        <h2>Langkah 7 (Penyelesaian Masalah): Ralat 502 Bad Gateway</h2>
-        <p>Jika anda melayari alamat IP anda dan mendapat ralat <strong>502 Bad Gateway</strong>, ia berkemungkinan besar berpunca daripada kehilangan konfigurasi kod rahsia dalam fail <code>.env</code>.</p>
-        <p>Anda boleh memeriksa log ralat dengan menaip arahan berikut di terminal:</p>
-        <div class="code-block">sudo pm2 logs mace-system --lines 50</div>
-        <p>Jika anda melihat ralat <code>SESSION_SECRET tidak dikonfigurasikan</code>, sila jalankan kedua-dua arahan di bawah secara berasingan untuk membetulkannya:</p>
-        <div class="code-block">sudo bash -c "echo 'SESSION_SECRET=a2b4c6d8e0f1a3b5c7d9e2f4a6b8c0d2e4f6a8b0c2d4e6f8a0b2c4d6e8f0a2b4' >> .env"
+    <div class="step" style="border: 2px solid #ef4444;">
+        <h2 style="color: #b91c1c;">Penyelesaian Masalah 1: Ralat 502 Bad Gateway</h2>
+        <p>Jika anda melayari alamat IP anda dan mendapat ralat <strong>502 Bad Gateway</strong>, ia berkemungkinan besar berpunca daripada Pangkalan Data (MongoDB) yang terhenti atau terpadam. Sistem tidak dapat berhubung dengan database lalu menyebabkan ralat ini.</p>
+        <p>Jalankan arahan berikut di terminal VPS untuk menghidupkan semula database dan sistem MACE:</p>
+        <div class="code-block"># 1. Hidupkan semula MongoDB
+sudo systemctl restart mongod
+
+# 2. Periksa statusnya (pastikan ia 'active')
+sudo systemctl status mongod
+# (Tekan butang 'q' untuk keluar dari log status)
+
+# 3. Mulakan semula sistem MACE
 sudo pm2 restart mace-system</div>
+    </div>
+
+    <div class="step" style="border: 2px solid #ef4444;">
+        <h2 style="color: #b91c1c;">Penyelesaian Masalah 2: PM2 Tersekat (Hang/Stuck)</h2>
+        <p>Jika arahan PM2 seperti <code>pm2 restart</code> tidak berfungsi dan skrin terminal anda tersekat, ia bermakna proses di belakang tabir telah terhenti. Gunakan pelan tindakan ini untuk mematikan dan menghidupkannya secara paksa:</p>
+        <div class="code-block"># Tekan Ctrl + C di keyboard anda untuk keluar dari arahan yang tersekat
+
+# 1. Matikan enjin PM2 secara paksa
+sudo pkill -9 -f pm2
+
+# 2. Matikan apa-apa proses Node.js yang tersangkut (pilihan)
+sudo pkill -9 -f node
+
+# 3. Hidupkan semula PM2 dan Sistem MACE
+sudo pm2 start app.js --name "mace-system"</div>
     </div>
 
     <div class="step" style="border: 2px solid #3b82f6;">
@@ -129,21 +149,6 @@ git pull origin main
 # cd client && npm install && npm run build && cd ..
 
 sudo pm2 restart mace-system</div>
-    </div>
-
-    <div class="step" style="border: 2px solid #ef4444;">
-        <h2 style="color: #b91c1c;">Info Tambahan: Arahan Penting Jika PM2 Tersekat (Hang/Stuck)</h2>
-        <p>Jika arahan PM2 seperti <code>pm2 restart</code> tidak berfungsi dan skrin terminal anda tersekat, ia bermakna proses di belakang tabir telah terhenti. Gunakan pelan tindakan (arahan) ini untuk mematikan dan menghidupkannya secara paksa:</p>
-        <div class="code-block"># Tekan Ctrl + C di keyboard anda untuk keluar dari arahan yang tersekat
-
-# 1. Matikan enjin PM2 secara paksa
-sudo pkill -9 -f pm2
-
-# 2. Matikan apa-apa proses Node.js yang tersangkut (pilihan)
-sudo pkill -9 -f node
-
-# 3. Hidupkan semula PM2 dan Sistem MACE
-sudo pm2 start app.js --name "mace-system"</div>
     </div>
 
 </body>
