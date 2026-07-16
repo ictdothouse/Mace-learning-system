@@ -69,15 +69,6 @@ echo -e "\n${YELLOW}Langkah 4: Memasang PM2...${NC}"
 npm install -g pm2
 
 echo -e "\n${YELLOW}Langkah 5: Mengkonfigurasi Fail .env...${NC}"
-read -p "Adakah anda menggunakan Cloudflare R2 untuk storan video? (y/n): " USE_R2
-if [[ "$USE_R2" =~ ^[Yy]$ ]]; then
-    read -p "R2 Account ID: " R2_ACCOUNT_ID
-    read -p "R2 Access Key ID: " R2_ACCESS_KEY_ID
-    read -p "R2 Secret Access Key: " R2_SECRET_ACCESS_KEY
-    read -p "R2 Bucket Name: " R2_BUCKET_NAME
-    read -p "R2 Public URL (contoh: https://media.domain.com): " R2_PUBLIC_URL
-    R2_ENDPOINT="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
-fi
 
 cat > .env << EOL
 PORT=$APP_PORT
@@ -87,21 +78,17 @@ SESSION_SECRET=$SESSION_SECRET
 ADMIN_USER=admin
 ADMIN_PASS=$ADMIN_PASS
 NODE_ENV=production
+
+# Konfigurasi Cloudflare R2 (Lalai/Default)
+R2_ACCOUNT_ID=bcbbb19cae463ec3327efdcf8c57f96c
+R2_ENDPOINT=https://bcbbb19cae463ec3327efdcf8c57f96c.r2.cloudflarestorage.com
+R2_ACCESS_KEY_ID=42f6482c52f80ead4ca71b180d9bbff2
+R2_SECRET_ACCESS_KEY=ff73d0ed7838b2d075cf6845da6bc441342f0dd8d2226b0dba3a5b65ee722aa1
+R2_BUCKET_NAME=modulmace
+R2_PUBLIC_URL=https://media.modulatletmsn.com
 EOL
 
-if [[ "$USE_R2" =~ ^[Yy]$ ]]; then
-cat >> .env << EOL
-R2_ACCOUNT_ID=$R2_ACCOUNT_ID
-R2_ENDPOINT=$R2_ENDPOINT
-R2_ACCESS_KEY_ID=$R2_ACCESS_KEY_ID
-R2_SECRET_ACCESS_KEY=$R2_SECRET_ACCESS_KEY
-R2_BUCKET_NAME=$R2_BUCKET_NAME
-R2_PUBLIC_URL=$R2_PUBLIC_URL
-EOL
-echo -e "${GREEN}Fail .env berjaya dicipta dengan sokongan Cloudflare R2.${NC}"
-else
-echo -e "${GREEN}Fail .env berjaya dicipta dengan Sambungan Database Local (127.0.0.1).${NC}"
-fi
+echo -e "${GREEN}Fail .env berjaya dicipta dengan sokongan Cloudflare R2 secara automatik.${NC}"
 
 echo -e "\n${YELLOW}Langkah 6: Memasang NPM Dependencies & Membina React App...${NC}"
 npm install
