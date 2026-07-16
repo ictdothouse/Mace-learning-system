@@ -119,5 +119,17 @@ pm2 save</div>
 sudo pm2 restart mace-system</div>
     </div>
 
+    <div class="step" style="border: 2px solid #3b82f6;">
+        <h2 style="color: #1d4ed8;">Info Tambahan: Cara Mengemaskini (Redeploy) Sistem</h2>
+        <p>Jika terdapat kod baru yang telah di-push ke GitHub dan anda ingin mengemas kini sistem MACE di pelayan anda, jalankan arahan berikut di terminal VPS:</p>
+        <div class="code-block">cd ~/Mace-learning-system
+git pull origin main
+
+# (Pilihan) Jika ada perubahan pada antaramuka (Frontend/React):
+# cd client && npm install && npm run build && cd ..
+
+sudo pm2 restart mace-system</div>
+    </div>
+
 </body>
 </html>
