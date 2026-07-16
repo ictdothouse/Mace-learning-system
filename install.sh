@@ -29,11 +29,11 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 echo -e "\n${YELLOW}Langkah 1: Mengumpul Maklumat Sistem...${NC}"
-read -p "Masukkan nama domain (contoh: mace.domain.com) atau IP (kosongkan jika tiada): " DOMAIN_NAME
+read -p "Masukkan nama domain (contoh: mace.domain.com) atau IP (kosongkan jika tiada): " DOMAIN_NAME < /dev/tty
 DOMAIN_NAME=${DOMAIN_NAME:-localhost}
-read -p "Masukkan Port untuk Node.js (Lalai/Default: 3000): " APP_PORT
+read -p "Masukkan Port untuk Node.js (Lalai/Default: 3000): " APP_PORT < /dev/tty
 APP_PORT=${APP_PORT:-3000}
-read -p "Masukkan Kata Laluan untuk Akaun Master Admin (Lalai: admin123): " ADMIN_PASS
+read -p "Masukkan Kata Laluan untuk Akaun Master Admin (Lalai: admin123): " ADMIN_PASS < /dev/tty
 ADMIN_PASS=${ADMIN_PASS:-admin123}
 
 # Generate random secrets
@@ -68,7 +68,13 @@ sleep 3
 echo -e "\n${YELLOW}Langkah 4: Memasang PM2...${NC}"
 npm install -g pm2
 
-echo -e "\n${YELLOW}Langkah 5: Mengkonfigurasi Fail .env...${NC}"
+echo -e "\n${YELLOW}Langkah 5: Memuat turun Kod Sistem (Git Clone)...${NC}"
+if [ ! -d "Mace-learning-system" ]; then
+    git clone https://github.com/ictdothouse/Mace-learning-system.git
+fi
+cd Mace-learning-system || { echo "Folder gagal diakses"; exit 1; }
+
+echo -e "\n${YELLOW}Langkah 6: Mengkonfigurasi Fail .env...${NC}"
 
 cat > .env << EOL
 PORT=$APP_PORT
@@ -90,7 +96,7 @@ EOL
 
 echo -e "${GREEN}Fail .env berjaya dicipta dengan sokongan Cloudflare R2 secara automatik.${NC}"
 
-echo -e "\n${YELLOW}Langkah 6: Memasang NPM Dependencies & Membina React App...${NC}"
+echo -e "\n${YELLOW}Langkah 7: Memasang NPM Dependencies & Membina React App...${NC}"
 npm install
 
 if [ -d "client" ]; then
@@ -103,13 +109,13 @@ else
     echo -e "${RED}Amaran: Folder 'client' tidak dijumpai. Binaan React dilangkau.${NC}"
 fi
 
-echo -e "\n${YELLOW}Langkah 7: Menghidupkan Sistem MACE & MonitorPanel melalui PM2...${NC}"
+echo -e "\n${YELLOW}Langkah 8: Menghidupkan Sistem MACE & MonitorPanel melalui PM2...${NC}"
 pm2 start app.js --name "mace-system"
 pm2 start monitorpanel.js --name "mace-monitor"
 pm2 save
 pm2 startup | grep "sudo" | bash
 
-echo -e "\n${YELLOW}Langkah 8: Mengkonfigurasi Nginx (Reverse Proxy)...${NC}"
+echo -e "\n${YELLOW}Langkah 9: Mengkonfigurasi Nginx (Reverse Proxy)...${NC}"
 NGINX_CONF="/etc/nginx/sites-available/mace"
 
 cat > $NGINX_CONF << EOL
