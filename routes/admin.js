@@ -591,6 +591,12 @@ router.post('/upload-data', upload.single('dataFile'), async (req, res) => {
         const Page = require('../models/Page');
         const Level = require('../models/Level');
         const CertificateTemplate = require('../models/CertificateTemplate');
+        const Sport = require('../models/Sport');
+        const User = require('../models/User');
+        const LessonProgress = require('../models/LessonProgress');
+        const LevelProgress = require('../models/LevelProgress');
+        const QuizResult = require('../models/QuizResult');
+        const QuestionBank = require('../models/QuestionBank');
         
         // Bersihkan database (drop semua)
         await Promise.all([
@@ -601,7 +607,13 @@ router.post('/upload-data', upload.single('dataFile'), async (req, res) => {
             Group.deleteMany({}),
             Page.deleteMany({}),
             Level.deleteMany({}),
-            CertificateTemplate.deleteMany({})
+            CertificateTemplate.deleteMany({}),
+            Sport.deleteMany({}),
+            User.deleteMany({}),
+            LessonProgress.deleteMany({}),
+            LevelProgress.deleteMany({}),
+            QuizResult.deleteMany({}),
+            QuestionBank.deleteMany({})
         ]);
         
         // Masukkan data baru
@@ -622,6 +634,12 @@ router.post('/upload-data', upload.single('dataFile'), async (req, res) => {
         if (data.pages && data.pages.length > 0) await Page.insertMany(data.pages);
         if (data.levels && data.levels.length > 0) await Level.insertMany(data.levels);
         if (data.templates && data.templates.length > 0) await CertificateTemplate.insertMany(data.templates);
+        if (data.sports && data.sports.length > 0) await Sport.insertMany(data.sports);
+        if (data.users && data.users.length > 0) await User.insertMany(data.users);
+        if (data.lessonProgresses && data.lessonProgresses.length > 0) await LessonProgress.insertMany(data.lessonProgresses);
+        if (data.levelProgresses && data.levelProgresses.length > 0) await LevelProgress.insertMany(data.levelProgresses);
+        if (data.quizResults && data.quizResults.length > 0) await QuizResult.insertMany(data.quizResults);
+        if (data.questionBanks && data.questionBanks.length > 0) await QuestionBank.insertMany(data.questionBanks);
         
         // Refresh branding cache so the restored branding shows up immediately
         if (typeof req.refreshBrandingCache === 'function') {
@@ -648,8 +666,14 @@ router.get('/download-system-data', async (req, res) => {
         const Page = require('../models/Page');
         const Level = require('../models/Level');
         const CertificateTemplate = require('../models/CertificateTemplate');
+        const Sport = require('../models/Sport');
+        const User = require('../models/User');
+        const LessonProgress = require('../models/LessonProgress');
+        const LevelProgress = require('../models/LevelProgress');
+        const QuizResult = require('../models/QuizResult');
+        const QuestionBank = require('../models/QuestionBank');
 
-        const [athletes, modules, lessons, branding, groups, pages, levels, templates] = await Promise.all([
+        const [athletes, modules, lessons, branding, groups, pages, levels, templates, sports, users, lessonProgresses, levelProgresses, quizResults, questionBanks] = await Promise.all([
             Athlete.find().lean(),
             Module.find().lean(),
             Lesson.find().lean(),
@@ -657,7 +681,13 @@ router.get('/download-system-data', async (req, res) => {
             Group.find().lean(),
             Page.find().lean(),
             Level.find().lean(),
-            CertificateTemplate.find().lean()
+            CertificateTemplate.find().lean(),
+            Sport.find().lean(),
+            User.find().lean(),
+            LessonProgress.find().lean(),
+            LevelProgress.find().lean(),
+            QuizResult.find().lean(),
+            QuestionBank.find().lean()
         ]);
 
         const exportData = {
@@ -669,7 +699,13 @@ router.get('/download-system-data', async (req, res) => {
             athletes,
             pages,
             levels,
-            templates
+            templates,
+            sports,
+            users,
+            lessonProgresses,
+            levelProgresses,
+            quizResults,
+            questionBanks
         };
 
         res.setHeader('Content-disposition', 'attachment; filename=mace_system_data.json');
