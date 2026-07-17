@@ -123,10 +123,10 @@ app.use(limiter);
 let isDbConnected = false;
 
 mongoose.connect(process.env.MONGO_URI, {
-    maxPoolSize: 5,                     // ⚡ Hadkan pool ke 5 untuk kurangkan beban memory/socket di Hostinger
-    serverSelectionTimeoutMS: 5000,     // ⚡ Timeout cepat jika Atlas tak respons
+    maxPoolSize: 50,                    // ⚡ Hadkan pool ke 50 (Sesuai untuk VPS sendiri berbanding Hostinger)
+    serverSelectionTimeoutMS: 5000,     // ⚡ Timeout cepat jika DB tak respons
     socketTimeoutMS: 20000,             // ⚡ Turunkan socket timeout ke 20s untuk fail-fast
-    heartbeatFrequencyMS: 10000,        // ⚡ Ping setiap 10s untuk elak Hostinger drop connection
+    heartbeatFrequencyMS: 10000,        // ⚡ Ping setiap 10s untuk elak drop connection
 })
     .then(async () => {
         console.log('✅ DB Connected successfully to MongoDB Atlas');
