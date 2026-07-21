@@ -77,10 +77,10 @@ echo -e "\n${YELLOW}Langkah 4: Memasang PM2...${NC}"
 npm install -g pm2
 
 echo -e "\n${YELLOW}Langkah 5: Memuat turun Kod Sistem (Git Clone)...${NC}"
-if [ ! -d "Mace-learning-system" ]; then
-    git clone https://github.com/ictdothouse/Mace-learning-system.git
+if [ ! -d "MACE-SYSTEM-DEPLOY" ]; then
+    git clone https://github.com/ictdothouse/MACE-SYSTEM-DEPLOY.git
 fi
-cd Mace-learning-system || { echo "Folder gagal diakses"; exit 1; }
+cd MACE-SYSTEM-DEPLOY || { echo "Folder gagal diakses"; exit 1; }
 
 echo -e "\n${YELLOW}Langkah 6: Mengkonfigurasi Fail .env...${NC}"
 
@@ -94,10 +94,10 @@ ADMIN_PASS=$ADMIN_PASS
 NODE_ENV=production
 
 # Konfigurasi Cloudflare R2 (Lalai/Default)
-R2_ACCOUNT_ID=bcbbb19cae463ec3327efdcf8c57f96c
-R2_ENDPOINT=https://bcbbb19cae463ec3327efdcf8c57f96c.r2.cloudflarestorage.com
-R2_ACCESS_KEY_ID=42f6482c52f80ead4ca71b180d9bbff2
-R2_SECRET_ACCESS_KEY=ff73d0ed7838b2d075cf6845da6bc441342f0dd8d2226b0dba3a5b65ee722aa1
+R2_ACCOUNT_ID=your_account_id_here
+R2_ENDPOINT=https://your_account_id_here.r2.cloudflarestorage.com
+R2_ACCESS_KEY_ID=your_access_key_here
+R2_SECRET_ACCESS_KEY=your_secret_access_key_here
 R2_BUCKET_NAME=modulmace
 R2_PUBLIC_URL=https://media.modulatletmsn.com
 EOL

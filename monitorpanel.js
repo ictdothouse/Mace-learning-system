@@ -61,7 +61,8 @@ app.get('/', (req, res) => {
         freeMem: formatBytes(freeMem),
         memPercent: memPercent,
         uptime: `${uptimeHours} jam, ${uptimeMinutes} minit`,
-        cpus: os.cpus().length
+        cpus: os.cpus().length,
+        isWindows: os.platform() === 'win32'
     };
 
     res.render('monitorpanel', { systemInfo });
@@ -82,7 +83,9 @@ app.post('/api/exec', (req, res) => {
         'pm2 logs mace-system --lines 50 --nostream',
         'npm install',
         'sudo systemctl status mongod',
-        'sudo systemctl restart mongod'
+        'sudo systemctl restart mongod',
+        'powershell -c "Get-Service MongoDB"',
+        'powershell -c "Restart-Service MongoDB"'
     ];
 
     if (!allowedCommands.includes(cmd)) {

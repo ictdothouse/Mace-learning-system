@@ -7,8 +7,8 @@
 Credentials berikut telah terdedah dan PERLU ditukar segera:
 
 #### MongoDB Atlas:
-- ❌ Username lama: `icthouseteam_db_user`
-- ❌ Password lama: `AimiLove20!`
+- ❌ Username lama: `your_old_mongodb_user`
+- ❌ Password lama: `your_old_mongodb_password`
 
 **Tindakan:**
 1. Login ke https://cloud.mongodb.com/
@@ -17,9 +17,9 @@ Credentials berikut telah terdedah dan PERLU ditukar segera:
 4. Copy connection string baru
 
 #### Cloudflare R2:
-- ❌ Account ID: `bcbbb19cae463ec3327efdcf8c57f96c`
-- ❌ Access Key: `0846169959a184be871db25d970fa352`
-- ❌ Secret Key: `b688a64a77031b23644b75df326084c938e8e5f9d97f580dc5f2128df2d9bc96`
+- ❌ Account ID: `your_old_account_id`
+- ❌ Access Key: `your_old_access_key`
+- ❌ Secret Key: `your_old_secret_key`
 
 **Tindakan:**
 1. Login ke https://dash.cloudflare.com/
